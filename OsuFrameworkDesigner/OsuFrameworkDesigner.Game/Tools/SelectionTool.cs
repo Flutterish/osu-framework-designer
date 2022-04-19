@@ -25,8 +25,11 @@ public class SelectionTool : Tool {
 		var bottomRight = ToScreenSpace( hoverSelection.Position + hoverSelection.Size );
 		var selectionQuad = new Quad( topLeft, new( bottomRight.X, topLeft.Y ), new( topLeft.X, bottomRight.Y ), bottomRight );
 
-		Composer.Selection.Clear();
-		Composer.Selection.AddRange( Composer.Components.Where( x => x.AsDrawable().ScreenSpaceDrawQuad.Intersects( selectionQuad ) ) );
+		var selected = Composer.Components.Where( x => x.AsDrawable().ScreenSpaceDrawQuad.Intersects( selectionQuad ) );
+		if ( !selected.SequenceEqual( Composer.Selection ) ) {
+			Composer.Selection.Clear();
+			Composer.Selection.AddRange( selected );
+		}
 	}
 
 	protected override void OnDragEnd ( DragEndEvent e ) {
