@@ -1,29 +1,41 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Extensions.PolygonExtensions;
+using osu.Framework.Graphics.Primitives;
+using osu.Framework.Input.Events;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
 public class SelectionTool : Tool {
 	SelectionBox? selection;
-	protected override bool OnMouseDown ( MouseDownEvent e ) {
-		selection?.FadeOut( 500 ).Expire();
-
+	protected override bool OnDragStart ( DragStartEvent e ) {
 		AddInternal( selection = new() );
 		selection.Position = e.MousePosition;
 
 		return true;
 	}
 
-	protected override bool OnMouseMove ( MouseMoveEvent e ) {
-		if ( selection != null ) {
-			selection.Size = e.MousePosition - selection.Position;
-		}
+	protected override void OnDrag ( DragEvent e ) {
+		selection!.Size = e.MousePosition - selection.Position;
 
-		return true;
+		var topLeft = ToScreenSpace( selection.Position );
+		var bottomRight = ToScreenSpace( selection.Position + selection.Size );
+		var selectionQuad = new Quad( topLeft, new( bottomRight.X, topLeft.Y ), new( topLeft.X, bottomRight.Y ), bottomRight );
+
+		Composer.Selection.Clear();
+		Composer.Selection.AddRange( Composer.Components.Where( x => x.AsDrawable().ScreenSpaceDrawQuad.Intersects( selectionQuad ) ) );
 	}
 
-	protected override void OnMouseUp ( MouseUpEvent e ) {
-		selection?.FadeOut( 500 ).Expire();
+	protected override void OnDragEnd ( DragEndEvent e ) {
+		selection.FadeOut( 500 ).Expire();
 		selection = null;
+	}
+
+	protected override bool OnClick ( ClickEvent e ) {
+		Composer.Selection.Clear();
+		var item = Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().ScreenSpaceDrawQuad.Contains( e.ScreenSpaceMouseDownPosition ) );
+		if ( item != null )
+			Composer.Selection.Add( item );
+
+		return true;
 	}
 }
 
