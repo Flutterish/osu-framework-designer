@@ -124,4 +124,7 @@ public static class Extensions {
 		=> component is IEnumerable<IComponent> container
 			? component.Properties.Concat( container.SelectMany( GetNestedProperties ) )
 			: component.Properties;
+
+	public static Vector2 Round ( this Vector2 self )
+		=> new( MathF.Round( self.X ), MathF.Round( self.Y ) );
 }
