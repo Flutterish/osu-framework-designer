@@ -40,7 +40,7 @@ public class RectangleBlueprint : BasicTransformBlueprint<RectangleComponent> {
 	void updateCorners () {
 		float min = isDragging == 0 ? 20 : 0;
 
-		if ( min > Value.MaxCornerRadius || TransformProps.Width.Value < 0 || TransformProps.Height.Value < 0 ) {
+		if ( min > Value.MaxCornerRadius ) {
 			cornerRadiusTopLeft.Hide();
 			cornerRadiusTopRight.Hide();
 			cornerRadiusBottomLeft.Hide();

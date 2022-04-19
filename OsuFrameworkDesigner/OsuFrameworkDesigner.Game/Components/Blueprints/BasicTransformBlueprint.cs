@@ -108,5 +108,17 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		var scale = ( a - b ).Length;
 		Size = Value.AsDrawable().DrawSize * scale;
 		Rotation = TransformProps.Rotation.Value;
+
+		if ( Width < 0 ) {
+			X += MathF.Cos( Rotation / 180 * MathF.PI ) * Width;
+			Y += MathF.Sin( Rotation / 180 * MathF.PI ) * Width;
+			Width = -Width;
+		}
+
+		if ( Height < 0 ) {
+			Y += MathF.Sin( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
+			X += MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
+			Height = -Height;
+		}
 	}
 }
