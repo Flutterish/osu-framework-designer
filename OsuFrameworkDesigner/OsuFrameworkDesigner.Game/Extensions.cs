@@ -127,4 +127,7 @@ public static class Extensions {
 
 	public static Vector2 Round ( this Vector2 self )
 		=> new( MathF.Round( self.X ), MathF.Round( self.Y ) );
+
+	public static float Round ( this float self )
+		=> MathF.Round( self );
 }

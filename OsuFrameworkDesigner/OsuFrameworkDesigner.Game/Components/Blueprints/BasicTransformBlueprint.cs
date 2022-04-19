@@ -15,23 +15,23 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 
 		box.TopLeft.Dragged += e => {
 			e.Target = Value.AsDrawable();
-			TransformProps.SetLeftEdge( e.MousePosition.X );
-			TransformProps.SetTopEdge( e.MousePosition.Y );
+			TransformProps.SetLeftEdge( e.AltPressed ? e.MousePosition.X : e.MousePosition.X.Round() );
+			TransformProps.SetTopEdge( e.AltPressed ? e.MousePosition.Y : e.MousePosition.Y.Round() );
 		};
 		box.TopRight.Dragged += e => {
 			e.Target = Value.AsDrawable();
-			TransformProps.SetRightEdge( e.MousePosition.X );
-			TransformProps.SetTopEdge( e.MousePosition.Y );
+			TransformProps.SetRightEdge( e.AltPressed ? e.MousePosition.X : e.MousePosition.X.Round() );
+			TransformProps.SetTopEdge( e.AltPressed ? e.MousePosition.Y : e.MousePosition.Y.Round() );
 		};
 		box.BottomLeft.Dragged += e => {
 			e.Target = Value.AsDrawable();
-			TransformProps.SetLeftEdge( e.MousePosition.X );
-			TransformProps.SetBottomEdge( e.MousePosition.Y );
+			TransformProps.SetLeftEdge( e.AltPressed ? e.MousePosition.X : e.MousePosition.X.Round() );
+			TransformProps.SetBottomEdge( e.AltPressed ? e.MousePosition.Y : e.MousePosition.Y.Round() );
 		};
 		box.BottomRight.Dragged += e => {
 			e.Target = Value.AsDrawable();
-			TransformProps.SetRightEdge( e.MousePosition.X );
-			TransformProps.SetBottomEdge( e.MousePosition.Y );
+			TransformProps.SetRightEdge( e.AltPressed ? e.MousePosition.X : e.MousePosition.X.Round() );
+			TransformProps.SetBottomEdge( e.AltPressed ? e.MousePosition.Y : e.MousePosition.Y.Round() );
 		};
 
 		box.TopLeft.DragEnded += dragEnded;
