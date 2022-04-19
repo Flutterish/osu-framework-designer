@@ -1,6 +1,4 @@
-﻿
-
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Tools;
 
@@ -11,6 +9,10 @@ public class DesignerTopBar : CompositeDrawable {
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.TopbarDefault );
 
 	FillFlowContainer toolSelection;
+	Bindable<ToolButton> selected = new();
+	public readonly Bindable<Tool> Tool = new();
+
+	DesignerTextFlowContainer title;
 
 	public DesignerTopBar () {
 		RelativeSizeAxes = Axes.X;
@@ -26,34 +28,34 @@ public class DesignerTopBar : CompositeDrawable {
 			Content = new Drawable[][] {
 				new Drawable[] {
 					toolSelection = new FillFlowContainer().FilledHorizontal().WithChildren(
-						new ToolButton { Icon = FontAwesome.Regular.QuestionCircle },
-						new ToolButton { Icon = FontAwesome.Solid.MousePointer },
-						new ToolButton { Icon = FontAwesome.Solid.Crop },
-						new ToolButton { Icon = FontAwesome.Regular.Square },
-						new ToolButton { Icon = FontAwesome.Solid.PenNib },
-						new ToolButton { Icon = FontAwesome.Solid.TextHeight },
-						new ToolButton { Icon = FontAwesome.Solid.HandPointer },
-						new ToolButton { Icon = FontAwesome.Regular.Comment }
+						new ToolButton( () => new SelectionTool() ) { Icon = FontAwesome.Solid.MousePointer },
+						new ToolButton( () => new SelectionTool() ) { Icon = FontAwesome.Solid.MousePointer }
 					).WithEachChild<FillFlowContainer, ToolButton>( (child, children) => {
 						child.Selected.BindValueChanged( v => {
-							if ( v.NewValue ) foreach ( var i in children )
-								i.Selected.Value = i == child;
+							if ( v.NewValue ) selected.Value = child;
 						} );
-					} ),
-					new DesignerSpriteText {
-						Text = "Drafts / Untitled",
-						Font = new FontUsage(size: 24)
-					}.Center(),
+					} ).With( x => x.Children.OfType<ToolButton>().First().Selected.Value = true ),
+					title = new DesignerTextFlowContainer {
+						TextAnchor = Anchor.Centre
+					}.FillY().Center(),
 					null!
 				}
 			}
 		}.Fill() );
+
+		title.AddText( "Drafts / ", s => s.Alpha = 0.5f );
+		title.AddText( "Untitled" );
+
+		selected.BindValueChanged( v => {
+			Tool.Value = v.NewValue.Tool;
+			foreach ( ToolButton i in toolSelection )
+				i.Selected.Value = i == v.NewValue;
+		}, true );
 	}
 
 	[BackgroundDependencyLoader]
 	private void load ( ColourConfiguration colours ) {
 		backgroundColor.BindTo( colours.Topbar );
-
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );
 	}

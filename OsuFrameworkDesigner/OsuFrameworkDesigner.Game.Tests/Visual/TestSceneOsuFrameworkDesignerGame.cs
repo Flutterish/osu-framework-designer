@@ -10,7 +10,7 @@ public class TestSceneOsuFrameworkDesignerGame : OsuFrameworkDesignerTestScene {
 	private OsuFrameworkDesignerGame game;
 
 	[BackgroundDependencyLoader]
-	private void load (GameHost host) {
+	private void load ( GameHost host ) {
 		game = new OsuFrameworkDesignerGame();
 		game.SetHost( host );
 

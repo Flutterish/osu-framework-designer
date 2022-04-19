@@ -3,5 +3,5 @@
 namespace OsuFrameworkDesigner.Game.Graphics;
 
 public static class DesignerFont {
-	public static FontUsage Default => new(size: 24);
+	public static FontUsage Default => new( size: 24 );
 }

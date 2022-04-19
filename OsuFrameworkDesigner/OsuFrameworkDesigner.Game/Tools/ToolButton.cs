@@ -17,12 +17,16 @@ public class ToolButton : Button {
 	}
 
 	public readonly BindableBool Selected = new();
+	Func<Tool> createTool;
+	Tool? tool;
+	public Tool Tool => tool ??= createTool();
 
-	public ToolButton () {
+	public ToolButton ( Func<Tool> createTool ) {
+		this.createTool = createTool;
 		RelativeSizeAxes = Axes.Y;
 		Width = 60;
 		AddInternal( background = new Box().Fill() );
-		AddInternal( icon = new SpriteIcon { 
+		AddInternal( icon = new SpriteIcon {
 			Icon = FontAwesome.Solid.QuestionCircle,
 			Size = new( 0.6f )
 		}.Fill().Center() );
@@ -38,8 +42,8 @@ public class ToolButton : Button {
 		activeColor.BindTo( colours.TopbarButtonActive );
 
 		icon.FadeColour( iconColor );
-		background.FadeColour( backgroundColor );
-		FinishTransforms(true);
+		updateColour();
+		FinishTransforms( true );
 	}
 
 	private bool isPressed;
@@ -48,7 +52,7 @@ public class ToolButton : Button {
 		hoverColor.UnbindEvents();
 		activeColor.UnbindEvents();
 
-		background.FadeColour( (isPressed || Selected.Value) ? activeColor : IsHovered ? hoverColor : backgroundColor );
+		background.FadeColour( ( isPressed || Selected.Value ) ? activeColor : IsHovered ? hoverColor : backgroundColor );
 	}
 
 	protected override bool OnHover ( HoverEvent e ) {

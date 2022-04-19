@@ -13,6 +13,6 @@ public class OsuFrameworkDesignerTestScene : TestScene {
 			Add( runner = new TestSceneTestRunner.TestRunner() );
 		}
 
-		public void RunTestBlocking (TestScene test) => runner.RunTestBlocking( test );
+		public void RunTestBlocking ( TestScene test ) => runner.RunTestBlocking( test );
 	}
 }
