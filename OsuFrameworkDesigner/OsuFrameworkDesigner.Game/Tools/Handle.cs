@@ -50,3 +50,27 @@ public class CornerHandle : Handle {
 		FinishTransforms( true );
 	}
 }
+
+public class PointHandle : Handle {
+	Circle background;
+	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
+	Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
+
+	public PointHandle () {
+		Origin = Anchor.Centre;
+		AddInternal( new Container {
+			Size = new( 16 ),
+			Child = background = new Circle { BorderThickness = 4 }.Fill(),
+		}.Center() );
+		Size = new( 24 );
+	}
+
+	[BackgroundDependencyLoader]
+	private void load ( ColourConfiguration colours ) {
+		backgroundColor.BindTo( colours.SelectionHandle );
+		selectionColor.BindTo( colours.Selection );
+		background.FadeColour( backgroundColor );
+		selectionColor.BindValueChanged( v => background.BorderColour = v.NewValue, true );
+		FinishTransforms( true );
+	}
+}

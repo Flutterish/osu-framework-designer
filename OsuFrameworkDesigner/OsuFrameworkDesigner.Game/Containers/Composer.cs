@@ -55,6 +55,11 @@ public class Composer : CompositeDrawable {
 					selection.Apply( i.AsDrawable() );
 				}
 			}
+
+			if ( Selection.Count < 2 )
+				layerAbove.Hide();
+			else
+				layerAbove.Show();
 		} );
 	}
 
@@ -73,8 +78,11 @@ public class Composer : CompositeDrawable {
 	Stack<DrawableSelection> selectionPool = new();
 	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
 
-	new public Vector2 ToLocalSpace ( Vector2 screenSpace )
+	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;
+
+	public Vector2 ContentToScreenSpace ( Vector2 contentSpace )
+		=> content.ToScreenSpace( contentSpace - content.Position + content.DrawSize / 2 );
 
 	protected override void LoadComplete () {
 		base.LoadComplete();

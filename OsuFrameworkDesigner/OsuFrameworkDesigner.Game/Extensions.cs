@@ -130,4 +130,23 @@ public static class Extensions {
 
 	public static float Round ( this float self )
 		=> MathF.Round( self );
+
+	public static float Abs ( this float self )
+		=> MathF.Abs( self );
+
+	public static Vector2 ClosestPointToLine ( Vector2 startPoint, Vector2 direction, Vector2 point ) {
+		Vector2 w = point - startPoint;
+
+		float b = Vector2.Dot( w, direction ) / direction.LengthSquared;
+		Vector2 pB = startPoint + b * direction;
+
+		return pB;
+	}
+
+	public static float SignedDistance ( Vector2 startPoint, Vector2 direction, Vector2 point ) {
+		direction.Normalize();
+		Vector2 w = point - startPoint;
+
+		return Vector2.Dot( w, direction );
+	}
 }

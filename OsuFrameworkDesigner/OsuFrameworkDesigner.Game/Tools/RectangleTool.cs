@@ -7,7 +7,7 @@ public class RectangleTool : Tool {
 	RectangleComponent? rect;
 	Vector2 dragStartPosition;
 	protected override bool OnDragStart ( DragStartEvent e ) {
-		dragStartPosition = Composer.ToLocalSpace( e.ScreenSpaceMouseDownPosition );
+		dragStartPosition = Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
 		Composer.Add( rect = new RectangleComponent {
 			Position = e.AltPressed ? dragStartPosition : dragStartPosition.Round(),
 			Colour = Colour4.Green
@@ -18,7 +18,7 @@ public class RectangleTool : Tool {
 	}
 
 	protected override void OnDrag ( DragEvent e ) {
-		var size = Composer.ToLocalSpace( e.ScreenSpaceMousePosition ) - dragStartPosition;
+		var size = Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - dragStartPosition;
 		if ( e.AltPressed ) {
 			rect!.Position = dragStartPosition;
 			rect.Size = size;
