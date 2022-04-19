@@ -8,6 +8,7 @@ global using osuTK;
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
+using osu.Framework.Graphics.Primitives;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game;
@@ -96,4 +97,20 @@ public static class Extensions {
 
 	public static Drawable AsDrawable ( this IComponent component )
 		=> (Drawable)component;
+
+	public static RectangleF GetBoundingBox<T> ( this IEnumerable<T> self, Func<T, RectangleF> func ) {
+		var rect = func( self.First() );
+		foreach ( var i in self.Skip( 1 ).Select( func ) ) {
+			if ( i.X < rect.X )
+				rect.X = i.X;
+			if ( i.Y < rect.Y )
+				rect.Y = i.Y;
+			if ( i.Right > rect.Right )
+				rect.Width = i.Right - rect.X;
+			if ( i.Bottom > rect.Bottom )
+				rect.Height = i.Bottom - rect.Y;
+		}
+
+		return rect;
+	}
 }

@@ -24,7 +24,7 @@ public class Prop<T> : Bindable<T>, IProp {
 		get => Description;
 		init => Description = value;
 	}
-	public string Category { get; init; }
+	public string Category { get; init; } = "Ungrouped";
 	public bool Groupable { get; init; } = false;
 	public Type Type => typeof( T );
 	object? IProp.Value => Value;

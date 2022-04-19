@@ -37,7 +37,6 @@ public class DrawableSelection : CompositeDrawable {
 	[BackgroundDependencyLoader]
 	private void load ( ColourConfiguration colours ) {
 		backgroundColor.BindTo( colours.Selection );
-		background.FadeColour( backgroundColor );
 		backgroundColor.BindValueChanged( v => BorderColour = v.NewValue, true );
 		FinishTransforms( true );
 	}

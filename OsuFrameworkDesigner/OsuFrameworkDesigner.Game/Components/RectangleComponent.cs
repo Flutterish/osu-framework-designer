@@ -9,5 +9,6 @@ public class RectangleComponent : Box, IComponent {
 		TransformProps = new( this );
 	}
 
+	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps;
 }

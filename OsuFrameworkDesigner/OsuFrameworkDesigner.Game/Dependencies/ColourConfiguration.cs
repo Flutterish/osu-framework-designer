@@ -19,4 +19,6 @@ public class ColourConfiguration {
 
 	public static Colour4 SelectionDefault { get; } = Colour4.FromHex( "#0D99FF" );
 	public readonly Bindable<Colour4> Selection = new( SelectionDefault );
+	public static Colour4 SelectionHandleDefault { get; } = Colour4.FromHex( "#FCFCFC" );
+	public readonly Bindable<Colour4> SelectionHandle = new( SelectionHandleDefault );
 }
