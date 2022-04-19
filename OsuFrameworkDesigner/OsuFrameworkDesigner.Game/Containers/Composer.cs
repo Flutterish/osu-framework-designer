@@ -63,6 +63,9 @@ public class Composer : CompositeDrawable {
 	public void Remove<T> ( T component ) where T : Drawable, IComponent {
 		components.Remove( component );
 	}
+	public void RemoveRange ( IEnumerable<IComponent> components ) {
+		this.components.RemoveRange( components.OfType<Drawable>() );
+	}
 
 	Stack<DrawableSelection> selectionPool = new();
 	Dictionary<IComponent, DrawableSelection> visibleSelections = new();

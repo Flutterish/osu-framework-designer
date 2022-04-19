@@ -2,6 +2,7 @@
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
+using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
@@ -66,6 +67,16 @@ public class SelectionTool : Tool {
 		Composer.Selection.BindCollectionChanged( ( _, _ ) => {
 			selectionBox.Alpha = Composer.Selection.Skip( 1 ).Any() ? 1 : 0;
 		} );
+	}
+
+	protected override bool OnKeyDown ( KeyDownEvent e ) {
+		if ( e.Key is Key.Delete && selection.Any() ) {
+			Composer.RemoveRange( selection );
+			selection.Clear();
+			return true;
+		}
+
+		return base.OnKeyDown( e );
 	}
 }
 
