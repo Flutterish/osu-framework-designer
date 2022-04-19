@@ -8,6 +8,6 @@ public class TestSceneMainScreen : OsuFrameworkDesignerTestScene {
 	// You can make changes to classes associated with the tests and they will recompile and update immediately.
 
 	public TestSceneMainScreen () {
-		Add( new ScreenStack( new MainScreen() ) { RelativeSizeAxes = Axes.Both } );
+		Add( new ScreenStack( new DesignerScreen() ) { RelativeSizeAxes = Axes.Both } );
 	}
 }

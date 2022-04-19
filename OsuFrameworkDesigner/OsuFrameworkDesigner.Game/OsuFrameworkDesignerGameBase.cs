@@ -1,12 +1,13 @@
 using osu.Framework.IO.Stores;
 using OsuFrameworkDesigner.Resources;
-using osuTK;
 
 namespace OsuFrameworkDesigner.Game;
 
 public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
-	protected override Container<Drawable> Content { get; }
+	[Cached]
+	public ColourConfiguration ColourConfiguration { get; } = new();
 
+	protected override Container<Drawable> Content { get; }
 	protected OsuFrameworkDesignerGameBase () {
 		base.Content.Add( Content = new DrawSizePreservingFillContainer {
 			TargetDrawSize = new Vector2( 1920, 1080 )
