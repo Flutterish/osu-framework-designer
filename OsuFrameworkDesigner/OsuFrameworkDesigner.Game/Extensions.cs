@@ -9,6 +9,7 @@ global using System;
 global using System.Collections.Generic;
 global using System.Linq;
 using osu.Framework.Graphics.Primitives;
+using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game;
@@ -113,4 +114,9 @@ public static class Extensions {
 
 		return rect;
 	}
+
+	public static IEnumerable<IProp> GetNestedProperties ( this IComponent component )
+		=> component is IEnumerable<IComponent> container
+			? component.Properties.Concat( container.SelectMany( GetNestedProperties ) )
+			: component.Properties;
 }

@@ -3,8 +3,17 @@
 namespace OsuFrameworkDesigner.Game.Components;
 
 public interface IProp : IBindable {
+	/// <summary>
+	/// The name of the property. Properties with the same name and type, in the same category are merged
+	/// </summary>
 	string Name { get; }
+	/// <summary>
+	/// The category of the properrty. Properties are grouped by category
+	/// </summary>
 	string Category { get; }
+	/// <summary>
+	/// Whether this property should be grouped by same value (<see langword="true"/>) or be just one field (<see langword="false"/>)
+	/// </summary>
 	bool Groupable { get; }
 	Type Type { get; }
 	object? Value { get; }
