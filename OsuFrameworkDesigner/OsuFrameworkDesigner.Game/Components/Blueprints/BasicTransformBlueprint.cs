@@ -36,7 +36,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 
 		box.TopLeft.DragEnded += dragEnded;
 		box.TopRight.DragEnded += dragEnded;
-		box.TopRight.DragEnded += dragEnded;
+		box.BottomLeft.DragEnded += dragEnded;
 		box.BottomRight.DragEnded += dragEnded;
 	}
 

@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
+using OsuFrameworkDesigner.Game.Cursor;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
@@ -137,10 +138,10 @@ public class SelectionBox : CompositeDrawable {
 			Child = new Box { Alpha = 0, AlwaysPresent = true }.Fill()
 		}.Fill() );
 
-		AddInternal( TopLeft = new Handle { Anchor = Anchor.TopLeft } );
-		AddInternal( TopRight = new Handle { Anchor = Anchor.TopRight } );
-		AddInternal( BottomLeft = new Handle { Anchor = Anchor.BottomLeft } );
-		AddInternal( BottomRight = new Handle { Anchor = Anchor.BottomRight } );
+		AddInternal( TopLeft = new Handle { Anchor = Anchor.TopLeft, CursorStyle = CursorStyle.ResizeNW } );
+		AddInternal( TopRight = new Handle { Anchor = Anchor.TopRight, CursorStyle = CursorStyle.ResizeSW } );
+		AddInternal( BottomLeft = new Handle { Anchor = Anchor.BottomLeft, CursorStyle = CursorStyle.ResizeSW } );
+		AddInternal( BottomRight = new Handle { Anchor = Anchor.BottomRight, CursorStyle = CursorStyle.ResizeNW } );
 	}
 
 	[BackgroundDependencyLoader]
@@ -150,7 +151,7 @@ public class SelectionBox : CompositeDrawable {
 		FinishTransforms( true );
 	}
 
-	new public class Handle : CompositeDrawable {
+	new public class Handle : CompositeDrawable, IUsesCursorStyle {
 		Box background;
 		Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
 		Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
@@ -186,5 +187,7 @@ public class SelectionBox : CompositeDrawable {
 
 		public event Action<DragEvent>? Dragged;
 		public event Action<DragEndEvent>? DragEnded;
+
+		public CursorStyle CursorStyle { get; set; }
 	}
 }
