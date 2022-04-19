@@ -72,6 +72,7 @@ public class PropertiesPanel : CompositeDrawable {
 public class FloatEditField : FillFlowContainer {
 	DesignerSpriteText title;
 	BasicTextBox textBox;
+	IEnumerable<IProp> props;
 
 	public FloatEditField ( string title, IEnumerable<IProp> props ) {
 		RelativeSizeAxes = Axes.X;
@@ -93,6 +94,18 @@ public class FloatEditField : FillFlowContainer {
 			Origin = Anchor.CentreLeft
 		} );
 
+		this.props = props;
+		updateValue();
+		foreach ( IBindable<float> i in props ) {
+			i.ValueChanged += onValueChanged;
+		}
+	}
+
+	private void onValueChanged ( ValueChangedEvent<float> e ) {
+		updateValue();
+	}
+
+	void updateValue () {
 		var v = props.First().Value;
 		if ( props.All( x => EqualityComparer<object>.Default.Equals( x.Value, v ) ) )
 			textBox.Text = $"{v:0.##}";
@@ -104,5 +117,12 @@ public class FloatEditField : FillFlowContainer {
 		base.Update();
 
 		textBox.Width = ChildSize.X - title.DrawWidth - 10;
+	}
+
+	protected override void Dispose ( bool isDisposing ) {
+		base.Dispose( isDisposing );
+		foreach ( IBindable<float> i in props ) {
+			i.ValueChanged -= onValueChanged;
+		}
 	}
 }
