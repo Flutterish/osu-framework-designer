@@ -16,7 +16,12 @@ public class PropertiesPanel : CompositeDrawable {
 		RelativeSizeAxes = Axes.Y;
 		Width = 300;
 		AddInternal( background = new Box().Fill() );
-		AddInternal( items = new FillFlowContainer().Vertical() );
+		AddInternal( items = new FillFlowContainer {
+			Direction = FillDirection.Full,
+			AutoSizeAxes = Axes.Y,
+			RelativeSizeAxes = Axes.X,
+			Padding = new( 10 )
+		} );
 
 		Components.BindCollectionChanged( ( _, _ ) => componentCache.Invalidate() );
 	}
@@ -39,34 +44,65 @@ public class PropertiesPanel : CompositeDrawable {
 
 			items.Clear();
 			foreach ( var category in Components.SelectMany( Extensions.GetNestedProperties ).GroupBy( x => x.Category ) ) {
-				items.Add( new DesignerSpriteText { Text = category.Key, Colour = Colour4.Black } );
+				items.Add( new DesignerSpriteText { Text = category.Key, Font = DesignerFont.Bold( 18 ), Colour = Colour4.Black, Alpha = 0.5f, RelativeSizeAxes = Axes.X } );
 
 				foreach ( var prop in category.GroupBy( x => (x.Name, x.Type) ) ) {
-					items.Add( new DesignerSpriteText { Text = prop.Key.Name, Colour = Colour4.Black } );
-
 					var ungroupable = prop.Where( x => !x.Groupable );
 					if ( ungroupable.Any() ) {
-						var distinct = ungroupable.Select( x => x.Value ).Distinct();
-						items.Add( createEditField( prop.Key.Type, ungroupable, distinctValues: distinct.Count() != 1 ) );
+						items.Add( createEditField( prop.Key.Type, ungroupable ) );
 					}
 
 					foreach ( var i in prop.Where( x => x.Groupable ).GroupBy( x => x.Value ) ) {
-						items.Add( createEditField( prop.Key.Type, i, distinctValues: false ) );
+						items.Add( createEditField( prop.Key.Type, i ) );
 					}
 				}
 			}
 		}
 	}
 
-	Drawable createEditField ( Type type, IEnumerable<IProp> props, bool distinctValues ) {
+	Drawable createEditField ( Type type, IEnumerable<IProp> props ) {
 		if ( type == typeof( float ) ) {
-			return new BasicTextBox {
-				Text = distinctValues ? "Mixed" : $"{props.First().Value}",
-				Height = 40,
-				RelativeSizeAxes = Axes.X
-			};
+			return new FloatEditField( props.First().Name, props );
 		}
 
 		throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
+	}
+}
+
+public class FloatEditField : FillFlowContainer {
+	DesignerSpriteText title;
+	BasicTextBox textBox;
+
+	public FloatEditField ( string title, IEnumerable<IProp> props ) {
+		RelativeSizeAxes = Axes.X;
+		Height = 40;
+		Width = 0.5f;
+		Direction = FillDirection.Horizontal;
+		Add( this.title = new DesignerSpriteText {
+			Text = title[0..1],
+			Colour = Colour4.Black,
+			Alpha = 0.5f,
+			Anchor = Anchor.CentreLeft,
+			Origin = Anchor.CentreLeft,
+			Font = DesignerFont.Monospace( 20 ),
+			Width = 16
+		} );
+		Add( textBox = new BasicTextBox {
+			Height = 30,
+			Anchor = Anchor.CentreLeft,
+			Origin = Anchor.CentreLeft
+		} );
+
+		var v = props.First().Value;
+		if ( props.All( x => EqualityComparer<object>.Default.Equals( x.Value, v ) ) )
+			textBox.Text = $"{v:0.##}";
+		else
+			textBox.Text = "Mixed";
+	}
+
+	protected override void Update () {
+		base.Update();
+
+		textBox.Width = ChildSize.X - title.DrawWidth - 10;
 	}
 }

@@ -4,6 +4,6 @@ namespace OsuFrameworkDesigner.Game.Graphics;
 
 public class DesignerSpriteText : SpriteText {
 	public DesignerSpriteText () {
-		Font = DesignerFont.Default;
+		Font = DesignerFont.Default();
 	}
 }
