@@ -9,9 +9,15 @@ public class Composer : CompositeDrawable {
 	Box background;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.ComposerBackgroundDefault );
 
+	TransformContainer content;
+
 	public Composer () {
 		this.Fill();
 		AddInternal( background = new Box().Fill() );
+		AddInternal( new DrawSizePreservingFillContainer {
+			TargetDrawSize = new Vector2( 500 ),
+			Child = content = new TransformContainer().Fit().Center()
+		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
 	}
 

@@ -29,6 +29,13 @@ public static class Extensions {
 		return self;
 	}
 
+	public static T Fit<T> ( this T self, float aspectRatio = 1 ) where T : Drawable {
+		self.RelativeSizeAxes = Axes.Both;
+		self.FillMode = FillMode.Fit;
+		self.FillAspectRatio = aspectRatio;
+		return self;
+	}
+
 	public static T Vertical<T> ( this T self ) where T : FillFlowContainer<Drawable> {
 		self.RelativeSizeAxes = Axes.X;
 		self.AutoSizeAxes = Axes.Y;

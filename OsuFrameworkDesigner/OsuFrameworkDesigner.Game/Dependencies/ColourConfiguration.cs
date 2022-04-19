@@ -16,4 +16,7 @@ public class ColourConfiguration {
 	public readonly Bindable<Colour4> ComposerBackground = new( ComposerBackgroundDefault );
 	public static Colour4 SidePanelDefault { get; } = Colour4.White;
 	public readonly Bindable<Colour4> SidePanel = new( SidePanelDefault );
+
+	public static Colour4 SelectionDefault { get; } = Colour4.FromHex( "#0D99FF" );
+	public readonly Bindable<Colour4> Selection = new( SelectionDefault );
 }
