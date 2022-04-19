@@ -10,13 +10,14 @@ public class DesignerScreen : Screen {
 	PropertiesPanel propertiesPanel;
 
 	public DesignerScreen () {
+		composer = new Composer();
 		AddInternal( new GridContainer {
 			RowDimensions = new Dimension[] {
 				new( GridSizeMode.AutoSize ),
 				new()
 			},
 			Content = new Drawable[][] {
-				new Drawable[] { topBar = new DesignerTopBar() },
+				new Drawable[] { topBar = new DesignerTopBar( composer ) },
 				new Drawable[] { new GridContainer {
 					ColumnDimensions = new Dimension[] {
 						new( GridSizeMode.AutoSize ),
@@ -26,7 +27,7 @@ public class DesignerScreen : Screen {
 					Content = new Drawable[][] {
 						new Drawable[] {
 							assetsPanel = new AssetsPanel(),
-							composer = new Composer(),
+							composer,
 							propertiesPanel = new PropertiesPanel()
 						}
 					}

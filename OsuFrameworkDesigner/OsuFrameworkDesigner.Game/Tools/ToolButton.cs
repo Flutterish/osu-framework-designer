@@ -17,12 +17,10 @@ public class ToolButton : Button {
 	}
 
 	public readonly BindableBool Selected = new();
-	Func<Tool> createTool;
-	Tool? tool;
-	public Tool Tool => tool ??= createTool();
+	public readonly Tool Tool;
 
-	public ToolButton ( Func<Tool> createTool ) {
-		this.createTool = createTool;
+	public ToolButton ( Tool tool ) {
+		Tool = tool;
 		RelativeSizeAxes = Axes.Y;
 		Width = 60;
 		AddInternal( background = new Box().Fill() );

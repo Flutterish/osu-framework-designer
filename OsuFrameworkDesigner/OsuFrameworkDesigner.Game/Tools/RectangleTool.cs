@@ -30,4 +30,15 @@ public class RectangleTool : Tool {
 
 		rect!.TransformProps.CopyProps( rect );
 	}
+
+	protected override void OnDragEnd ( DragEndEvent e ) {
+		Composer.Selection.Add( rect! );
+		if ( !e.ShiftPressed ) {
+			Composer.Tool.Value = Composer.SelectionTool;
+		}
+	}
+
+	public override void BeginUsing () {
+		Composer.Selection.Clear();
+	}
 }

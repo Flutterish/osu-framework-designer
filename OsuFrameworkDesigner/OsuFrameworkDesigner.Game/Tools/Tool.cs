@@ -9,4 +9,7 @@ public abstract class Tool : CompositeDrawable {
 	public Tool () {
 		this.Fill();
 	}
+
+	public virtual void BeginUsing () { }
+	public virtual void StopUsing () { }
 }

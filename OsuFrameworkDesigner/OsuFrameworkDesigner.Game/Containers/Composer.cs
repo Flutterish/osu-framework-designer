@@ -20,6 +20,9 @@ public class Composer : CompositeDrawable {
 	UnmaskableContainer components;
 	UnmaskableContainer layerAbove;
 
+	public readonly SelectionTool SelectionTool = new();
+	public readonly RectangleTool RectangleTool = new();
+
 	public Composer () {
 		this.Fill();
 		Masking = true;
@@ -78,6 +81,7 @@ public class Composer : CompositeDrawable {
 		Tool.BindValueChanged( v => {
 			var oldTool = v.OldValue;
 			if ( oldTool != null ) {
+				oldTool.StopUsing();
 				oldTool.FadeOut( 200 );
 			}
 
@@ -91,6 +95,7 @@ public class Composer : CompositeDrawable {
 					tool.FadeInFromZero( 200 );
 				}
 				tools.ChangeChildDepth( tool, (float)-Time.Current );
+				tool.BeginUsing();
 			}
 		}, true );
 	}
