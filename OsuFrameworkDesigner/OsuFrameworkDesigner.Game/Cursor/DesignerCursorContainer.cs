@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 
 namespace OsuFrameworkDesigner.Game.Cursor;
 
@@ -10,11 +11,18 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 		AddInternal( cursorContainer = new ShapedCursorContainer().Fill() );
 	}
 
+	InputManager? inputManager;
+	InputManager InputManager => inputManager ??= GetContainingInputManager();
 	protected override void Update () {
 		base.Update();
 
-		var targets = FindTargets();
-		cursorContainer.Style = targets.FirstOrDefault()?.CursorStyle ?? CursorStyle.Default;
+		if ( InputManager.DraggedDrawable is IUsesCursorStyle cursorStyle ) {
+			cursorContainer.Style = cursorStyle.CursorStyle;
+		}
+		else {
+			var targets = FindTargets();
+			cursorContainer.Style = targets.FirstOrDefault()?.CursorStyle ?? CursorStyle.Default;
+		}
 	}
 
 	private class ShapedCursorContainer : CursorContainer {
@@ -27,7 +35,8 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			[CursorStyle.ResizeDiagonal] = (FontAwesome.Solid.ExpandArrowsAlt, new(), 0, Anchor.TopLeft, new( 1 )),
 			[CursorStyle.ResizeOrthogonal] = (FontAwesome.Solid.ArrowsAlt, new(), 0, Anchor.TopLeft, new( 1 )),
 			[CursorStyle.ResizeHorizontal] = (FontAwesome.Solid.ArrowsAltH, new(), 0, Anchor.Centre, new( 1.2f )),
-			[CursorStyle.ResizeVertical] = (FontAwesome.Solid.ArrowsAltV, new(), 0, Anchor.Centre, new( 1.2f ))
+			[CursorStyle.ResizeVertical] = (FontAwesome.Solid.ArrowsAltV, new(), 0, Anchor.Centre, new( 1.2f )),
+			[CursorStyle.Rotate] = (FontAwesome.Solid.RedoAlt, new(), 0, Anchor.Centre, new( 1 ))
 		};
 
 		CursorStyle style;

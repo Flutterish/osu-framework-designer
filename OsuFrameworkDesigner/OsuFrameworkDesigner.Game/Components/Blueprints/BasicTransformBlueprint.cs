@@ -58,6 +58,15 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			TransformProps.Y.Value = e.AltPressed ? delta.Y : delta.Y.Round();
 		};
 
+		box.FarBottomLeft.DragStarted += onRotationDragStarted;
+		box.FarBottomRight.DragStarted += onRotationDragStarted;
+		box.FarTopLeft.DragStarted += onRotationDragStarted;
+		box.FarTopRight.DragStarted += onRotationDragStarted;
+		box.FarBottomLeft.Dragged += onRotationDrag;
+		box.FarBottomRight.Dragged += onRotationDrag;
+		box.FarTopLeft.Dragged += onRotationDrag;
+		box.FarTopRight.Dragged += onRotationDrag;
+
 		box.TopLeft.DragEnded += dragEnded;
 		box.TopRight.DragEnded += dragEnded;
 		box.BottomLeft.DragEnded += dragEnded;
@@ -68,7 +77,23 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		box.Bottom.DragEnded += dragEnded;
 	}
 
-	private void dragEnded ( DragEndEvent obj ) {
+	private void dragEnded ( DragEndEvent e ) {
 		TransformProps.Normalize();
+	}
+
+	float startAngle;
+	private void onRotationDragStarted ( DragStartEvent e ) {
+		startAngle = TransformProps.Rotation.Value;
+	}
+
+	private void onRotationDrag ( DragEvent e ) {
+		var center = Value.AsDrawable().ScreenSpaceDrawQuad.TopLeft;
+		var startDiff = e.ScreenSpaceMouseDownPosition - center;
+		var diff = e.ScreenSpaceMousePosition - center;
+
+		var startAngle = MathF.Atan2( startDiff.Y, startDiff.X ) / MathF.PI * 180;
+		var angle = MathF.Atan2( diff.Y, diff.X ) / MathF.PI * 180;
+		angle = this.startAngle + angle - startAngle;
+		TransformProps.Rotation.Value = e.AltPressed ? angle : angle.Round();
 	}
 }

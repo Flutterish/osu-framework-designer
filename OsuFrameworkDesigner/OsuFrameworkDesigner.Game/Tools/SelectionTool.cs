@@ -136,12 +136,22 @@ public class SelectionBox : Handle {
 	public readonly Handle Top;
 	public readonly Handle Bottom;
 
+	public readonly Handle FarTopLeft;
+	public readonly Handle FarTopRight;
+	public readonly Handle FarBottomLeft;
+	public readonly Handle FarBottomRight;
+
 	public SelectionBox () {
 		AddInternal( border = new Container {
 			Masking = true,
 			BorderThickness = 4,
 			Child = new Box { Alpha = 0, AlwaysPresent = true }.Fill()
 		}.Fill() );
+
+		AddInternal( FarTopLeft = new Handle { Anchor = Anchor.TopLeft, Origin = Anchor.BottomRight, Size = new( 28 ), CursorStyle = CursorStyle.Rotate } );
+		AddInternal( FarTopRight = new Handle { Anchor = Anchor.TopRight, Origin = Anchor.BottomLeft, Size = new( 28 ), CursorStyle = CursorStyle.Rotate } );
+		AddInternal( FarBottomLeft = new Handle { Anchor = Anchor.BottomLeft, Origin = Anchor.TopRight, Size = new( 28 ), CursorStyle = CursorStyle.Rotate } );
+		AddInternal( FarBottomRight = new Handle { Anchor = Anchor.BottomRight, Origin = Anchor.TopLeft, Size = new( 28 ), CursorStyle = CursorStyle.Rotate } );
 
 		AddInternal( Top = new Handle { Origin = Anchor.Centre, Anchor = Anchor.TopCentre, Height = 24, RelativeSizeAxes = Axes.X, CursorStyle = CursorStyle.ResizeVertical } );
 		AddInternal( Bottom = new Handle { Origin = Anchor.Centre, Anchor = Anchor.BottomCentre, Height = 24, RelativeSizeAxes = Axes.X, CursorStyle = CursorStyle.ResizeVertical } );
@@ -152,6 +162,7 @@ public class SelectionBox : Handle {
 		AddInternal( TopRight = new CornerHandle { Anchor = Anchor.TopRight, CursorStyle = CursorStyle.ResizeSW } );
 		AddInternal( BottomLeft = new CornerHandle { Anchor = Anchor.BottomLeft, CursorStyle = CursorStyle.ResizeSW } );
 		AddInternal( BottomRight = new CornerHandle { Anchor = Anchor.BottomRight, CursorStyle = CursorStyle.ResizeNW } );
+
 	}
 
 	[BackgroundDependencyLoader]

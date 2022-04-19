@@ -38,7 +38,7 @@ public class CornerHandle : Handle {
 			Masking = true,
 			BorderThickness = 4
 		}.Center() );
-		Size = new( 36 );
+		Size = new( 28 );
 	}
 
 	[BackgroundDependencyLoader]
