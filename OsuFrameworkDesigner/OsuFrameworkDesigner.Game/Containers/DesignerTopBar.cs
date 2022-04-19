@@ -29,7 +29,7 @@ public class DesignerTopBar : CompositeDrawable {
 				new Drawable[] {
 					toolSelection = new FillFlowContainer().FilledHorizontal().WithChildren(
 						new ToolButton( () => new SelectionTool() ) { Icon = FontAwesome.Solid.MousePointer },
-						new ToolButton( () => new SelectionTool() ) { Icon = FontAwesome.Solid.MousePointer }
+						new ToolButton( () => new RectangleTool() ) { Icon = FontAwesome.Regular.Square }
 					).WithEachChild<FillFlowContainer, ToolButton>( (child, children) => {
 						child.Selected.BindValueChanged( v => {
 							if ( v.NewValue ) selected.Value = child;

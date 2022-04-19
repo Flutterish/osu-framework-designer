@@ -8,6 +8,7 @@ global using osuTK;
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
+using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game;
 
@@ -92,4 +93,7 @@ public static class Extensions {
 		}, true );
 		return drawable;
 	}
+
+	public static Drawable AsDrawable ( this IComponent component )
+		=> (Drawable)component;
 }

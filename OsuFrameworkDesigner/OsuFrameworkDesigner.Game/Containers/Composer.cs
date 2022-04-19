@@ -1,7 +1,9 @@
-﻿using OsuFrameworkDesigner.Game.Tools;
+﻿using OsuFrameworkDesigner.Game.Components.Interfaces;
+using OsuFrameworkDesigner.Game.Tools;
 
 namespace OsuFrameworkDesigner.Game.Containers;
 
+[Cached]
 public class Composer : CompositeDrawable {
 	public readonly Bindable<Tool> Tool = new();
 	Container<Tool> tools;
@@ -20,6 +22,16 @@ public class Composer : CompositeDrawable {
 		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
 	}
+
+	public void Add<T> ( T component ) where T : Drawable, IComponent {
+		content.Add( component );
+	}
+	public void Remove<T> ( T component ) where T : Drawable, IComponent {
+		content.Remove( component );
+	}
+
+	new public Vector2 ToLocalSpace ( Vector2 screenSpace )
+		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;
 
 	protected override void LoadComplete () {
 		base.LoadComplete();
