@@ -27,6 +27,40 @@ public struct TransformProps : IEnumerable<IProp> {
 	public readonly Prop<float> Height = new() { Category = "Basic" };
 	public readonly Prop<float> Rotation = new() { Category = "Basic" };
 
+	public void Normalize () {
+		var w = Width.Value;
+		if ( w < 0 ) {
+			X.Value += w;
+			Width.Value = -w;
+		}
+
+		var h = Height.Value;
+		if ( h < 0 ) {
+			Y.Value += h;
+			Height.Value = -h;
+		}
+	}
+
+	public void SetRightEdge ( float x ) {
+		Width.Value = x - X.Value;
+	}
+
+	public void SetBottomEdge ( float y ) {
+		Height.Value = y - Y.Value;
+	}
+
+	public void SetLeftEdge ( float x ) {
+		var delta = X.Value - x;
+		X.Value -= delta;
+		Width.Value += delta;
+	}
+
+	public void SetTopEdge ( float y ) {
+		var delta = Y.Value - y;
+		Y.Value -= delta;
+		Height.Value += delta;
+	}
+
 	public IEnumerator<IProp> GetEnumerator () {
 		yield return X;
 		yield return Y;

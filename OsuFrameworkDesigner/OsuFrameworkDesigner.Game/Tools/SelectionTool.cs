@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
+using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using osuTK.Input;
 
@@ -27,9 +28,9 @@ public class SelectionTool : Tool {
 		var selectionQuad = new Quad( topLeft, new( bottomRight.X, topLeft.Y ), new( topLeft.X, bottomRight.Y ), bottomRight );
 
 		var selected = Composer.Components.Where( x => x.AsDrawable().ScreenSpaceDrawQuad.Intersects( selectionQuad ) );
-		if ( !selected.SequenceEqual( Composer.Selection ) ) {
-			Composer.Selection.Clear();
-			Composer.Selection.AddRange( selected );
+		if ( !selected.SequenceEqual( selection ) ) {
+			selection.Clear();
+			selection.AddRange( selected );
 		}
 	}
 
@@ -39,10 +40,17 @@ public class SelectionTool : Tool {
 	}
 
 	protected override bool OnClick ( ClickEvent e ) {
-		Composer.Selection.Clear();
 		var item = Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().ScreenSpaceDrawQuad.Contains( e.ScreenSpaceMouseDownPosition ) );
-		if ( item != null )
-			Composer.Selection.Add( item );
+
+		if ( item != null ) {
+			if ( selection.Count != 1 || item != selection.Single() ) {
+				selection.Clear();
+				Composer.Selection.Add( item );
+			}
+		}
+		else {
+			selection.Clear();
+		}
 
 		return true;
 	}
@@ -51,6 +59,12 @@ public class SelectionTool : Tool {
 	SelectionBox selectionBox;
 	protected override void Update () {
 		base.Update();
+		if ( blueprint != null ) {
+			var bounds = ToLocalSpace( blueprint.Value.AsDrawable().ScreenSpaceDrawQuad ).AABBFloat;
+			blueprint.Position = bounds.Location;
+			blueprint.Size = bounds.Size;
+		}
+
 		if ( selectionBox.Alpha == 0 )
 			return;
 
@@ -60,12 +74,20 @@ public class SelectionTool : Tool {
 		selectionBox.Size = box.Size;
 	}
 
+	Blueprint<IComponent>? blueprint;
 	protected override void LoadComplete () {
 		base.LoadComplete();
 
 		selection.BindTo( Composer.Selection );
-		Composer.Selection.BindCollectionChanged( ( _, _ ) => {
-			selectionBox.Alpha = Composer.Selection.Skip( 1 ).Any() ? 1 : 0;
+		selection.BindCollectionChanged( ( _, _ ) => {
+			if ( blueprint != null ) {
+				RemoveInternal( blueprint );
+				blueprint = null;
+			}
+			selectionBox.Alpha = selection.Skip( 1 ).Any() ? 1 : 0;
+			if ( selectionBox.Alpha == 0 && selection.SingleOrDefault() is IComponent comp ) {
+				AddInternal( blueprint = comp.CreateBlueprint() );
+			}
 		} );
 	}
 
@@ -103,10 +125,10 @@ public class SelectionBox : CompositeDrawable {
 	Container border;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
 
-	Handle topLeft;
-	Handle topRight;
-	Handle bottomLeft;
-	Handle bottomRight;
+	public readonly Handle TopLeft;
+	public readonly Handle TopRight;
+	public readonly Handle BottomLeft;
+	public readonly Handle BottomRight;
 
 	public SelectionBox () {
 		AddInternal( border = new Container {
@@ -115,10 +137,10 @@ public class SelectionBox : CompositeDrawable {
 			Child = new Box { Alpha = 0, AlwaysPresent = true }.Fill()
 		}.Fill() );
 
-		AddInternal( topLeft = new Handle { Anchor = Anchor.TopLeft } );
-		AddInternal( topRight = new Handle { Anchor = Anchor.TopRight } );
-		AddInternal( bottomLeft = new Handle { Anchor = Anchor.BottomLeft } );
-		AddInternal( bottomRight = new Handle { Anchor = Anchor.BottomRight } );
+		AddInternal( TopLeft = new Handle { Anchor = Anchor.TopLeft } );
+		AddInternal( TopRight = new Handle { Anchor = Anchor.TopRight } );
+		AddInternal( BottomLeft = new Handle { Anchor = Anchor.BottomLeft } );
+		AddInternal( BottomRight = new Handle { Anchor = Anchor.BottomRight } );
 	}
 
 	[BackgroundDependencyLoader]
@@ -128,7 +150,7 @@ public class SelectionBox : CompositeDrawable {
 		FinishTransforms( true );
 	}
 
-	new private class Handle : CompositeDrawable {
+	new public class Handle : CompositeDrawable {
 		Box background;
 		Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
 		Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
@@ -149,5 +171,20 @@ public class SelectionBox : CompositeDrawable {
 			selectionColor.BindValueChanged( v => BorderColour = v.NewValue, true );
 			FinishTransforms( true );
 		}
+
+		protected override bool OnDragStart ( DragStartEvent e ) {
+			return true;
+		}
+
+		protected override void OnDrag ( DragEvent e ) {
+			Dragged?.Invoke( e );
+		}
+
+		protected override void OnDragEnd ( DragEndEvent e ) {
+			DragEnded?.Invoke( e );
+		}
+
+		public event Action<DragEvent>? Dragged;
+		public event Action<DragEndEvent>? DragEnded;
 	}
 }
