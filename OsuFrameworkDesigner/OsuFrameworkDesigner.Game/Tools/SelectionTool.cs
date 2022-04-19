@@ -122,14 +122,19 @@ public class HoverSelectionBox : CompositeDrawable { // TODO the borders should 
 	}
 }
 
-public class SelectionBox : CompositeDrawable {
+public class SelectionBox : Handle {
 	Container border;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
 
-	public readonly Handle TopLeft;
-	public readonly Handle TopRight;
-	public readonly Handle BottomLeft;
-	public readonly Handle BottomRight;
+	public readonly CornerHandle TopLeft;
+	public readonly CornerHandle TopRight;
+	public readonly CornerHandle BottomLeft;
+	public readonly CornerHandle BottomRight;
+
+	public readonly Handle Left;
+	public readonly Handle Right;
+	public readonly Handle Top;
+	public readonly Handle Bottom;
 
 	public SelectionBox () {
 		AddInternal( border = new Container {
@@ -138,10 +143,15 @@ public class SelectionBox : CompositeDrawable {
 			Child = new Box { Alpha = 0, AlwaysPresent = true }.Fill()
 		}.Fill() );
 
-		AddInternal( TopLeft = new Handle { Anchor = Anchor.TopLeft, CursorStyle = CursorStyle.ResizeNW } );
-		AddInternal( TopRight = new Handle { Anchor = Anchor.TopRight, CursorStyle = CursorStyle.ResizeSW } );
-		AddInternal( BottomLeft = new Handle { Anchor = Anchor.BottomLeft, CursorStyle = CursorStyle.ResizeSW } );
-		AddInternal( BottomRight = new Handle { Anchor = Anchor.BottomRight, CursorStyle = CursorStyle.ResizeNW } );
+		AddInternal( Top = new Handle { Origin = Anchor.Centre, Anchor = Anchor.TopCentre, Height = 24, RelativeSizeAxes = Axes.X, CursorStyle = CursorStyle.ResizeVertical } );
+		AddInternal( Bottom = new Handle { Origin = Anchor.Centre, Anchor = Anchor.BottomCentre, Height = 24, RelativeSizeAxes = Axes.X, CursorStyle = CursorStyle.ResizeVertical } );
+		AddInternal( Left = new Handle { Origin = Anchor.Centre, Anchor = Anchor.CentreLeft, Width = 24, RelativeSizeAxes = Axes.Y, CursorStyle = CursorStyle.ResizeHorizontal } );
+		AddInternal( Right = new Handle { Origin = Anchor.Centre, Anchor = Anchor.CentreRight, Width = 24, RelativeSizeAxes = Axes.Y, CursorStyle = CursorStyle.ResizeHorizontal } );
+
+		AddInternal( TopLeft = new CornerHandle { Anchor = Anchor.TopLeft, CursorStyle = CursorStyle.ResizeNW } );
+		AddInternal( TopRight = new CornerHandle { Anchor = Anchor.TopRight, CursorStyle = CursorStyle.ResizeSW } );
+		AddInternal( BottomLeft = new CornerHandle { Anchor = Anchor.BottomLeft, CursorStyle = CursorStyle.ResizeSW } );
+		AddInternal( BottomRight = new CornerHandle { Anchor = Anchor.BottomRight, CursorStyle = CursorStyle.ResizeNW } );
 	}
 
 	[BackgroundDependencyLoader]
@@ -149,45 +159,5 @@ public class SelectionBox : CompositeDrawable {
 		backgroundColor.BindTo( colours.Selection );
 		backgroundColor.BindValueChanged( v => border.BorderColour = v.NewValue, true );
 		FinishTransforms( true );
-	}
-
-	new public class Handle : CompositeDrawable, IUsesCursorStyle {
-		Box background;
-		Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
-		Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
-
-		public Handle () {
-			Origin = Anchor.Centre;
-			Size = new( 12 );
-			AddInternal( background = new Box().Fill() );
-			Masking = true;
-			BorderThickness = 4;
-		}
-
-		[BackgroundDependencyLoader]
-		private void load ( ColourConfiguration colours ) {
-			backgroundColor.BindTo( colours.SelectionHandle );
-			selectionColor.BindTo( colours.Selection );
-			background.FadeColour( backgroundColor );
-			selectionColor.BindValueChanged( v => BorderColour = v.NewValue, true );
-			FinishTransforms( true );
-		}
-
-		protected override bool OnDragStart ( DragStartEvent e ) {
-			return true;
-		}
-
-		protected override void OnDrag ( DragEvent e ) {
-			Dragged?.Invoke( e );
-		}
-
-		protected override void OnDragEnd ( DragEndEvent e ) {
-			DragEnded?.Invoke( e );
-		}
-
-		public event Action<DragEvent>? Dragged;
-		public event Action<DragEndEvent>? DragEnded;
-
-		public CursorStyle CursorStyle { get; set; }
 	}
 }
