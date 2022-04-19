@@ -149,4 +149,9 @@ public static class Extensions {
 
 		return Vector2.Dot( w, direction );
 	}
+
+	public static void Deconstruct ( this Vector2 self, out float x, out float y ) {
+		x = self.X;
+		y = self.Y;
+	}
 }

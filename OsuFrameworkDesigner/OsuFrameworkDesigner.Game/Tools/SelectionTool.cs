@@ -60,11 +60,6 @@ public class SelectionTool : Tool {
 	SelectionBox selectionBox;
 	protected override void Update () {
 		base.Update();
-		if ( blueprint != null ) {
-			var bounds = ToLocalSpace( blueprint.Value.AsDrawable().ScreenSpaceDrawQuad ).AABBFloat;
-			blueprint.Position = bounds.Location;
-			blueprint.Size = bounds.Size;
-		}
 
 		if ( selectionBox.Alpha == 0 )
 			return;

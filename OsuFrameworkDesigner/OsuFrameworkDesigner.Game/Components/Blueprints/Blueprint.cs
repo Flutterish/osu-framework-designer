@@ -11,4 +11,11 @@ public abstract class Blueprint<T> : CompositeDrawable {
 	protected Blueprint ( T value ) {
 		Value = value;
 	}
+
+	protected override void Update () {
+		base.Update();
+		PositionSelf();
+	}
+
+	protected virtual void PositionSelf () { }
 }

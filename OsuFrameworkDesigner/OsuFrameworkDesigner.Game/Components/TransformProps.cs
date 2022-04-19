@@ -30,13 +30,15 @@ public struct TransformProps : IEnumerable<IProp> {
 	public void Normalize () {
 		var w = Width.Value;
 		if ( w < 0 ) {
-			X.Value += w;
+			X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * w;
+			Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * w;
 			Width.Value = -w;
 		}
 
 		var h = Height.Value;
 		if ( h < 0 ) {
-			Y.Value += h;
+			Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * h;
+			X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * h;
 			Height.Value = -h;
 		}
 	}
@@ -51,14 +53,16 @@ public struct TransformProps : IEnumerable<IProp> {
 
 	public void SetLeftEdge ( float x ) {
 		var delta = X.Value - x;
-		X.Value -= delta;
+		X.Value -= MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta;
 		Width.Value += delta;
+		Y.Value -= MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta;
 	}
 
 	public void SetTopEdge ( float y ) {
 		var delta = Y.Value - y;
-		Y.Value -= delta;
+		Y.Value -= MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
 		Height.Value += delta;
+		X.Value -= MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
 	}
 
 	public IEnumerator<IProp> GetEnumerator () {
