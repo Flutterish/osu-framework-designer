@@ -66,7 +66,7 @@ public class SelectionTool : Tool {
 	}
 }
 
-public class HoverSelectionBox : CompositeDrawable {
+public class HoverSelectionBox : CompositeDrawable { // TODO the borders should be around, not inside
 	Box background;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
 

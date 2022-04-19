@@ -1,6 +1,8 @@
-﻿using OsuFrameworkDesigner.Game.Components.Interfaces;
+﻿using osu.Framework.Input.Events;
+using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Tools;
+using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Containers;
 
@@ -15,17 +17,18 @@ public class Composer : CompositeDrawable {
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.ComposerBackgroundDefault );
 
 	TransformContainer content;
-	Container components;
-	Container layerAbove;
+	UnmaskableContainer components;
+	UnmaskableContainer layerAbove;
 
 	public Composer () {
 		this.Fill();
+		Masking = true;
 		AddInternal( background = new Box().Fill() );
 		AddInternal( new DrawSizePreservingFillContainer {
 			TargetDrawSize = new Vector2( 500 ),
 			Child = content = new TransformContainer().Fit().Center().WithChildren(
-				components = new Container().Center(),
-				layerAbove = new Container().Center()
+				components = new UnmaskableContainer().Center(),
+				layerAbove = new UnmaskableContainer().Center()
 			)
 		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
@@ -87,6 +90,42 @@ public class Composer : CompositeDrawable {
 				tools.ChangeChildDepth( tool, (float)-Time.Current );
 			}
 		}, true );
+	}
+
+	bool isDragged;
+	protected override bool OnMouseDown ( MouseDownEvent e ) {
+		if ( e.Button is MouseButton.Middle ) {
+			isDragged = true;
+			return true;
+		}
+
+		return false;
+	}
+
+	public override bool Contains ( Vector2 screenSpacePos ) => isDragged || base.Contains( screenSpacePos );
+	protected override bool OnMouseMove ( MouseMoveEvent e ) {
+		if ( isDragged ) {
+			e.Target = content;
+			content.Position -= Vector2.Divide( e.Delta, content.Scale );
+			return true;
+		}
+
+		return base.OnMouseMove( e );
+	}
+
+	protected override void OnMouseUp ( MouseUpEvent e ) {
+		if ( e.Button is MouseButton.Middle ) {
+			isDragged = false;
+		}
+		else base.OnMouseUp( e );
+	}
+
+	float zoom = 0;
+	protected override bool OnScroll ( ScrollEvent e ) {
+		zoom += e.ScrollDelta.Y / 4;
+		content.Scale = new( MathF.Pow( 2, zoom ) );
+
+		return true;
 	}
 
 	[BackgroundDependencyLoader]

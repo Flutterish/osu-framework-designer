@@ -1,6 +1,6 @@
 ﻿namespace OsuFrameworkDesigner.Game.Graphics;
 
-public class DrawableSelection : CompositeDrawable {
+public class DrawableSelection : CompositeDrawable { // TODO these should be constant size screen-space wise
 	Box background;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
 
