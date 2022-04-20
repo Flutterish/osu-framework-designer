@@ -12,17 +12,20 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	new public T Value => (T)base.Value;
 	public TransformProps TransformProps;
 
+	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
+		=> Value.AsDrawable().ToLocalSpace( screenSpacePosition );
+
 	/// <summary>
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
 	/// </summary>
 	public Vector2 ToTargetOriginSpace ( Vector2 screenSpacePosition )
-		=> new Vector2( TransformProps.X.Value, TransformProps.Y.Value ) + Value.AsDrawable().ToLocalSpace( screenSpacePosition );
+		=> TransformProps.Position + ToTargetSpace( screenSpacePosition );
 
 	/// <summary>
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the top left of the drawable
 	/// </summary>
 	public Vector2 ToTargetTopLeftSpace ( Vector2 screenSpacePosition )
-		=> new Vector2( TransformProps.X.Value - TransformProps.OriginX.Value * Value.AsDrawable().DrawWidth, TransformProps.Y.Value - TransformProps.OriginY.Value * Value.AsDrawable().DrawHeight ) + Value.AsDrawable().ToLocalSpace( screenSpacePosition );
+		=> TransformProps.Position - TransformProps.RelativeOrigin * TransformProps.Size + ToTargetSpace( screenSpacePosition );
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
 		AddInternal( box = new SelectionBox().Fill() );

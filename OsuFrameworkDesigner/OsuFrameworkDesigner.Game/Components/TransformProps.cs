@@ -73,6 +73,9 @@ public class TransformProps : IEnumerable<IProp> {
 	public float EffectiveWidth => Width.Value * ScaleX.Value;
 	public float EffectiveHeight => Height.Value * ScaleY.Value;
 
+	public Vector2 Size => new( Width.Value, Height.Value );
+	public Vector2 Position => new( X.Value, Y.Value );
+
 	public void Normalize () {
 		var w = Width.Value;
 		if ( w < 0 ) {
