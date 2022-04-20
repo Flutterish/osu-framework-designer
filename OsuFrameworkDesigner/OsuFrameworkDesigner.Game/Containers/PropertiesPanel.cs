@@ -100,6 +100,7 @@ public class FloatEditField : FillFlowContainer {
 			i.ValueChanged += onValueChanged;
 		}
 
+		textBox.CommitOnFocusLost = true;
 		textBox.OnCommit += ( _, _ ) => {
 			if ( !float.TryParse( textBox.Current.Value, out var value ) ) {
 				updateValue();
