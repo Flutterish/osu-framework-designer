@@ -1,4 +1,5 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Tools;
 
@@ -6,6 +7,7 @@ namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
 public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
 	SelectionBox box;
+	OriginHandle origin;
 	new public T Value => (T)base.Value;
 	public TransformProps TransformProps;
 
@@ -23,6 +25,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
 		AddInternal( box = new SelectionBox().Fill() );
+		AddInternal( origin = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 		TransformProps = props;
 
 		box.TopLeft.Dragged += e => {
@@ -89,6 +92,15 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		box.Bottom.DragEnded += dragEnded;
 	}
 
+	protected override void Update () {
+		base.Update();
+		updateOrigin();
+	}
+
+	void updateOrigin () {
+		origin.Position = DrawSize * TransformProps.RelativeOrigin;
+	}
+
 	private void dragEnded ( DragEndEvent e ) {
 		TransformProps.Normalize();
 	}
@@ -143,5 +155,35 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			X += MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
 			Height = -Height;
 		}
+	}
+}
+
+public class OriginHandle : Handle {
+	SpriteIcon icon;
+	SpriteIcon iconBorder1;
+	SpriteIcon iconBorder2;
+	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
+	Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
+
+	public OriginHandle () {
+		Origin = Anchor.Centre;
+		AddInternal( new Container {
+			Size = new( 18 )
+		}.Center().WithChildren(
+			iconBorder1 = new SpriteIcon { Icon = FontAwesome.Solid.Crosshairs, Size = new( 1.2f ) }.Fill().Center(),
+			iconBorder2 = new SpriteIcon { Icon = FontAwesome.Solid.Crosshairs, Size = new( 0.7f ) }.Fill().Center(),
+			icon = new SpriteIcon { Icon = FontAwesome.Solid.Crosshairs }.Fill().Center()
+		) );
+		Size = new( 24 );
+	}
+
+	[BackgroundDependencyLoader]
+	private void load ( ColourConfiguration colours ) {
+		backgroundColor.BindTo( colours.SelectionHandle );
+		selectionColor.BindTo( colours.Selection );
+		icon.FadeColour( backgroundColor );
+		iconBorder1.FadeColour( selectionColor );
+		iconBorder2.FadeColour( selectionColor );
+		FinishTransforms( true );
 	}
 }

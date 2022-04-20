@@ -36,8 +36,8 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			[CursorStyle.Pointer] = (FontAwesome.Solid.HandPointer, new(), 0, Anchor.TopLeft, new( 1 )),
 			[CursorStyle.ResizeNW] = (FontAwesome.Solid.ArrowsAltH, new(), 45, Anchor.Centre, new( 1.2f )),
 			[CursorStyle.ResizeSW] = (FontAwesome.Solid.ArrowsAltH, new(), -45, Anchor.Centre, new( 1.2f )),
-			[CursorStyle.ResizeDiagonal] = (FontAwesome.Solid.ExpandArrowsAlt, new(), 0, Anchor.TopLeft, new( 1 )),
-			[CursorStyle.ResizeOrthogonal] = (FontAwesome.Solid.ArrowsAlt, new(), 0, Anchor.TopLeft, new( 1 )),
+			[CursorStyle.ResizeDiagonal] = (FontAwesome.Solid.ExpandArrowsAlt, new(), 0, Anchor.Centre, new( 1 )),
+			[CursorStyle.ResizeOrthogonal] = (FontAwesome.Solid.ArrowsAlt, new(), 0, Anchor.Centre, new( 1 )),
 			[CursorStyle.ResizeHorizontal] = (FontAwesome.Solid.ArrowsAltH, new(), 0, Anchor.Centre, new( 1.2f )),
 			[CursorStyle.ResizeVertical] = (FontAwesome.Solid.ArrowsAltV, new(), 0, Anchor.Centre, new( 1.2f )),
 			[CursorStyle.Rotate] = (FontAwesome.Solid.RedoAlt, new(), 0, Anchor.Centre, new( 1 ))
