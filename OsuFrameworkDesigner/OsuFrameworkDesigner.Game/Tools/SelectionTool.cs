@@ -13,6 +13,40 @@ public class SelectionTool : Tool {
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
 		AddInternal( selectionBox = new() { Alpha = 0 } );
+
+		Dictionary<IComponent, (IHasPosition pos, Vector2 handle)> dragHandleByComponent = new();
+		selectionBox.DragStarted += e => {
+			perform( IHasPosition.From, ( pos, comp ) => {
+				dragHandleByComponent.Add( comp, (pos, new( pos.X.Value, pos.Y.Value )) );
+			} );
+		};
+		selectionBox.Dragged += e => {
+			var delta = Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
+			delta = e.AltPressed ? delta : delta.Round();
+
+			foreach ( var (pos, handle) in dragHandleByComponent.Values ) {
+				pos.X.Value = handle.X + delta.X;
+				pos.Y.Value = handle.Y + delta.Y;
+			}
+		};
+		selectionBox.DragEnded += e => dragHandleByComponent.Clear();
+	}
+
+	void perform<T> ( Func<IComponent, T?> transformer, Action<T, IComponent> action ) {
+		var transformed = Selection.Select( x => (transformer( x ), x) );
+		if ( transformed.All( x => x.Item1 != null ) ) {
+			foreach ( var i in transformed ) {
+				action( i.Item1!, i.Item2 );
+			}
+		}
+	}
+	void perform<T> ( Func<IComponent, T?> transformer, Action<T> action ) {
+		var transformed = Selection.Select( transformer );
+		if ( transformed.All( x => x != null ) ) {
+			foreach ( var i in transformed ) {
+				action( i! );
+			}
+		}
 	}
 
 	HoverSelectionBox? hoverSelection;

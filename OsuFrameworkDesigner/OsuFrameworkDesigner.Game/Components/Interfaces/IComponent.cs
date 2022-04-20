@@ -7,4 +7,7 @@ public interface IComponent {
 	IEnumerable<IProp> Properties { get; }
 
 	Blueprint<IComponent> CreateBlueprint ();
+
+	public Prop<T>? GetProperty<T> ( string name, string category )
+		=> Properties.FirstOrDefault( x => x.Name == name && x.Category == category && x.Type == typeof( T ) ) as Prop<T>;
 }
