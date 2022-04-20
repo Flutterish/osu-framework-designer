@@ -3,7 +3,7 @@ using OsuFrameworkDesigner.Game.Cursor;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
-public class Handle : CompositeDrawable, IUsesCursorStyle {
+public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation {
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		DragStarted?.Invoke( e );
 		return true;
@@ -22,6 +22,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle {
 	public event Action<DragEndEvent>? DragEnded;
 
 	public CursorStyle CursorStyle { get; set; }
+	public float CursorRotation { get; set; }
 }
 
 public class CornerHandle : Handle {

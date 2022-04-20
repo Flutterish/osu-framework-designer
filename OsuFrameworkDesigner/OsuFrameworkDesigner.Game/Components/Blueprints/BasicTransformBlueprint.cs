@@ -109,6 +109,20 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		Size = Value.AsDrawable().DrawSize * scale;
 		Rotation = TransformProps.Rotation.Value;
 
+		box.TopRight.CursorRotation = Rotation;
+		box.TopLeft.CursorRotation = Rotation;
+		box.BottomRight.CursorRotation = Rotation;
+		box.BottomLeft.CursorRotation = Rotation;
+		box.Left.CursorRotation = Rotation;
+		box.Right.CursorRotation = Rotation;
+		box.Top.CursorRotation = Rotation;
+		box.Bottom.CursorRotation = Rotation;
+
+		box.FarTopLeft.CursorRotation = Rotation;
+		box.FarTopRight.CursorRotation = Rotation + 90;
+		box.FarBottomRight.CursorRotation = Rotation + 180;
+		box.FarBottomLeft.CursorRotation = Rotation + 270;
+
 		if ( Width < 0 ) {
 			X += MathF.Cos( Rotation / 180 * MathF.PI ) * Width;
 			Y += MathF.Sin( Rotation / 180 * MathF.PI ) * Width;

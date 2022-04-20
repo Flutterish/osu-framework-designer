@@ -15,3 +15,7 @@ public enum CursorStyle {
 public interface IUsesCursorStyle : IDrawable {
 	CursorStyle CursorStyle { get; }
 }
+
+public interface IUsesCursorRotation : IUsesCursorStyle {
+	float CursorRotation { get; }
+}

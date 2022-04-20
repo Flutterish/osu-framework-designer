@@ -16,12 +16,16 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 	protected override void Update () {
 		base.Update();
 
-		if ( InputManager.DraggedDrawable is IUsesCursorStyle cursorStyle ) {
+		var target = ( InputManager.DraggedDrawable as IUsesCursorStyle )
+			?? FindTargets().FirstOrDefault();
+
+		if ( target is IUsesCursorStyle cursorStyle ) {
 			cursorContainer.Style = cursorStyle.CursorStyle;
+			cursorContainer.CursorRotation = ( cursorStyle as IUsesCursorRotation )?.CursorRotation ?? 0;
 		}
 		else {
-			var targets = FindTargets();
-			cursorContainer.Style = targets.FirstOrDefault()?.CursorStyle ?? CursorStyle.Default;
+			cursorContainer.Style = CursorStyle.Default;
+			cursorContainer.CursorRotation = 0;
 		}
 	}
 
@@ -38,6 +42,10 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			[CursorStyle.ResizeVertical] = (FontAwesome.Solid.ArrowsAltV, new(), 0, Anchor.Centre, new( 1.2f )),
 			[CursorStyle.Rotate] = (FontAwesome.Solid.RedoAlt, new(), 0, Anchor.Centre, new( 1 ))
 		};
+
+		public float CursorRotation {
+			set => ActiveCursor.Rotation = value;
+		}
 
 		CursorStyle style;
 		public CursorStyle Style {
