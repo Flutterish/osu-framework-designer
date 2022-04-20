@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
-using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
 
@@ -10,8 +9,6 @@ namespace OsuFrameworkDesigner.Game.Containers;
 public class Composer : CompositeDrawable {
 	public readonly Bindable<Tool> Tool = new();
 	Container<Tool> tools;
-
-	public readonly BindableList<IComponent> Selection = new();
 
 	Box background;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.ComposerBackgroundDefault );
@@ -35,32 +32,6 @@ public class Composer : CompositeDrawable {
 			)
 		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
-
-		Selection.BindCollectionChanged( ( _, e ) => {
-			if ( e.OldItems != null ) {
-				foreach ( IComponent i in e.OldItems ) {
-					visibleSelections.Remove( i, out var selection );
-					selection!.Free();
-					selectionPool.Push( selection );
-					layerAbove.Remove( selection );
-				}
-			}
-			if ( e.NewItems != null ) {
-				foreach ( IComponent i in e.NewItems ) {
-					if ( !selectionPool.TryPop( out var selection ) ) {
-						selection = new();
-					}
-					visibleSelections.Add( i, selection );
-					layerAbove.Add( selection );
-					selection.Apply( i.AsDrawable() );
-				}
-			}
-
-			if ( Selection.Count < 2 )
-				layerAbove.Hide();
-			else
-				layerAbove.Show();
-		} );
 	}
 
 	public IEnumerable<IComponent> Components => components.OfType<IComponent>();
@@ -74,9 +45,6 @@ public class Composer : CompositeDrawable {
 	public void RemoveRange ( IEnumerable<IComponent> components ) {
 		this.components.RemoveRange( components.OfType<Drawable>() );
 	}
-
-	Stack<DrawableSelection> selectionPool = new();
-	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;

@@ -1,13 +1,18 @@
-﻿namespace OsuFrameworkDesigner.Game.Graphics;
+﻿using OsuFrameworkDesigner.Game.Containers;
 
-public class DrawableSelection : CompositeDrawable { // TODO these should be constant size screen-space wise
+namespace OsuFrameworkDesigner.Game.Graphics;
+
+public class DrawableSelection : CompositeDrawable {
+	[Resolved]
+	protected Composer Composer { get; private set; } = null!;
+
 	Box background;
 	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
 
 	public DrawableSelection () {
 		AddInternal( background = new Box { Alpha = 0, AlwaysPresent = true }.Fill() );
 		Masking = true;
-		BorderThickness = 3;
+		BorderThickness = 6;
 	}
 
 	Drawable? selection;
@@ -17,13 +22,13 @@ public class DrawableSelection : CompositeDrawable { // TODO these should be con
 		if ( selection is null )
 			return;
 
+		var topLeft = Parent.ToLocalSpace( selection.ScreenSpaceDrawQuad.TopLeft );
+		Position = topLeft;
+		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
+		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
+		var scale = ( a - b ).Length;
+		Size = selection.DrawSize * scale;
 		Rotation = selection.Rotation;
-		Width = selection.DrawWidth;
-		Height = selection.DrawHeight;
-		X = selection.X;
-		Y = selection.Y;
-		Origin = selection.Origin;
-		Anchor = selection.Anchor;
 	}
 
 	public void Apply ( Drawable drawable ) {

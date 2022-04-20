@@ -39,6 +39,6 @@ public class DesignerScreen : Screen {
 		}.Fill() );
 
 		composer.Tool.BindTo( topBar.Tool );
-		propertiesPanel.Components.BindTo( composer.Selection );
+		propertiesPanel.Components.BindTo( composer.SelectionTool.Selection );
 	}
 }

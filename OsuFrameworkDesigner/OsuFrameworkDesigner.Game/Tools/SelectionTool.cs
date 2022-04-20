@@ -4,12 +4,14 @@ using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Cursor;
+using OsuFrameworkDesigner.Game.Graphics;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
 public class SelectionTool : Tool {
 	public SelectionTool () {
+		AddInternal( selections = new Container<DrawableSelection>().Fill() );
 		AddInternal( selectionBox = new() { Alpha = 0 } );
 	}
 
@@ -29,9 +31,9 @@ public class SelectionTool : Tool {
 		var selectionQuad = new Quad( topLeft, new( bottomRight.X, topLeft.Y ), new( topLeft.X, bottomRight.Y ), bottomRight );
 
 		var selected = Composer.Components.Where( x => x.AsDrawable().ScreenSpaceDrawQuad.Intersects( selectionQuad ) );
-		if ( !selected.SequenceEqual( selection ) ) {
-			selection.Clear();
-			selection.AddRange( selected );
+		if ( !selected.SequenceEqual( Selection ) ) {
+			Selection.Clear();
+			Selection.AddRange( selected );
 		}
 	}
 
@@ -44,19 +46,19 @@ public class SelectionTool : Tool {
 		var item = Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().ScreenSpaceDrawQuad.Contains( e.ScreenSpaceMouseDownPosition ) );
 
 		if ( item != null ) {
-			if ( selection.Count != 1 || item != selection.Single() ) {
-				selection.Clear();
-				Composer.Selection.Add( item );
+			if ( Selection.Count != 1 || item != Selection.Single() ) {
+				Selection.Clear();
+				Selection.Add( item );
 			}
 		}
 		else {
-			selection.Clear();
+			Selection.Clear();
 		}
 
 		return true;
 	}
 
-	BindableList<IComponent> selection = new();
+	public readonly BindableList<IComponent> Selection = new();
 	SelectionBox selectionBox;
 	protected override void Update () {
 		base.Update();
@@ -64,33 +66,61 @@ public class SelectionTool : Tool {
 		if ( selectionBox.Alpha == 0 )
 			return;
 
-		var box = ToLocalSpace( selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
+		var box = ToLocalSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
 		//var localBox = selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.DrawRectangle );
 		selectionBox.Position = box.Location;
 		selectionBox.Size = box.Size;
 	}
 
+	Container<DrawableSelection> selections;
 	Blueprint<IComponent>? blueprint;
+	Stack<DrawableSelection> selectionPool = new();
+	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
 	protected override void LoadComplete () {
 		base.LoadComplete();
 
-		selection.BindTo( Composer.Selection );
-		selection.BindCollectionChanged( ( _, _ ) => {
+		Selection.BindCollectionChanged( ( _, _ ) => {
 			if ( blueprint != null ) {
 				RemoveInternal( blueprint );
 				blueprint = null;
 			}
-			selectionBox.Alpha = selection.Skip( 1 ).Any() ? 1 : 0;
-			if ( selectionBox.Alpha == 0 && selection.SingleOrDefault() is IComponent comp ) {
+			selectionBox.Alpha = Selection.Count > 1 ? 1 : 0;
+			if ( selectionBox.Alpha == 0 && Selection.SingleOrDefault() is IComponent comp ) {
 				AddInternal( blueprint = comp.CreateBlueprint() );
 			}
+		} );
+
+		Selection.BindCollectionChanged( ( _, e ) => {
+			if ( e.OldItems != null ) {
+				foreach ( IComponent i in e.OldItems ) {
+					visibleSelections.Remove( i, out var selection );
+					selection!.Free();
+					selectionPool.Push( selection );
+					selections.Remove( selection );
+				}
+			}
+			if ( e.NewItems != null ) {
+				foreach ( IComponent i in e.NewItems ) {
+					if ( !selectionPool.TryPop( out var selection ) ) {
+						selection = new();
+					}
+					visibleSelections.Add( i, selection );
+					selections.Add( selection );
+					selection.Apply( i.AsDrawable() );
+				}
+			}
+
+			if ( Selection.Count < 2 )
+				selections.Hide();
+			else
+				selections.Show();
 		} );
 	}
 
 	protected override bool OnKeyDown ( KeyDownEvent e ) {
-		if ( e.Key is Key.Delete && selection.Any() ) {
-			Composer.RemoveRange( selection );
-			selection.Clear();
+		if ( e.Key is Key.Delete && Selection.Any() ) {
+			Composer.RemoveRange( Selection );
+			Selection.Clear();
 			return true;
 		}
 

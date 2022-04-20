@@ -32,13 +32,13 @@ public class RectangleTool : Tool {
 	}
 
 	protected override void OnDragEnd ( DragEndEvent e ) {
-		Composer.Selection.Add( rect! );
+		Composer.SelectionTool.Selection.Add( rect! );
 		if ( !e.ShiftPressed ) {
 			Composer.Tool.Value = Composer.SelectionTool;
 		}
 	}
 
 	public override void BeginUsing () {
-		Composer.Selection.Clear();
+		Composer.SelectionTool.Selection.Clear();
 	}
 }
