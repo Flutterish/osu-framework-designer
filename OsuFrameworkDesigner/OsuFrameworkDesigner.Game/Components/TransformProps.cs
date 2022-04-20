@@ -63,39 +63,57 @@ public struct TransformProps : IEnumerable<IProp> {
 	public void Normalize () {
 		var w = Width.Value;
 		if ( w < 0 ) {
-			X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * w;
-			Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * w;
+			X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * ( 1 - OriginX.Value * 2 ) * w;
+			Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * ( 1 - OriginX.Value * 2 ) * w;
 			Width.Value = -w;
 		}
 
 		var h = Height.Value;
 		if ( h < 0 ) {
-			Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * h;
-			X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * h;
+			X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * ( 1 - OriginY.Value * 2 ) * h;
+			Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * ( 1 - OriginY.Value * 2 ) * h;
 			Height.Value = -h;
 		}
 	}
 
 	public void SetRightEdge ( float x ) {
-		Width.Value = x - X.Value;
+		var right = X.Value + Width.Value * ( 1 - OriginX.Value );
+		var delta = x - right;
+
+		Width.Value += delta;
+
+		X.Value += OriginX.Value * MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta;
+		Y.Value += OriginX.Value * MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta;
 	}
 
 	public void SetBottomEdge ( float y ) {
-		Height.Value = y - Y.Value;
+		var bottom = Y.Value + Height.Value * ( 1 - OriginY.Value );
+		var delta = y - bottom;
+
+		Height.Value += delta;
+
+		X.Value += OriginY.Value * MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
+		Y.Value += OriginY.Value * MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
 	}
 
 	public void SetLeftEdge ( float x ) {
-		var delta = X.Value - x;
-		X.Value -= MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta;
-		Width.Value += delta;
-		Y.Value -= MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta;
+		var left = X.Value - Width.Value * OriginX.Value;
+		var delta = x - left;
+
+		Width.Value -= delta;
+
+		X.Value += ( 1 - OriginX.Value ) * MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta;
+		Y.Value += ( 1 - OriginX.Value ) * MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta;
 	}
 
 	public void SetTopEdge ( float y ) {
-		var delta = Y.Value - y;
-		Y.Value -= MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
-		Height.Value += delta;
-		X.Value -= MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
+		var top = Y.Value - Height.Value * OriginY.Value;
+		var delta = y - top;
+
+		Height.Value -= delta;
+
+		X.Value += ( 1 - OriginY.Value ) * MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
+		Y.Value += ( 1 - OriginY.Value ) * MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
 	}
 
 	public IEnumerator<IProp> GetEnumerator () {

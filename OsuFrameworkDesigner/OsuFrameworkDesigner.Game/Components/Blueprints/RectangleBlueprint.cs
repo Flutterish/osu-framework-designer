@@ -14,7 +14,7 @@ public class RectangleBlueprint : BasicTransformBlueprint<RectangleComponent> {
 			handle.DragStarted += e => isDragging++;
 			handle.DragEnded += e => { isDragging--; updateCorners(); };
 			handle.Dragged += e => {
-				var pos = ToTargetSpace( e.ScreenSpaceMousePosition );
+				var pos = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 				var r = Extensions.SignedDistance( getOrigin(), direction, pos ) / MathF.Sqrt( 2 );
 				r = Math.Clamp( r, 0, Value.MaxCornerRadius );
 

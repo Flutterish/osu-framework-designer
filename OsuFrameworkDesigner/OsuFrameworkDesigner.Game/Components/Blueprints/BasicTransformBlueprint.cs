@@ -9,47 +9,56 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	new public T Value => (T)base.Value;
 	public TransformProps TransformProps;
 
-	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
+	/// <summary>
+	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
+	/// </summary>
+	public Vector2 ToTargetOriginSpace ( Vector2 screenSpacePosition )
 		=> new Vector2( TransformProps.X.Value, TransformProps.Y.Value ) + Value.AsDrawable().ToLocalSpace( screenSpacePosition );
+
+	/// <summary>
+	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the top left of the drawable
+	/// </summary>
+	public Vector2 ToTargetTopLeftSpace ( Vector2 screenSpacePosition )
+		=> new Vector2( TransformProps.X.Value - TransformProps.OriginX.Value * Value.AsDrawable().DrawWidth, TransformProps.Y.Value - TransformProps.OriginY.Value * Value.AsDrawable().DrawHeight ) + Value.AsDrawable().ToLocalSpace( screenSpacePosition );
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
 		AddInternal( box = new SelectionBox().Fill() );
 		TransformProps = props;
 
 		box.TopLeft.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.TopRight.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.BottomLeft.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.BottomRight.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Bottom.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Top.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Left.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 		};
 		box.Right.Dragged += e => {
-			var (x, y) = ToTargetSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 		};
 		Vector2 boxDragHandle = Vector2.Zero;
