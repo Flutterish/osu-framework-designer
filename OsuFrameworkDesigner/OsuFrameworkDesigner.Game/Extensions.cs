@@ -128,6 +128,12 @@ public static class Extensions {
 	public static Vector2 Round ( this Vector2 self )
 		=> new( MathF.Round( self.X ), MathF.Round( self.Y ) );
 
+	public static Vector2 Round ( this Vector2 self, float precision )
+		=> new( MathF.Round( self.X / precision ) * precision, MathF.Round( self.Y / precision ) * precision );
+
+	public static Vector2 Clamp ( this Vector2 self, Vector2 min, Vector2 max )
+		=> new( Math.Clamp( self.X, min.X, max.X ), Math.Clamp( self.Y, min.Y, max.Y ) );
+
 	public static float Round ( this float self )
 		=> MathF.Round( self );
 

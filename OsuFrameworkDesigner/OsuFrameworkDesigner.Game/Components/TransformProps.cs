@@ -116,6 +116,18 @@ public class TransformProps : IEnumerable<IProp> {
 		Y.Value += ( 1 - OriginY.Value ) * MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta;
 	}
 
+	public void SetOrigin ( Vector2 value ) {
+		var deltaX = value.X - OriginX.Value;
+		OriginX.Value = value.X;
+		X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * deltaX * Width.Value;
+		Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * deltaX * Width.Value;
+
+		var deltaY = value.Y - OriginY.Value;
+		OriginY.Value = value.Y;
+		X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * deltaY * Height.Value;
+		Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * deltaY * Height.Value;
+	}
+
 	public IEnumerator<IProp> GetEnumerator () {
 		yield return X;
 		yield return Y;

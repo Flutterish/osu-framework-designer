@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Tools;
@@ -71,6 +72,10 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			var delta = boxDragHandle + ( e.MousePosition - e.MouseDownPosition );
 			TransformProps.X.Value = e.AltPressed ? delta.X : delta.X.Round();
 			TransformProps.Y.Value = e.AltPressed ? delta.Y : delta.Y.Round();
+		};
+		origin.Dragged += e => {
+			var pos = Vector2.Divide( Value.AsDrawable().ToLocalSpace( e.ScreenSpaceMousePosition ), Value.AsDrawable().DrawSize );
+			TransformProps.SetOrigin( e.AltPressed ? pos : pos.Round( 0.5f ).Clamp( Vector2.Zero, Vector2.One ) );
 		};
 
 		box.FarBottomLeft.DragStarted += onRotationDragStarted;
@@ -155,6 +160,10 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			X += MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
 			Height = -Height;
 		}
+	}
+
+	protected override bool ComputeIsMaskedAway ( RectangleF maskingBounds ) {
+		return !origin.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) && base.ComputeIsMaskedAway( maskingBounds );
 	}
 }
 
