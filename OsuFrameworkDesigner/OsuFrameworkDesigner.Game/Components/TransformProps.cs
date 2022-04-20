@@ -2,7 +2,7 @@
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public struct TransformProps : IEnumerable<IProp> {
+public class TransformProps : IEnumerable<IProp> {
 	public TransformProps ( Drawable drawable ) {
 		CopyProps( drawable );
 
