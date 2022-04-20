@@ -30,6 +30,21 @@ public class SelectionTool : Tool {
 			}
 		};
 		selectionBox.DragEnded += e => dragHandleByComponent.Clear();
+
+		selectionBox.Top.Hide();
+		selectionBox.Bottom.Hide();
+		selectionBox.Left.Hide();
+		selectionBox.Right.Hide();
+
+		selectionBox.TopLeft.Hide();
+		selectionBox.TopRight.Hide();
+		selectionBox.BottomLeft.Hide();
+		selectionBox.BottomRight.Hide();
+
+		selectionBox.FarTopLeft.Hide();
+		selectionBox.FarTopRight.Hide();
+		selectionBox.FarBottomLeft.Hide();
+		selectionBox.FarBottomRight.Hide();
 	}
 
 	void perform<T> ( Func<IComponent, T?> transformer, Action<T, IComponent> action ) {
