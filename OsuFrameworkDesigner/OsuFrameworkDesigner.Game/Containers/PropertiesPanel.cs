@@ -96,13 +96,27 @@ public class FloatEditField : FillFlowContainer {
 
 		this.props = props;
 		updateValue();
-		foreach ( IBindable<float> i in props ) {
+		foreach ( Prop<float> i in props ) {
 			i.ValueChanged += onValueChanged;
 		}
+
+		textBox.OnCommit += ( _, _ ) => {
+			if ( !float.TryParse( textBox.Current.Value, out var value ) ) {
+				updateValue();
+				return;
+			}
+
+			ignoreUpdates = true;
+			foreach ( Prop<float> i in props ) {
+				i.Value = value;
+			}
+			ignoreUpdates = false;
+		};
 	}
 
+	bool ignoreUpdates;
 	private void onValueChanged ( ValueChangedEvent<float> e ) {
-		updateValue();
+		if ( !ignoreUpdates ) updateValue();
 	}
 
 	void updateValue () {
