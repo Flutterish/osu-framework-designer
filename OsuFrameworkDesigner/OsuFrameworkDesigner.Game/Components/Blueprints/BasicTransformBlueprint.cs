@@ -90,7 +90,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	private void onRotationDrag ( DragEvent e ) {
-		var center = Value.AsDrawable().ScreenSpaceDrawQuad.TopLeft;
+		var center = Value.AsDrawable().ToScreenSpace( TransformProps.RelativeOrigin * Value.AsDrawable().DrawSize );
 		var startDiff = e.ScreenSpaceMouseDownPosition - center;
 		var diff = e.ScreenSpaceMousePosition - center;
 
