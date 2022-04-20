@@ -132,7 +132,8 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
 		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
 		var scale = ( a - b ).Length;
-		Size = Value.AsDrawable().DrawSize * scale;
+		Size = Value.AsDrawable().DrawSize * Value.AsDrawable().Scale * scale;
+		//Shear = Value.AsDrawable().Shear;
 		Rotation = TransformProps.Rotation.Value;
 
 		box.TopRight.CursorRotation = Rotation;

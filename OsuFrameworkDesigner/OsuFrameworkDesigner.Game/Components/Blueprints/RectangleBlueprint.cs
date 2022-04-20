@@ -58,11 +58,11 @@ public class RectangleBlueprint : BasicTransformBlueprint<RectangleComponent> {
 		var r = Math.Clamp( Value.CornerRadius.Value, min, Value.MaxCornerRadius );
 		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
 		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( r, 0 ) ) );
-		r = ( a - b ).Length * MathF.Sqrt( 2 );
+		r = ( a - b ).Length;
 
-		cornerRadiusTopLeft.Position = new Vector2( 1, 1 ).Normalized() * r;
-		cornerRadiusTopRight.Position = new Vector2( -1, 1 ).Normalized() * r;
-		cornerRadiusBottomLeft.Position = new Vector2( 1, -1 ).Normalized() * r;
-		cornerRadiusBottomRight.Position = new Vector2( -1, -1 ).Normalized() * r;
+		cornerRadiusTopLeft.Position = new Vector2( 1, 1 ) * Value.Scale * r;
+		cornerRadiusTopRight.Position = new Vector2( -1, 1 ) * Value.Scale * r;
+		cornerRadiusBottomLeft.Position = new Vector2( 1, -1 ) * Value.Scale * r;
+		cornerRadiusBottomRight.Position = new Vector2( -1, -1 ) * Value.Scale * r;
 	}
 }

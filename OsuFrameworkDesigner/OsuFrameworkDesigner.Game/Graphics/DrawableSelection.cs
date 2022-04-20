@@ -27,7 +27,8 @@ public class DrawableSelection : CompositeDrawable {
 		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
 		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
 		var scale = ( a - b ).Length;
-		Size = selection.DrawSize * scale;
+		Size = selection.DrawSize * selection.Scale * scale;
+		//Shear = selection.Shear;
 		Rotation = selection.Rotation;
 	}
 
