@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Tools;
@@ -54,19 +55,35 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		};
 		box.Bottom.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+			if ( isShearing ) {
+				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				TransformProps.ShearBottom( x - lx );
+			}
+			else TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Top.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+			if ( isShearing ) {
+				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				TransformProps.ShearTop( x - lx );
+			}
+			else TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Left.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
+			if ( isShearing ) {
+				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				TransformProps.ShearLeft( y - ly );
+			}
+			else TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 		};
 		box.Right.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
+			if ( isShearing ) {
+				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				TransformProps.ShearRight( y - ly );
+			}
+			else TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 		};
 		Vector2 boxDragHandle = Vector2.Zero;
 		box.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
@@ -90,6 +107,19 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		box.FarTopLeft.Dragged += onRotationDrag;
 		box.FarTopRight.Dragged += onRotationDrag;
 
+		box.TopLeft.DragStarted += dragStarted;
+		box.TopRight.DragStarted += dragStarted;
+		box.BottomLeft.DragStarted += dragStarted;
+		box.BottomRight.DragStarted += dragStarted;
+		box.Left.DragStarted += dragStarted;
+		box.Right.DragStarted += dragStarted;
+		box.Top.DragStarted += dragStarted;
+		box.Bottom.DragStarted += dragStarted;
+		box.FarBottomLeft.DragStarted += dragStarted;
+		box.FarBottomRight.DragStarted += dragStarted;
+		box.FarTopLeft.DragStarted += dragStarted;
+		box.FarTopRight.DragStarted += dragStarted;
+
 		box.TopLeft.DragEnded += dragEnded;
 		box.TopRight.DragEnded += dragEnded;
 		box.BottomLeft.DragEnded += dragEnded;
@@ -98,6 +128,10 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		box.Right.DragEnded += dragEnded;
 		box.Top.DragEnded += dragEnded;
 		box.Bottom.DragEnded += dragEnded;
+		box.FarBottomLeft.DragEnded += dragEnded;
+		box.FarBottomRight.DragEnded += dragEnded;
+		box.FarTopLeft.DragEnded += dragEnded;
+		box.FarTopRight.DragEnded += dragEnded;
 	}
 
 	protected override void Update () {
@@ -109,7 +143,11 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		origin.Position = DrawSize * TransformProps.RelativeOrigin;
 	}
 
+	private void dragStarted ( DragStartEvent e ) {
+		isDragging = true;
+	}
 	private void dragEnded ( DragEndEvent e ) {
+		isDragging = false;
 		TransformProps.Normalize();
 	}
 
@@ -129,6 +167,10 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		TransformProps.Rotation.Value = e.AltPressed ? angle : angle.Round();
 	}
 
+	InputManager? inputManager;
+	InputManager InputManager => inputManager ??= GetContainingInputManager();
+	bool isShearing;
+	bool isDragging;
 	protected override void PositionSelf () {
 		var topLeft = Parent.ToLocalSpace( Value.AsDrawable().ScreenSpaceDrawQuad.TopLeft );
 		Position = topLeft;
@@ -139,14 +181,37 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		Shear = TransformProps.Shear;
 		Rotation = TransformProps.Rotation.Value;
 
+		if ( !isDragging ) {
+			isShearing = InputManager.CurrentState.Keyboard.ControlPressed;
+		}
+
+		if ( isShearing ) {
+			box.Left.CursorRotation = Rotation;
+			box.Right.CursorRotation = Rotation;
+			box.Top.CursorRotation = Rotation + 90;
+			box.Bottom.CursorRotation = Rotation + 90;
+
+			box.Left.CursorStyle = Cursor.CursorStyle.Shear;
+			box.Right.CursorStyle = Cursor.CursorStyle.Shear;
+			box.Top.CursorStyle = Cursor.CursorStyle.Shear;
+			box.Bottom.CursorStyle = Cursor.CursorStyle.Shear;
+		}
+		else {
+			box.Left.CursorRotation = Rotation;
+			box.Right.CursorRotation = Rotation;
+			box.Top.CursorRotation = Rotation;
+			box.Bottom.CursorRotation = Rotation;
+
+			box.Left.CursorStyle = Cursor.CursorStyle.ResizeHorizontal;
+			box.Right.CursorStyle = Cursor.CursorStyle.ResizeHorizontal;
+			box.Top.CursorStyle = Cursor.CursorStyle.ResizeVertical;
+			box.Bottom.CursorStyle = Cursor.CursorStyle.ResizeVertical;
+		}
+
 		box.TopRight.CursorRotation = Rotation;
 		box.TopLeft.CursorRotation = Rotation;
 		box.BottomRight.CursorRotation = Rotation;
 		box.BottomLeft.CursorRotation = Rotation;
-		box.Left.CursorRotation = Rotation;
-		box.Right.CursorRotation = Rotation;
-		box.Top.CursorRotation = Rotation;
-		box.Bottom.CursorRotation = Rotation;
 
 		box.FarTopLeft.CursorRotation = Rotation;
 		box.FarTopRight.CursorRotation = Rotation + 90;

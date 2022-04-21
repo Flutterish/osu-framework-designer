@@ -9,7 +9,8 @@ public enum CursorStyle {
 	ResizeNW,
 	ResizeDiagonal,
 	ResizeOrthogonal,
-	Rotate
+	Rotate,
+	Shear
 }
 
 public interface IUsesCursorStyle : IDrawable {

@@ -40,7 +40,8 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			[CursorStyle.ResizeOrthogonal] = (FontAwesome.Solid.ArrowsAlt, new(), 0, Anchor.Centre, new( 1 )),
 			[CursorStyle.ResizeHorizontal] = (FontAwesome.Solid.ArrowsAltH, new(), 0, Anchor.Centre, new( 1.2f )),
 			[CursorStyle.ResizeVertical] = (FontAwesome.Solid.ArrowsAltV, new(), 0, Anchor.Centre, new( 1.2f )),
-			[CursorStyle.Rotate] = (FontAwesome.Solid.RedoAlt, new(), 0, Anchor.Centre, new( 1 ))
+			[CursorStyle.Rotate] = (FontAwesome.Solid.RedoAlt, new(), 0, Anchor.Centre, new( 1 )),
+			[CursorStyle.Shear] = (FontAwesome.Solid.Sort, new(), 0, Anchor.Centre, new( 1 ))
 		};
 
 		public float CursorRotation {

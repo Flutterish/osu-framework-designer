@@ -178,6 +178,46 @@ public class TransformProps : IEnumerable<IProp> {
 		Y.Value += sin * total * deltaX * EffectiveWidth;
 	}
 
+	public void ShearTop ( float deltaX ) {
+		var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+		var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+
+		X.Value += ( cos + sin * ShearY.Value ) * deltaX * ( 1 - OriginY.Value );
+		Y.Value += ( sin - cos * ShearY.Value ) * deltaX * ( 1 - OriginY.Value );
+
+		ShearX.Value += deltaX / EffectiveHeight;
+		// TODO: scuffed when there is Y shear
+	}
+
+	public void ShearBottom ( float deltaX ) {
+		var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+		var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+
+		X.Value += ( cos - sin * ShearY.Value ) * deltaX * OriginY.Value;
+		Y.Value += ( sin + cos * ShearY.Value ) * deltaX * OriginY.Value;
+
+		ShearX.Value -= deltaX / EffectiveHeight;
+		// TODO: scuffed when there is Y shear
+	}
+
+	public void ShearLeft ( float deltaY ) {
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+
+		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * ( 1 - OriginX.Value );
+		X.Value += ( cos - sin * ShearX.Value ) * deltaY * ( 1 - OriginX.Value );
+		ShearY.Value += deltaY / EffectiveWidth;
+	}
+
+	public void ShearRight ( float deltaY ) {
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+
+		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * OriginX.Value;
+		X.Value += ( cos - sin * ShearX.Value ) * deltaY * OriginX.Value;
+		ShearY.Value -= deltaY / EffectiveWidth;
+	}
+
 	public IEnumerator<IProp> GetEnumerator () {
 		yield return X;
 		yield return Y;
