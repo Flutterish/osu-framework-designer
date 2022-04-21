@@ -132,11 +132,11 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	protected override void PositionSelf () {
 		var topLeft = Parent.ToLocalSpace( Value.AsDrawable().ScreenSpaceDrawQuad.TopLeft );
 		Position = topLeft;
-		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
-		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
+		var a = Parent.ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
+		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
 		var scale = ( a - b ).Length;
-		Size = Value.AsDrawable().DrawSize * Value.AsDrawable().Scale * scale;
-		//Shear = Value.AsDrawable().Shear;
+		Size = TransformProps.Size * TransformProps.Scale * scale;
+		Shear = TransformProps.Shear;
 		Rotation = TransformProps.Rotation.Value;
 
 		box.TopRight.CursorRotation = Rotation;
@@ -153,16 +153,26 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		box.FarBottomRight.CursorRotation = Rotation + 180;
 		box.FarBottomLeft.CursorRotation = Rotation + 270;
 
-		if ( Width < 0 ) {
-			X += MathF.Cos( Rotation / 180 * MathF.PI ) * Width;
-			Y += MathF.Sin( Rotation / 180 * MathF.PI ) * Width;
-			Width = -Width;
+		if ( Height < 0 ) {
+			var cos = MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI );
+			var sin = MathF.Sin( ( Rotation + 90 ) / 180 * MathF.PI );
+			X += ( cos - sin * Shear.X ) * Height;
+			Y += ( sin + cos * Shear.X ) * Height;
+
+			Height = -Height;
 		}
 
-		if ( Height < 0 ) {
-			Y += MathF.Sin( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
-			X += MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI ) * Height;
-			Height = -Height;
+		if ( Width < 0 ) {
+			var cos = MathF.Cos( Rotation / 180 * MathF.PI );
+			var sin = MathF.Sin( Rotation / 180 * MathF.PI );
+			X += ( cos + sin * Shear.Y ) * Width;
+			Y += ( sin - cos * Shear.Y ) * Width;
+			// shear is non-commutative
+			var total = Shear.X * Shear.Y;
+			X += cos * total * Width;
+			Y += sin * total * Width;
+
+			Width = -Width;
 		}
 	}
 

@@ -12,7 +12,7 @@ public class TransformProps : IEnumerable<IProp> {
 		Height.ValueChanged += v => drawable.Height = v.NewValue;
 		Rotation.ValueChanged += v => drawable.Rotation = v.NewValue;
 		(ScaleX, ScaleY).BindValueChanged( ( sx, sy ) => drawable.Scale = new( sx, sy ) );
-		//(ShearX, ShearY).BindValueChanged( (sx, sy) => drawable.Shear = new( sx, sy ) ); 
+		(ShearX, ShearY).BindValueChanged( ( sx, sy ) => drawable.Shear = new( sx, sy ) );
 
 		(OriginX, OriginY).BindValueChanged( ( ox, oy ) => {
 			var xAnchor = ox switch { 0 => Anchor.x0, 0.5f => Anchor.x1, 1 => Anchor.x2, _ => Anchor.Custom };
@@ -43,8 +43,8 @@ public class TransformProps : IEnumerable<IProp> {
 		Rotation.Value = drawable.Rotation;
 		ScaleX.Value = drawable.Scale.X;
 		ScaleY.Value = drawable.Scale.Y;
-		//ShearX.Value = drawable.Shear.X;
-		//ShearY.Value = drawable.Shear.Y;
+		ShearX.Value = drawable.Shear.X;
+		ShearY.Value = drawable.Shear.Y;
 
 		if ( drawable.Origin is Anchor.Custom ) {
 			if ( Width.Value != 0 ) OriginX.Value = drawable.OriginPosition.X / Width.Value;
@@ -63,8 +63,8 @@ public class TransformProps : IEnumerable<IProp> {
 	public readonly Prop<float> Rotation = new() { Category = "Basic" };
 	public readonly Prop<float> ScaleX = new( "X" ) { Category = "Scale" };
 	public readonly Prop<float> ScaleY = new( "Y" ) { Category = "Scale" };
-	//public readonly Prop<float> ShearX = new( "X" ) { Category = "Shear" };
-	//public readonly Prop<float> ShearY = new( "Y" ) { Category = "Shear" };
+	public readonly Prop<float> ShearX = new( "X" ) { Category = "Shear" };
+	public readonly Prop<float> ShearY = new( "Y" ) { Category = "Shear" };
 	public readonly Prop<float> OriginX = new( "X" ) { Category = "Origin" };
 	public readonly Prop<float> OriginY = new( "Y" ) { Category = "Origin" };
 
@@ -74,21 +74,31 @@ public class TransformProps : IEnumerable<IProp> {
 	public float EffectiveHeight => Height.Value * ScaleY.Value;
 
 	public Vector2 Size => new( Width.Value, Height.Value );
+	public Vector2 Scale => new( ScaleX.Value, ScaleY.Value );
 	public Vector2 Position => new( X.Value, Y.Value );
+	public Vector2 Shear => new( ShearX.Value, ShearY.Value );
 
 	public void Normalize () {
-		var w = Width.Value;
-		if ( w < 0 ) {
-			X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * ( 1 - OriginX.Value * 2 ) * w;
-			Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * ( 1 - OriginX.Value * 2 ) * w;
-			Width.Value = -w;
+		if ( Height.Value < 0 ) {
+			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			X.Value += ( cos - sin * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * Height.Value;
+			Y.Value += ( sin + cos * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * Height.Value;
+
+			Height.Value = -Height.Value;
 		}
 
-		var h = Height.Value;
-		if ( h < 0 ) {
-			X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * ( 1 - OriginY.Value * 2 ) * h;
-			Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * ( 1 - OriginY.Value * 2 ) * h;
-			Height.Value = -h;
+		if ( Width.Value < 0 ) {
+			var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+			var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+			X.Value += ( cos + sin * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * Width.Value;
+			Y.Value += ( sin - cos * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * Width.Value;
+			// shear is non-commutative
+			var total = Shear.X * Shear.Y;
+			X.Value += cos * total * Width.Value * ( 1 - OriginX.Value * 2 );
+			Y.Value += sin * total * Width.Value * ( 1 - OriginX.Value * 2 );
+
+			Width.Value = -Width.Value;
 		}
 	}
 
@@ -97,9 +107,15 @@ public class TransformProps : IEnumerable<IProp> {
 		var delta = x - right;
 
 		Width.Value += delta;
+		var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
+		var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
 
-		X.Value += OriginX.Value * MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
-		Y.Value += OriginX.Value * MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
+		X.Value += OriginX.Value * ( cos + sin * ShearY.Value );
+		Y.Value += OriginX.Value * ( sin - cos * ShearY.Value );
+		// shear is non-commutative
+		var total = Shear.X * Shear.Y;
+		X.Value += OriginX.Value * cos * total;
+		Y.Value += OriginX.Value * sin * total;
 	}
 
 	public void SetBottomEdge ( float y ) {
@@ -107,9 +123,11 @@ public class TransformProps : IEnumerable<IProp> {
 		var delta = y - bottom;
 
 		Height.Value += delta;
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
 
-		X.Value += OriginY.Value * MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
-		Y.Value += OriginY.Value * MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
+		X.Value += OriginY.Value * ( cos - sin * ShearX.Value );
+		Y.Value += OriginY.Value * ( sin + cos * ShearX.Value );
 	}
 
 	public void SetLeftEdge ( float x ) {
@@ -117,9 +135,15 @@ public class TransformProps : IEnumerable<IProp> {
 		var delta = x - left;
 
 		Width.Value -= delta;
+		var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
+		var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
 
-		X.Value += ( 1 - OriginX.Value ) * MathF.Cos( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
-		Y.Value += ( 1 - OriginX.Value ) * MathF.Sin( Rotation.Value / 180 * MathF.PI ) * delta * ScaleX.Value;
+		X.Value += ( 1 - OriginX.Value ) * ( cos + sin * ShearY.Value );
+		Y.Value += ( 1 - OriginX.Value ) * ( sin - cos * ShearY.Value );
+		// shear is non-commutative
+		var total = Shear.X * Shear.Y;
+		X.Value += ( 1 - OriginX.Value ) * cos * total;
+		Y.Value += ( 1 - OriginX.Value ) * sin * total;
 	}
 
 	public void SetTopEdge ( float y ) {
@@ -127,21 +151,31 @@ public class TransformProps : IEnumerable<IProp> {
 		var delta = y - top;
 
 		Height.Value -= delta;
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
 
-		X.Value += ( 1 - OriginY.Value ) * MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
-		Y.Value += ( 1 - OriginY.Value ) * MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * delta * ScaleY.Value;
+		X.Value += ( 1 - OriginY.Value ) * ( cos - sin * ShearX.Value );
+		Y.Value += ( 1 - OriginY.Value ) * ( sin + cos * ShearX.Value );
 	}
 
 	public void SetOrigin ( Vector2 value ) {
-		var deltaX = value.X - OriginX.Value;
-		OriginX.Value = value.X;
-		X.Value += MathF.Cos( Rotation.Value / 180 * MathF.PI ) * deltaX * EffectiveWidth;
-		Y.Value += MathF.Sin( Rotation.Value / 180 * MathF.PI ) * deltaX * EffectiveWidth;
-
 		var deltaY = value.Y - OriginY.Value;
 		OriginY.Value = value.Y;
-		X.Value += MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * deltaY * EffectiveHeight;
-		Y.Value += MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI ) * deltaY * EffectiveHeight;
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		X.Value += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
+		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
+
+		var deltaX = value.X - OriginX.Value;
+		OriginX.Value = value.X;
+		cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+		sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+		X.Value += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
+		Y.Value += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
+		// shear is non-commutative
+		var total = Shear.X * Shear.Y;
+		X.Value += cos * total * deltaX * EffectiveWidth;
+		Y.Value += sin * total * deltaX * EffectiveWidth;
 	}
 
 	public IEnumerator<IProp> GetEnumerator () {
@@ -154,8 +188,8 @@ public class TransformProps : IEnumerable<IProp> {
 		yield return OriginY;
 		yield return ScaleX;
 		yield return ScaleY;
-		//yield return ShearX;
-		//yield return ShearY;
+		yield return ShearX;
+		yield return ShearY;
 	}
 
 	IEnumerator IEnumerable.GetEnumerator ()

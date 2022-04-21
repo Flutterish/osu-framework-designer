@@ -24,11 +24,11 @@ public class DrawableSelection : CompositeDrawable {
 
 		var topLeft = Parent.ToLocalSpace( selection.ScreenSpaceDrawQuad.TopLeft );
 		Position = topLeft;
-		var a = ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
-		var b = ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
+		var a = Parent.ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
+		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
 		var scale = ( a - b ).Length;
 		Size = selection.DrawSize * selection.Scale * scale;
-		//Shear = selection.Shear;
+		Shear = selection.Shear;
 		Rotation = selection.Rotation;
 	}
 
