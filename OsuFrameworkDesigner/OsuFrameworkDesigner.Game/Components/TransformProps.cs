@@ -185,8 +185,20 @@ public class TransformProps : IEnumerable<IProp> {
 		X.Value += ( cos + sin * ShearY.Value ) * deltaX * ( 1 - OriginY.Value );
 		Y.Value += ( sin - cos * ShearY.Value ) * deltaX * ( 1 - OriginY.Value );
 
-		ShearX.Value += deltaX / EffectiveHeight;
-		// TODO: scuffed when there is Y shear
+		var deltaXShear = -deltaX / EffectiveHeight;
+
+		// shear is non-commutative
+		var dy = deltaXShear * ShearY.Value * ShearY.Value / ( deltaXShear * ShearX.Value + 1 );
+		var dw = deltaXShear * EffectiveWidth * ShearY.Value; // TODO this is scuffed (maybe becase of invalid input?)
+		ShearX.Value -= deltaXShear;
+		if ( float.IsNormal( dy ) ) {
+			var orig = RelativeOrigin;
+			SetOrigin( Vector2.Zero );
+			Height.Value += deltaX * ShearY.Value;
+			ShearY.Value += dy;
+			Width.Value += dw;
+			SetOrigin( orig );
+		}
 	}
 
 	public void ShearBottom ( float deltaX ) {
@@ -196,8 +208,20 @@ public class TransformProps : IEnumerable<IProp> {
 		X.Value += ( cos - sin * ShearY.Value ) * deltaX * OriginY.Value;
 		Y.Value += ( sin + cos * ShearY.Value ) * deltaX * OriginY.Value;
 
-		ShearX.Value -= deltaX / EffectiveHeight;
-		// TODO: scuffed when there is Y shear
+		var deltaXShear = deltaX / EffectiveHeight;
+
+		// shear is non-commutative
+		var dy = -deltaXShear * ShearY.Value * ShearY.Value / ( deltaXShear * ShearY.Value + 1 );
+		var dw = deltaXShear * EffectiveWidth * ShearY.Value; // TODO this is scuffed (maybe becase of invalid input?)
+		ShearX.Value -= deltaXShear;
+		if ( float.IsNormal( dy ) ) {
+			var orig = RelativeOrigin;
+			SetOrigin( Vector2.Zero );
+			Height.Value -= deltaX * ShearY.Value;
+			ShearY.Value += dy;
+			Width.Value += dw;
+			SetOrigin( orig );
+		}
 	}
 
 	public void ShearLeft ( float deltaY ) {
