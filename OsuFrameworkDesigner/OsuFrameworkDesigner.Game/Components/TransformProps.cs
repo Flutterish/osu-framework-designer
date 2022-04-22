@@ -76,6 +76,17 @@ public class TransformProps : IEnumerable<IProp> {
 	public Vector2 Size => new( Width.Value, Height.Value );
 	public Vector2 Scale => new( ScaleX.Value, ScaleY.Value );
 	public Vector2 Position => new( X.Value, Y.Value );
+	// Notes about shear:
+	//	given the origin is at (x,y), the point at (x + dx, y) is translated so that:
+	//		X += dx * shearX * shearY
+	//		Y -= dx * shearY
+	//	given the origin is at (x,y), the point at (x, y + dy) is translated so that:
+	//		X -= dy * shearX
+	//		Y stays constant
+	//	given the origin is at (x,y), the point at (x + dx, y + dy) is translated so that:
+	//		X += dx * shearX * shearY - dy * shearX
+	//		Y -= dx * shearY
+	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
 	public Vector2 Shear => new( ShearX.Value, ShearY.Value );
 
 	public void Normalize () {
@@ -189,7 +200,7 @@ public class TransformProps : IEnumerable<IProp> {
 
 		// shear is non-commutative
 		var dy = deltaXShear * ShearY.Value * ShearY.Value / ( deltaXShear * ShearX.Value + 1 );
-		var dw = deltaXShear * EffectiveWidth * ShearY.Value; // TODO this is scuffed (maybe becase of invalid input?)
+		var dw = deltaXShear * EffectiveWidth * ShearY.Value;
 		ShearX.Value -= deltaXShear;
 		if ( float.IsNormal( dy ) ) {
 			var orig = RelativeOrigin;
@@ -197,6 +208,7 @@ public class TransformProps : IEnumerable<IProp> {
 			Height.Value += deltaX * ShearY.Value;
 			ShearY.Value += dy;
 			Width.Value += dw;
+			normalizeShear();
 			SetOrigin( orig );
 		}
 	}
@@ -212,7 +224,7 @@ public class TransformProps : IEnumerable<IProp> {
 
 		// shear is non-commutative
 		var dy = -deltaXShear * ShearY.Value * ShearY.Value / ( deltaXShear * ShearY.Value + 1 );
-		var dw = deltaXShear * EffectiveWidth * ShearY.Value; // TODO this is scuffed (maybe becase of invalid input?)
+		var dw = deltaXShear * EffectiveWidth * ShearY.Value;
 		ShearX.Value -= deltaXShear;
 		if ( float.IsNormal( dy ) ) {
 			var orig = RelativeOrigin;
@@ -220,6 +232,7 @@ public class TransformProps : IEnumerable<IProp> {
 			Height.Value -= deltaX * ShearY.Value;
 			ShearY.Value += dy;
 			Width.Value += dw;
+			normalizeShear();
 			SetOrigin( orig );
 		}
 	}
@@ -231,6 +244,8 @@ public class TransformProps : IEnumerable<IProp> {
 		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * ( 1 - OriginX.Value );
 		X.Value += ( cos - sin * ShearX.Value ) * deltaY * ( 1 - OriginX.Value );
 		ShearY.Value += deltaY / EffectiveWidth;
+
+		normalizeShear();
 	}
 
 	public void ShearRight ( float deltaY ) {
@@ -240,6 +255,43 @@ public class TransformProps : IEnumerable<IProp> {
 		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * OriginX.Value;
 		X.Value += ( cos - sin * ShearX.Value ) * deltaY * OriginX.Value;
 		ShearY.Value -= deltaY / EffectiveWidth;
+
+		normalizeShear();
+	}
+
+	void normalizeShear () {
+		// dont ask. I dont know. It works, okay?
+		// okay, anyway, the way it works is it rotates such that shearY = 0,
+		// then it constraints the top right X value,
+		// then shears so that the X value of the bottom left is constrained
+		// and finally constraints the Y of the bottom left
+		// all done under an offset rotation because the calculations assume the X and Y axis
+		// the math can be relatively easily derived from the shear notes above and vector rotation
+		var TRX = EffectiveWidth;
+		var TRY = 0;
+		var BRX = EffectiveWidth - EffectiveHeight * ShearX.Value;
+		var BRY = EffectiveHeight;
+		var offset = MathF.Atan2( TRY - BRY, TRX - BRX ) + Rotation.Value / 180 * MathF.PI + MathF.PI / 2;
+
+		var ncos = MathF.Cos( -Rotation.Value / 180 * MathF.PI + offset );
+		var nsin = MathF.Sin( -Rotation.Value / 180 * MathF.PI + offset );
+		var currrentX = ncos * EffectiveWidth;
+		var currrentY = ncos * EffectiveHeight + nsin * EffectiveHeight * ShearX.Value;
+
+		var px = -EffectiveHeight * ShearY.Value;
+		var py = EffectiveHeight;
+		ShearY.Value = 0;
+
+		var theta = ( MathF.Atan2( -py, px ) + MathF.PI / 2 );
+		Rotation.Value += theta / MathF.PI * 180;
+		ncos = MathF.Cos( -Rotation.Value / 180 * MathF.PI + offset );
+		nsin = MathF.Sin( -Rotation.Value / 180 * MathF.PI + offset );
+		var w = EffectiveWidth;
+		var h = EffectiveHeight;
+
+		Width.Value += currrentX / ncos - w;
+		ShearX.Value += nsin / ncos - ShearX.Value;
+		Height.Value += ( currrentY - ncos * h - nsin * ShearX.Value * h ) / ( ncos + nsin * ShearX.Value );
 	}
 
 	public IEnumerator<IProp> GetEnumerator () {
