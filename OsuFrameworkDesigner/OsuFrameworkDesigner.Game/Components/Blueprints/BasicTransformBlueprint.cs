@@ -37,7 +37,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		var x = lx - ly * sx;
 		var y = ly + x * sy;
 
-		return new(x, y);
+		return new( x, y );
 	}
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
@@ -67,8 +67,8 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		};
 		box.Bottom.Dragged += e => {
 			if ( isShearing ) {
-				var (x, y) = Unshear(ToTargetSpace( e.ScreenSpaceMousePosition ));
-				var (lx, ly) = Unshear(ToTargetSpace( e.ScreenSpaceLastMousePosition ));
+				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
+				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
 				TransformProps.ShearBottom( x - lx );
 			}
 			else {

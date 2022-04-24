@@ -189,17 +189,7 @@ public class TransformProps : IEnumerable<IProp> {
 		Y.Value += sin * total * deltaX * EffectiveWidth;
 	}
 
-	// Notes about shear:
-	//	given the origin is at (x,y), the point at (x + dx, y) is translated so that:
-	//		X += dx * shearX * shearY
-	//		Y -= dx * shearY
-	//	given the origin is at (x,y), the point at (x, y + dy) is translated so that:
-	//		X -= dy * shearX
-	//		Y stays constant
-	//	given the origin is at (x,y), the point at (x + dx, y + dy) is translated so that:
-	//		X += dx * shearX * shearY - dy * shearX
-	//		Y -= dx * shearY
-	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
+	// TODO this and shear bottom is still incorrect because of shearY, but normalizing makes it never come up
 	public void ShearTop ( float deltaX ) {
 		var orig = RelativeOrigin;
 		SetOrigin( Vector2.UnitY );
