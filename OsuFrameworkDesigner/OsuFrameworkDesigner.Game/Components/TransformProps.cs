@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using osu.Framework.Caching;
+using System.Collections;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
@@ -6,13 +7,34 @@ public class TransformProps : IEnumerable<IProp> {
 	public TransformProps ( Drawable drawable ) {
 		CopyProps( drawable );
 
-		X.ValueChanged += v => drawable.X = v.NewValue;
-		Y.ValueChanged += v => drawable.Y = v.NewValue;
-		Width.ValueChanged += v => drawable.Width = v.NewValue;
-		Height.ValueChanged += v => drawable.Height = v.NewValue;
-		Rotation.ValueChanged += v => drawable.Rotation = v.NewValue;
-		(ScaleX, ScaleY).BindValueChanged( ( sx, sy ) => drawable.Scale = new( sx, sy ) );
-		(ShearX, ShearY).BindValueChanged( ( sx, sy ) => drawable.Shear = new( sx, sy ) );
+		X.ValueChanged += v => {
+			drawable.X = v.NewValue;
+			drawInfo.Invalidate();
+		};
+		Y.ValueChanged += v => {
+			drawable.Y = v.NewValue;
+			drawInfo.Invalidate();
+		};
+		Width.ValueChanged += v => {
+			drawable.Width = v.NewValue;
+			drawInfo.Invalidate();
+		};
+		Height.ValueChanged += v => {
+			drawable.Height = v.NewValue;
+			drawInfo.Invalidate();
+		};
+		Rotation.ValueChanged += v => {
+			drawable.Rotation = v.NewValue;
+			drawInfo.Invalidate();
+		};
+		(ScaleX, ScaleY).BindValueChanged( ( sx, sy ) => {
+			drawable.Scale = new( sx, sy );
+			drawInfo.Invalidate();
+		} );
+		(ShearX, ShearY).BindValueChanged( ( sx, sy ) => {
+			drawable.Shear = new( sx, sy );
+			drawInfo.Invalidate();
+		} );
 
 		(OriginX, OriginY).BindValueChanged( ( ox, oy ) => {
 			var xAnchor = ox switch { 0 => Anchor.x0, 0.5f => Anchor.x1, 1 => Anchor.x2, _ => Anchor.Custom };
@@ -23,6 +45,8 @@ public class TransformProps : IEnumerable<IProp> {
 			else {
 				drawable.Origin = Anchor.Custom;
 			}
+
+			drawInfo.Invalidate();
 		} );
 
 		(OriginX, Width).BindValueChanged( ( ox, w ) => {
@@ -88,6 +112,31 @@ public class TransformProps : IEnumerable<IProp> {
 	//		Y -= dx * shearY
 	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
 	public Vector2 Shear => new( ShearX.Value, ShearY.Value );
+
+	public Vector2 TopLeft {
+		get {
+			var x = X.Value;
+			var y = Y.Value;
+
+			var deltaY = -OriginY.Value;
+			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			x += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
+			y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
+
+			var deltaX = -OriginX.Value;
+			cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+			sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+			x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
+			y += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
+			// shear is non-commutative
+			var total = Shear.X * Shear.Y;
+			x += cos * total * deltaX * EffectiveWidth;
+			y += sin * total * deltaX * EffectiveWidth;
+
+			return new( x, y );
+		}
+	}
 
 	public void Normalize () {
 		if ( Height.Value < 0 ) {
@@ -293,6 +342,22 @@ public class TransformProps : IEnumerable<IProp> {
 		ShearX.Value += nsin / ncos - ShearX.Value;
 		Height.Value += ( currrentY - ncos * h - nsin * ShearX.Value * h ) / ( ncos + nsin * ShearX.Value );
 	}
+
+	Cached<DrawInfo> drawInfo = new();
+	public DrawInfo DrawInfo {
+		get {
+			if ( !drawInfo.IsValid ) {
+				var info = new DrawInfo( null );
+				info.ApplyTransform( Position, Scale, Rotation.Value, Shear, RelativeOrigin * Size );
+				drawInfo.Value = info;
+			}
+
+			return drawInfo.Value;
+		}
+	}
+
+	public Vector2 ToLocalSpace ( Vector2 contentSpace )
+		=> Vector2Extensions.Transform( contentSpace, DrawInfo.MatrixInverse );
 
 	public IEnumerator<IProp> GetEnumerator () {
 		yield return X;

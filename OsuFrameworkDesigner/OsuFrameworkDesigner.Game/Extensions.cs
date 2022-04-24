@@ -96,6 +96,7 @@ public static class Extensions {
 		return drawable;
 	}
 
+	// TODO remove this assumption
 	public static Drawable AsDrawable ( this IComponent component )
 		=> (Drawable)component;
 

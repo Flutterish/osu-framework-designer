@@ -1,4 +1,5 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Graphics.Primitives;
+using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
@@ -48,6 +49,17 @@ public class Composer : CompositeDrawable {
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;
+	public Quad ToContentSpace ( Quad screenSpaceQuad ) {
+		var offset = content.Position - content.DrawSize / 2;
+		var quad = content.ToLocalSpace( screenSpaceQuad );
+
+		return new Quad(
+			quad.TopLeft + offset,
+			quad.TopRight + offset,
+			quad.BottomLeft + offset,
+			quad.BottomRight + offset
+		);
+	}
 
 	public Vector2 ContentToScreenSpace ( Vector2 contentSpace )
 		=> content.ToScreenSpace( contentSpace - content.Position + content.DrawSize / 2 );

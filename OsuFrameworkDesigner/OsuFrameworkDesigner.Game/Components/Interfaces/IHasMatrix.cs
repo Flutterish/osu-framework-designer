@@ -1,4 +1,6 @@
-﻿namespace OsuFrameworkDesigner.Game.Components.Interfaces;
+﻿using osu.Framework.Extensions.MatrixExtensions;
+
+namespace OsuFrameworkDesigner.Game.Components.Interfaces;
 
 public interface IHasMatrix : IHasPosition, IHasOrigin, IHasScale, IHasSize, IHasShear, IHasRotation {
 	Matrix3 Matrix { get; set; }
@@ -48,18 +50,21 @@ public interface IHasMatrix : IHasPosition, IHasOrigin, IHasScale, IHasSize, IHa
 
 		public Matrix3 Matrix {
 			get {
-				var di = new DrawInfo();
-				var originPosition = new Vector2( Width.Value, Height.Value ) * new Vector2( OriginX.Value, OriginY.Value );
-				var pos = new Vector2( X.Value, Y.Value ) + originPosition;
-				var drawScale = new Vector2( ScaleX.Value, ScaleY.Value );
-				var shear = new Vector2( ShearX.Value, ShearY.Value );
+				var matrix = Matrix3.Identity;
 
-				di.ApplyTransform( pos, drawScale, Rotation.Value, shear, originPosition );
+				var pos = new Vector2( X.Value, Y.Value );
+				MatrixExtensions.TranslateFromLeft( ref matrix, pos );
 
-				return di.Matrix;
+				return matrix;
 			}
 			set {
+				// M = T*R*Z*S*O
 
+
+				var dx = value.Row2.X;
+				var dy = value.Row2.Y;
+				X.Value = dx;
+				Y.Value = dy;
 			}
 		}
 	}

@@ -1,10 +1,12 @@
 ﻿using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
+using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Cursor;
 using OsuFrameworkDesigner.Game.Graphics;
+using osuTK.Graphics;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
@@ -12,39 +14,37 @@ namespace OsuFrameworkDesigner.Game.Tools;
 public class SelectionTool : Tool {
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
-		AddInternal( selectionBox = new() { Alpha = 0 } );
+		selectionComponent = ( new SelectionComponent().CreateBlueprint() as BasicTransformBlueprint<SelectionComponent> )!;
+		AddInternal( selectionComponent );
+		selectionComponent.Alpha = 0;
 
-		Dictionary<IComponent, (IHasPosition pos, Vector2 handle)> dragHandleByComponent = new();
-		selectionBox.DragStarted += e => {
-			perform( IHasPosition.From, ( pos, comp ) => {
-				dragHandleByComponent.Add( comp, (pos, new( pos.X.Value, pos.Y.Value )) );
-			} );
-		};
-		selectionBox.Dragged += e => {
-			var delta = Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
-			delta = e.AltPressed ? delta : delta.Round();
+		//selectionBox.Dragged += e => {
+		//	var delta = Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceLastMousePosition );
+		//	var matrix = Matrix3.Identity;
+		//	MatrixExtensions.TranslateFromLeft( ref matrix, delta );
 
-			foreach ( var (pos, handle) in dragHandleByComponent.Values ) {
-				pos.X.Value = handle.X + delta.X;
-				pos.Y.Value = handle.Y + delta.Y;
-			}
-		};
-		selectionBox.DragEnded += e => dragHandleByComponent.Clear();
+		//	perform( IHasMatrix.From, i => {
+		//		i.Matrix = matrix * i.Matrix;
+		//	} );
+		//};
 
-		selectionBox.Top.Hide();
-		selectionBox.Bottom.Hide();
-		selectionBox.Left.Hide();
-		selectionBox.Right.Hide();
+		Selection.BindCollectionChanged( ( _, _ ) => {
+			var selectionHasMatrices = !Selection.Any( x => IHasMatrix.From( x ) is null );
 
-		selectionBox.TopLeft.Hide();
-		selectionBox.TopRight.Hide();
-		selectionBox.BottomLeft.Hide();
-		selectionBox.BottomRight.Hide();
-
-		selectionBox.FarTopLeft.Hide();
-		selectionBox.FarTopRight.Hide();
-		selectionBox.FarBottomLeft.Hide();
-		selectionBox.FarBottomRight.Hide();
+			selectionBox.Top.Alpha =
+			selectionBox.Bottom.Alpha =
+			selectionBox.Left.Alpha =
+			selectionBox.Right.Alpha =
+			selectionBox.TopLeft.Alpha =
+			selectionBox.TopRight.Alpha =
+			selectionBox.BottomLeft.Alpha =
+			selectionBox.BottomRight.Alpha =
+			selectionBox.FarTopLeft.Alpha =
+			selectionBox.FarTopRight.Alpha =
+			selectionBox.FarBottomLeft.Alpha =
+			selectionBox.FarBottomRight.Alpha =
+				selectionHasMatrices ? 1 : 0;
+		} );
 	}
 
 	void perform<T> ( Func<IComponent, T?> transformer, Action<T, IComponent> action ) {
@@ -108,18 +108,8 @@ public class SelectionTool : Tool {
 	}
 
 	public readonly BindableList<IComponent> Selection = new();
-	SelectionBox selectionBox;
-	protected override void Update () {
-		base.Update();
-
-		if ( selectionBox.Alpha == 0 )
-			return;
-
-		var box = ToLocalSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
-		//var localBox = selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.DrawRectangle );
-		selectionBox.Position = box.Location;
-		selectionBox.Size = box.Size;
-	}
+	BasicTransformBlueprint<SelectionComponent> selectionComponent;
+	SelectionBox selectionBox => selectionComponent.SelectionBox;
 
 	Container<DrawableSelection> selections;
 	Blueprint<IComponent>? blueprint;
@@ -133,10 +123,27 @@ public class SelectionTool : Tool {
 				RemoveInternal( blueprint );
 				blueprint = null;
 			}
-			selectionBox.Alpha = Selection.Count > 1 ? 1 : 0;
-			if ( selectionBox.Alpha == 0 && Selection.SingleOrDefault() is IComponent comp ) {
+			selectionComponent.Alpha = Selection.Count > 1 ? 1 : 0;
+			if ( Selection.Count < 2 && Selection.SingleOrDefault() is IComponent comp ) {
 				AddInternal( blueprint = comp.CreateBlueprint() );
 			}
+
+			if ( Selection.Count < 2 )
+				return;
+
+			var box = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
+			var props = selectionComponent.TransformProps;
+			props.X.Value = box.Location.X;
+			props.Y.Value = box.Location.Y;
+			props.Width.Value = box.Width;
+			props.Height.Value = box.Height;
+			props.ScaleX.Value = 1;
+			props.ScaleY.Value = 1;
+			props.Rotation.Value = 0;
+			props.ShearX.Value = 0;
+			props.ShearY.Value = 0;
+			props.OriginX.Value = 0;
+			props.OriginY.Value = 0;
 		} );
 
 		Selection.BindCollectionChanged( ( _, e ) => {
@@ -174,6 +181,21 @@ public class SelectionTool : Tool {
 		}
 
 		return base.OnKeyDown( e );
+	}
+
+	private class SelectionComponent : Box, IComponent {
+		public readonly TransformProps TransformProps;
+		public SelectionComponent () {
+			Alpha = 0.1f;
+			AlwaysPresent = true;
+			Colour = Color4.Red;
+			TransformProps = new( this );
+		}
+
+		public Blueprint<IComponent> CreateBlueprint ()
+			=> new BasicTransformBlueprint<SelectionComponent>( this, TransformProps );
+		string IComponent.Name => Name;
+		public IEnumerable<IProp> Properties => TransformProps;
 	}
 }
 
@@ -245,17 +267,6 @@ public class SelectionBox : Handle {
 		FinishTransforms( true );
 	}
 
-	// Notes about shear:
-	//	given the origin is at (x,y), the point at (x + dx, y) is translated so that:
-	//		X += dx * shearX * shearY
-	//		Y -= dx * shearY
-	//	given the origin is at (x,y), the point at (x, y + dy) is translated so that:
-	//		X -= dy * shearX
-	//		Y stays constant
-	//	given the origin is at (x,y), the point at (x + dx, y + dy) is translated so that:
-	//		X += dx * shearX * shearY - dy * shearX
-	//		Y -= dx * shearY
-	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
 	public void UpdateCursorStyles ( float rotation, bool isShearing, Vector2 shear = default ) {
 		var rightX = 1f + shear.X * shear.Y;
 		var rightY = -shear.Y;

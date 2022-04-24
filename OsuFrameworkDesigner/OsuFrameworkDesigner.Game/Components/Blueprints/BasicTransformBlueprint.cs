@@ -8,13 +8,13 @@ using OsuFrameworkDesigner.Game.Tools;
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
 public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
-	SelectionBox box;
+	public readonly SelectionBox SelectionBox;
 	OriginHandle origin;
 	new public T Value => (T)base.Value;
 	public TransformProps TransformProps;
 
 	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
-		=> Value.AsDrawable().ToLocalSpace( screenSpacePosition );
+		=> TransformProps.ToLocalSpace( Composer.ToContentSpace( screenSpacePosition ) );
 
 	/// <summary>
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
@@ -41,31 +41,31 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
-		AddInternal( box = new SelectionBox().Fill() );
+		AddInternal( SelectionBox = new SelectionBox().Fill() );
 		AddInternal( origin = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 		TransformProps = props;
 
-		box.TopLeft.Dragged += e => {
+		SelectionBox.TopLeft.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
-		box.TopRight.Dragged += e => {
+		SelectionBox.TopRight.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 		};
-		box.BottomLeft.Dragged += e => {
+		SelectionBox.BottomLeft.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
-		box.BottomRight.Dragged += e => {
+		SelectionBox.BottomRight.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
-		box.Bottom.Dragged += e => {
+		SelectionBox.Bottom.Dragged += e => {
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
@@ -76,7 +76,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 			}
 		};
-		box.Top.Dragged += e => {
+		SelectionBox.Top.Dragged += e => {
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
@@ -87,7 +87,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
 			}
 		};
-		box.Left.Dragged += e => {
+		SelectionBox.Left.Dragged += e => {
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
@@ -98,7 +98,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
 			}
 		};
-		box.Right.Dragged += e => {
+		SelectionBox.Right.Dragged += e => {
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
@@ -110,52 +110,51 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 		};
 		Vector2 boxDragHandle = Vector2.Zero;
-		box.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
-		box.Dragged += e => {
-			e.Target = Value.AsDrawable();
-			var delta = boxDragHandle + ( e.MousePosition - e.MouseDownPosition );
+		SelectionBox.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
+		SelectionBox.Dragged += e => {
+			var delta = boxDragHandle + Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
 			TransformProps.X.Value = e.AltPressed ? delta.X : delta.X.Round();
 			TransformProps.Y.Value = e.AltPressed ? delta.Y : delta.Y.Round();
 		};
 		origin.Dragged += e => {
-			var pos = Vector2.Divide( Value.AsDrawable().ToLocalSpace( e.ScreenSpaceMousePosition ), Value.AsDrawable().DrawSize );
+			var pos = Vector2.Divide( ToTargetSpace( e.ScreenSpaceMousePosition ), TransformProps.Size );
 			TransformProps.SetOrigin( e.AltPressed ? pos : pos.Round( 0.5f ).Clamp( Vector2.Zero, Vector2.One ) );
 		};
 
-		box.FarBottomLeft.DragStarted += onRotationDragStarted;
-		box.FarBottomRight.DragStarted += onRotationDragStarted;
-		box.FarTopLeft.DragStarted += onRotationDragStarted;
-		box.FarTopRight.DragStarted += onRotationDragStarted;
-		box.FarBottomLeft.Dragged += onRotationDrag;
-		box.FarBottomRight.Dragged += onRotationDrag;
-		box.FarTopLeft.Dragged += onRotationDrag;
-		box.FarTopRight.Dragged += onRotationDrag;
+		SelectionBox.FarBottomLeft.DragStarted += onRotationDragStarted;
+		SelectionBox.FarBottomRight.DragStarted += onRotationDragStarted;
+		SelectionBox.FarTopLeft.DragStarted += onRotationDragStarted;
+		SelectionBox.FarTopRight.DragStarted += onRotationDragStarted;
+		SelectionBox.FarBottomLeft.Dragged += onRotationDrag;
+		SelectionBox.FarBottomRight.Dragged += onRotationDrag;
+		SelectionBox.FarTopLeft.Dragged += onRotationDrag;
+		SelectionBox.FarTopRight.Dragged += onRotationDrag;
 
-		box.TopLeft.DragStarted += dragStarted;
-		box.TopRight.DragStarted += dragStarted;
-		box.BottomLeft.DragStarted += dragStarted;
-		box.BottomRight.DragStarted += dragStarted;
-		box.Left.DragStarted += dragStarted;
-		box.Right.DragStarted += dragStarted;
-		box.Top.DragStarted += dragStarted;
-		box.Bottom.DragStarted += dragStarted;
-		box.FarBottomLeft.DragStarted += dragStarted;
-		box.FarBottomRight.DragStarted += dragStarted;
-		box.FarTopLeft.DragStarted += dragStarted;
-		box.FarTopRight.DragStarted += dragStarted;
+		SelectionBox.TopLeft.DragStarted += dragStarted;
+		SelectionBox.TopRight.DragStarted += dragStarted;
+		SelectionBox.BottomLeft.DragStarted += dragStarted;
+		SelectionBox.BottomRight.DragStarted += dragStarted;
+		SelectionBox.Left.DragStarted += dragStarted;
+		SelectionBox.Right.DragStarted += dragStarted;
+		SelectionBox.Top.DragStarted += dragStarted;
+		SelectionBox.Bottom.DragStarted += dragStarted;
+		SelectionBox.FarBottomLeft.DragStarted += dragStarted;
+		SelectionBox.FarBottomRight.DragStarted += dragStarted;
+		SelectionBox.FarTopLeft.DragStarted += dragStarted;
+		SelectionBox.FarTopRight.DragStarted += dragStarted;
 
-		box.TopLeft.DragEnded += dragEnded;
-		box.TopRight.DragEnded += dragEnded;
-		box.BottomLeft.DragEnded += dragEnded;
-		box.BottomRight.DragEnded += dragEnded;
-		box.Left.DragEnded += dragEnded;
-		box.Right.DragEnded += dragEnded;
-		box.Top.DragEnded += dragEnded;
-		box.Bottom.DragEnded += dragEnded;
-		box.FarBottomLeft.DragEnded += dragEnded;
-		box.FarBottomRight.DragEnded += dragEnded;
-		box.FarTopLeft.DragEnded += dragEnded;
-		box.FarTopRight.DragEnded += dragEnded;
+		SelectionBox.TopLeft.DragEnded += dragEnded;
+		SelectionBox.TopRight.DragEnded += dragEnded;
+		SelectionBox.BottomLeft.DragEnded += dragEnded;
+		SelectionBox.BottomRight.DragEnded += dragEnded;
+		SelectionBox.Left.DragEnded += dragEnded;
+		SelectionBox.Right.DragEnded += dragEnded;
+		SelectionBox.Top.DragEnded += dragEnded;
+		SelectionBox.Bottom.DragEnded += dragEnded;
+		SelectionBox.FarBottomLeft.DragEnded += dragEnded;
+		SelectionBox.FarBottomRight.DragEnded += dragEnded;
+		SelectionBox.FarTopLeft.DragEnded += dragEnded;
+		SelectionBox.FarTopRight.DragEnded += dragEnded;
 	}
 
 	protected override void Update () {
@@ -181,7 +180,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	private void onRotationDrag ( DragEvent e ) {
-		var center = Value.AsDrawable().ToScreenSpace( TransformProps.RelativeOrigin * Value.AsDrawable().DrawSize );
+		var center = Composer.ContentToScreenSpace( TransformProps.Position );
 		var startDiff = e.ScreenSpaceMouseDownPosition - center;
 		var diff = e.ScreenSpaceMousePosition - center;
 
@@ -196,7 +195,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	bool isShearing;
 	bool isDragging;
 	protected override void PositionSelf () {
-		var topLeft = Parent.ToLocalSpace( Value.AsDrawable().ScreenSpaceDrawQuad.TopLeft );
+		var topLeft = Parent.ToLocalSpace( Composer.ContentToScreenSpace( TransformProps.TopLeft ) );
 		Position = topLeft;
 		var a = Parent.ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
 		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
@@ -209,7 +208,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			isShearing = InputManager.CurrentState.Keyboard.ControlPressed;
 		}
 
-		box.UpdateCursorStyles( Rotation, isShearing, Shear );
+		SelectionBox.UpdateCursorStyles( Rotation, isShearing, Shear );
 
 		if ( Height < 0 ) {
 			var cos = MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI );
