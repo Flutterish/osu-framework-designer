@@ -28,6 +28,18 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	public Vector2 ToTargetTopLeftSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.Position - TransformProps.RelativeOrigin * TransformProps.Size + ToTargetSpace( screenSpacePosition );
 
+	public Vector2 Unshear ( Vector2 localPosition ) {
+		var lx = localPosition.X;
+		var ly = localPosition.Y;
+		var sx = TransformProps.ShearX.Value;
+		var sy = TransformProps.ShearY.Value;
+
+		var x = lx - ly * sx;
+		var y = ly + x * sy;
+
+		return new(x, y);
+	}
+
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
 		AddInternal( box = new SelectionBox().Fill() );
 		AddInternal( origin = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
@@ -54,36 +66,48 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
 		};
 		box.Bottom.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			if ( isShearing ) {
-				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				var (x, y) = Unshear(ToTargetSpace( e.ScreenSpaceMousePosition ));
+				var (lx, ly) = Unshear(ToTargetSpace( e.ScreenSpaceLastMousePosition ));
 				TransformProps.ShearBottom( x - lx );
 			}
-			else TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+			else {
+				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+			}
 		};
 		box.Top.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			if ( isShearing ) {
-				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
+				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
 				TransformProps.ShearTop( x - lx );
 			}
-			else TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+			else {
+				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+			}
 		};
 		box.Left.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			if ( isShearing ) {
-				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
+				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
 				TransformProps.ShearLeft( y - ly );
 			}
-			else TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
+			else {
+				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
+			}
 		};
 		box.Right.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
 			if ( isShearing ) {
-				var (lx, ly) = ToTargetTopLeftSpace( e.ScreenSpaceLastMousePosition );
+				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
+				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
 				TransformProps.ShearRight( y - ly );
 			}
-			else TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
+			else {
+				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
+			}
 		};
 		Vector2 boxDragHandle = Vector2.Zero;
 		box.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
