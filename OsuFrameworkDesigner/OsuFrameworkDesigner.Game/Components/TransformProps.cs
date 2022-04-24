@@ -147,11 +147,20 @@ public class TransformProps : IEnumerable<IProp> {
 	}
 
 	public void Normalize () {
+		if ( ScaleX.Value < 0 ) {
+			ScaleX.Value = -ScaleX.Value;
+			Width.Value = -Width.Value;
+		}
+		if ( ScaleY.Value < 0 ) {
+			ScaleY.Value = -ScaleY.Value;
+			Height.Value = -Height.Value;
+		}
+
 		if ( Height.Value < 0 ) {
 			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
 			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
-			X.Value += ( cos - sin * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * Height.Value;
-			Y.Value += ( sin + cos * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * Height.Value;
+			X.Value += ( cos - sin * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * EffectiveHeight;
+			Y.Value += ( sin + cos * ShearX.Value ) * ( 1 - OriginY.Value * 2 ) * EffectiveHeight;
 
 			Height.Value = -Height.Value;
 		}
@@ -159,12 +168,12 @@ public class TransformProps : IEnumerable<IProp> {
 		if ( Width.Value < 0 ) {
 			var cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
 			var sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
-			X.Value += ( cos + sin * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * Width.Value;
-			Y.Value += ( sin - cos * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * Width.Value;
+			X.Value += ( cos + sin * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * EffectiveWidth;
+			Y.Value += ( sin - cos * ShearY.Value ) * ( 1 - OriginX.Value * 2 ) * EffectiveWidth;
 			// shear is non-commutative
 			var total = Shear.X * Shear.Y;
-			X.Value += cos * total * Width.Value * ( 1 - OriginX.Value * 2 );
-			Y.Value += sin * total * Width.Value * ( 1 - OriginX.Value * 2 );
+			X.Value += cos * total * EffectiveWidth * ( 1 - OriginX.Value * 2 );
+			Y.Value += sin * total * EffectiveWidth * ( 1 - OriginX.Value * 2 );
 
 			Width.Value = -Width.Value;
 		}

@@ -141,6 +141,9 @@ public static class Extensions {
 	public static float Abs ( this float self )
 		=> MathF.Abs( self );
 
+	public static Vector2 Abs ( this Vector2 self )
+		=> new Vector2( MathF.Abs( self.X ), MathF.Abs( self.Y ) );
+
 	public static Vector2 ClosestPointToLine ( Vector2 startPoint, Vector2 direction, Vector2 point ) {
 		Vector2 w = point - startPoint;
 

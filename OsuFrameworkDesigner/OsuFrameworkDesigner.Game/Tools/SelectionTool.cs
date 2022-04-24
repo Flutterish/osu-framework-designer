@@ -38,6 +38,10 @@ public class SelectionTool : Tool {
 		} );
 
 		selectionComponent.OriginHandle.Dragged += _ => lastPosition = selectionComponent.TransformProps.Position;
+		selectionComponent.AfterNormalization += () => {
+			lastPosition = selectionComponent.TransformProps.Position;
+			lastMatrices = selectionComponent.TransformProps.LocalDrawInfo;
+		};
 	}
 
 	bool matrixChanged;

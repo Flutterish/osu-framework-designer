@@ -194,6 +194,8 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		SelectionBox.FarBottomRight.DragEnded += dragEnded;
 		SelectionBox.FarTopLeft.DragEnded += dragEnded;
 		SelectionBox.FarTopRight.DragEnded += dragEnded;
+
+		TransformProps.Normalize();
 	}
 
 	protected override void Update () {
@@ -210,7 +212,9 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 	private void dragEnded ( DragEndEvent e ) {
 		isDragging = false;
+		BeforeNormalization?.Invoke();
 		TransformProps.Normalize();
+		AfterNormalization?.Invoke();
 	}
 
 	float startAngle;
@@ -273,8 +277,11 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	protected override bool ComputeIsMaskedAway ( RectangleF maskingBounds ) {
-		return !OriginHandle.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) && base.ComputeIsMaskedAway( maskingBounds );
+		return !InternalChildren.Any( x => x.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) ) && base.ComputeIsMaskedAway( maskingBounds );
 	}
+
+	public event Action? BeforeNormalization;
+	public event Action? AfterNormalization;
 }
 
 public class OriginHandle : Handle {
