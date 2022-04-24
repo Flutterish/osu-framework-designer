@@ -17,16 +17,7 @@ public class SelectionTool : Tool {
 		selectionComponent = ( new SelectionComponent().CreateBlueprint() as BasicTransformBlueprint<SelectionComponent> )!;
 		AddInternal( selectionComponent );
 		selectionComponent.Alpha = 0;
-
-		//selectionBox.Dragged += e => {
-		//	var delta = Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceLastMousePosition );
-		//	var matrix = Matrix3.Identity;
-		//	MatrixExtensions.TranslateFromLeft( ref matrix, delta );
-
-		//	perform( IHasMatrix.From, i => {
-		//		i.Matrix = matrix * i.Matrix;
-		//	} );
-		//};
+		selectionComponent.ResizingScales = true;
 
 		Selection.BindCollectionChanged( ( _, _ ) => {
 			var selectionHasMatrices = !Selection.Any( x => IHasMatrix.From( x ) is null );
@@ -45,6 +36,41 @@ public class SelectionTool : Tool {
 			selectionBox.FarBottomRight.Alpha =
 				selectionHasMatrices ? 1 : 0;
 		} );
+
+		selectionComponent.OriginHandle.Dragged += _ => lastPosition = selectionComponent.TransformProps.Position;
+	}
+
+	bool matrixChanged;
+	DrawInfo lastMatrices;
+	Vector2 lastPosition;
+	void onMatrixChanged () {
+		matrixChanged = true;
+	}
+
+	protected override void Update () {
+		base.Update();
+
+		if ( matrixChanged ) {
+			var drawInfo = selectionComponent.TransformProps.LocalDrawInfo;
+			var matrix = lastMatrices.MatrixInverse * drawInfo.Matrix;
+			var delta = selectionComponent.TransformProps.Position - lastPosition;
+
+			var origin = selectionComponent.TransformProps.Position;
+			perform( IHasMatrix.From, ( i, c ) => {
+				var pos = IHasPosition.From( c )!;
+				pos.X.Value += delta.X - origin.X;
+				pos.Y.Value += delta.Y - origin.Y;
+
+				i.Matrix *= matrix;
+
+				pos.X.Value += origin.X;
+				pos.Y.Value += origin.Y;
+			} );
+
+			lastPosition = selectionComponent.TransformProps.Position;
+			lastMatrices = drawInfo;
+			matrixChanged = false;
+		}
 	}
 
 	void perform<T> ( Func<IComponent, T?> transformer, Action<T, IComponent> action ) {
@@ -119,6 +145,8 @@ public class SelectionTool : Tool {
 		base.LoadComplete();
 
 		Selection.BindCollectionChanged( ( _, _ ) => {
+			selectionComponent.TransformProps.MatrixChanged -= onMatrixChanged;
+
 			if ( blueprint != null ) {
 				RemoveInternal( blueprint );
 				blueprint = null;
@@ -144,6 +172,10 @@ public class SelectionTool : Tool {
 			props.ShearY.Value = 0;
 			props.OriginX.Value = 0;
 			props.OriginY.Value = 0;
+
+			lastPosition = selectionComponent.TransformProps.Position;
+			lastMatrices = props.LocalDrawInfo;
+			selectionComponent.TransformProps.MatrixChanged += onMatrixChanged;
 		} );
 
 		Selection.BindCollectionChanged( ( _, e ) => {

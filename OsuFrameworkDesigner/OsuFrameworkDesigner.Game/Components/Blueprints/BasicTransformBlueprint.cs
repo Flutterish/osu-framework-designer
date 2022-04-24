@@ -9,9 +9,11 @@ namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
 public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
 	public readonly SelectionBox SelectionBox;
-	OriginHandle origin;
+	public readonly OriginHandle OriginHandle;
 	new public T Value => (T)base.Value;
 	public TransformProps TransformProps;
+	public bool ResizingScales = false;
+	public bool CanShear = true;
 
 	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.ToLocalSpace( Composer.ToContentSpace( screenSpacePosition ) );
@@ -42,28 +44,65 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 
 	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
 		AddInternal( SelectionBox = new SelectionBox().Fill() );
-		AddInternal( origin = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
+		AddInternal( OriginHandle = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 		TransformProps = props;
+
+		void setTop ( float y ) {
+			if ( ResizingScales ) {
+				var h = TransformProps.Height.Value;
+				TransformProps.SetTopEdge( y );
+				TransformProps.ScaleY.Value *= TransformProps.Height.Value / h;
+				TransformProps.Height.Value = h;
+			}
+			else TransformProps.SetTopEdge( y );
+		}
+		void setBottom ( float y ) {
+			if ( ResizingScales ) {
+				var h = TransformProps.Height.Value;
+				TransformProps.SetBottomEdge( y );
+				TransformProps.ScaleY.Value *= TransformProps.Height.Value / h;
+				TransformProps.Height.Value = h;
+			}
+			else TransformProps.SetBottomEdge( y );
+		}
+		void setLeft ( float x ) {
+			if ( ResizingScales ) {
+				var w = TransformProps.Width.Value;
+				TransformProps.SetLeftEdge( x );
+				TransformProps.ScaleX.Value *= TransformProps.Width.Value / w;
+				TransformProps.Width.Value = w;
+			}
+			else TransformProps.SetLeftEdge( x );
+		}
+		void setRight ( float x ) {
+			if ( ResizingScales ) {
+				var w = TransformProps.Width.Value;
+				TransformProps.SetRightEdge( x );
+				TransformProps.ScaleX.Value *= TransformProps.Width.Value / w;
+				TransformProps.Width.Value = w;
+			}
+			else TransformProps.SetRightEdge( x );
+		}
 
 		SelectionBox.TopLeft.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
-			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+			setLeft( e.AltPressed ? x : x.Round() );
+			setTop( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.TopRight.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
-			TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+			setRight( e.AltPressed ? x : x.Round() );
+			setTop( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.BottomLeft.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
-			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+			setLeft( e.AltPressed ? x : x.Round() );
+			setBottom( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.BottomRight.Dragged += e => {
 			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-			TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
-			TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+			setRight( e.AltPressed ? x : x.Round() );
+			setBottom( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.Bottom.Dragged += e => {
 			if ( isShearing ) {
@@ -73,7 +112,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 			else {
 				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-				TransformProps.SetBottomEdge( e.AltPressed ? y : y.Round() );
+				setBottom( e.AltPressed ? y : y.Round() );
 			}
 		};
 		SelectionBox.Top.Dragged += e => {
@@ -84,7 +123,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 			else {
 				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-				TransformProps.SetTopEdge( e.AltPressed ? y : y.Round() );
+				setTop( e.AltPressed ? y : y.Round() );
 			}
 		};
 		SelectionBox.Left.Dragged += e => {
@@ -95,7 +134,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 			else {
 				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-				TransformProps.SetLeftEdge( e.AltPressed ? x : x.Round() );
+				setLeft( e.AltPressed ? x : x.Round() );
 			}
 		};
 		SelectionBox.Right.Dragged += e => {
@@ -106,7 +145,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 			else {
 				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
-				TransformProps.SetRightEdge( e.AltPressed ? x : x.Round() );
+				setRight( e.AltPressed ? x : x.Round() );
 			}
 		};
 		Vector2 boxDragHandle = Vector2.Zero;
@@ -116,7 +155,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			TransformProps.X.Value = e.AltPressed ? delta.X : delta.X.Round();
 			TransformProps.Y.Value = e.AltPressed ? delta.Y : delta.Y.Round();
 		};
-		origin.Dragged += e => {
+		OriginHandle.Dragged += e => {
 			var pos = Vector2.Divide( ToTargetSpace( e.ScreenSpaceMousePosition ), TransformProps.Size );
 			TransformProps.SetOrigin( e.AltPressed ? pos : pos.Round( 0.5f ).Clamp( Vector2.Zero, Vector2.One ) );
 		};
@@ -163,7 +202,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	void updateOrigin () {
-		origin.Position = DrawSize * TransformProps.RelativeOrigin;
+		OriginHandle.Position = DrawSize * TransformProps.RelativeOrigin;
 	}
 
 	private void dragStarted ( DragStartEvent e ) {
@@ -204,7 +243,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		Shear = TransformProps.Shear;
 		Rotation = TransformProps.Rotation.Value;
 
-		if ( !isDragging ) {
+		if ( !isDragging && CanShear ) {
 			isShearing = InputManager.CurrentState.Keyboard.ControlPressed;
 		}
 
@@ -234,7 +273,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	}
 
 	protected override bool ComputeIsMaskedAway ( RectangleF maskingBounds ) {
-		return !origin.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) && base.ComputeIsMaskedAway( maskingBounds );
+		return !OriginHandle.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) && base.ComputeIsMaskedAway( maskingBounds );
 	}
 }
 

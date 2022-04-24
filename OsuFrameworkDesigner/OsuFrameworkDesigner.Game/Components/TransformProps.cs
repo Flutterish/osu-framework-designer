@@ -10,30 +10,37 @@ public class TransformProps : IEnumerable<IProp> {
 		X.ValueChanged += v => {
 			drawable.X = v.NewValue;
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		};
 		Y.ValueChanged += v => {
 			drawable.Y = v.NewValue;
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		};
 		Width.ValueChanged += v => {
 			drawable.Width = v.NewValue;
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		};
 		Height.ValueChanged += v => {
 			drawable.Height = v.NewValue;
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		};
 		Rotation.ValueChanged += v => {
 			drawable.Rotation = v.NewValue;
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		};
 		(ScaleX, ScaleY).BindValueChanged( ( sx, sy ) => {
 			drawable.Scale = new( sx, sy );
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		} );
 		(ShearX, ShearY).BindValueChanged( ( sx, sy ) => {
 			drawable.Shear = new( sx, sy );
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		} );
 
 		(OriginX, OriginY).BindValueChanged( ( ox, oy ) => {
@@ -47,6 +54,7 @@ public class TransformProps : IEnumerable<IProp> {
 			}
 
 			drawInfo.Invalidate();
+			MatrixChanged?.Invoke();
 		} );
 
 		(OriginX, Width).BindValueChanged( ( ox, w ) => {
@@ -220,14 +228,14 @@ public class TransformProps : IEnumerable<IProp> {
 
 	public void SetOrigin ( Vector2 value ) {
 		var deltaY = value.Y - OriginY.Value;
-		OriginY.Value = value.Y;
+
 		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
 		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
 		X.Value += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
 		Y.Value += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
 
 		var deltaX = value.X - OriginX.Value;
-		OriginX.Value = value.X;
+
 		cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
 		sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
 		X.Value += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
@@ -236,6 +244,9 @@ public class TransformProps : IEnumerable<IProp> {
 		var total = Shear.X * Shear.Y;
 		X.Value += cos * total * deltaX * EffectiveWidth;
 		Y.Value += sin * total * deltaX * EffectiveWidth;
+
+		OriginY.Value = value.Y;
+		OriginX.Value = value.X;
 	}
 
 	// TODO this and shear bottom is still incorrect because of shearY, but normalizing makes it never come up
@@ -356,6 +367,14 @@ public class TransformProps : IEnumerable<IProp> {
 		}
 	}
 
+	public DrawInfo LocalDrawInfo {
+		get {
+			var info = new DrawInfo( null );
+			info.ApplyTransform( Vector2.Zero, Scale, Rotation.Value, Shear, Vector2.Zero );
+			return info;
+		}
+	}
+
 	public Vector2 ToLocalSpace ( Vector2 contentSpace )
 		=> Vector2Extensions.Transform( contentSpace, DrawInfo.MatrixInverse );
 
@@ -375,4 +394,6 @@ public class TransformProps : IEnumerable<IProp> {
 
 	IEnumerator IEnumerable.GetEnumerator ()
 		=> GetEnumerator();
+
+	public event Action? MatrixChanged;
 }

@@ -2,10 +2,10 @@
 
 namespace OsuFrameworkDesigner.Game.Components.Interfaces;
 
-public interface IHasMatrix : IHasPosition, IHasOrigin, IHasScale, IHasSize, IHasShear, IHasRotation {
+public interface IHasMatrix {
 	Matrix3 Matrix { get; set; }
 
-	new public static IHasMatrix? From ( IComponent component ) {
+	public static IHasMatrix? From ( IComponent component ) {
 		if ( component is IHasMatrix m )
 			return m;
 
@@ -55,16 +55,59 @@ public interface IHasMatrix : IHasPosition, IHasOrigin, IHasScale, IHasSize, IHa
 				var pos = new Vector2( X.Value, Y.Value );
 				MatrixExtensions.TranslateFromLeft( ref matrix, pos );
 
+				MatrixExtensions.RotateFromLeft( ref matrix, Rotation.Value / 180 * MathF.PI );
+
+				MatrixExtensions.ShearFromLeft( ref matrix, new( -ShearX.Value, -ShearY.Value ) );
+
+				MatrixExtensions.ScaleFromLeft( ref matrix, new( ScaleX.Value, ScaleY.Value ) );
+
 				return matrix;
 			}
 			set {
 				// M = T*R*Z*S*O
+				var m = value;
 
+				// extract translate
+				this.X.Value = m.Row2.X;
+				this.Y.Value = m.Row2.Y;
 
-				var dx = value.Row2.X;
-				var dy = value.Row2.Y;
-				X.Value = dx;
-				Y.Value = dy;
+				m.Row2.X = 0;
+				m.Row2.Y = 0;
+
+				// extract rotation
+				var cos = m.Column0.X;
+				var sin = m.Column1.X;
+				var rot = MathF.Atan2( sin, cos );
+				MatrixExtensions.RotateFromRight( ref m, -rot );
+				Rotation.Value = rot * 180 / MathF.PI;
+
+				// extract shear and scale
+				// [ X + Xxy -Xx ] = [ e f ]
+				// [ -Yy     Y   ]   [ g h ]
+				//
+				// Y = h
+				// -Yy = g -> y = -g/Y
+				//
+				// -Xx = f -> x = -f/X
+				// X + -X(f/X)y = e
+				// X = e + fy
+
+				var e = m.Row0.X;
+				var f = m.Row1.X;
+				var g = m.Row0.Y;
+				var h = m.Row1.Y;
+
+				var Y = h;
+				var y = -( g / Y );
+				var X = e + f * y;
+				//var x = -(f / X);
+
+				//ShearX.Value = x;
+				//ShearY.Value = y;
+				ScaleX.Value = X;
+				ScaleY.Value = Y;
+				//this.X.Value += m.Row2.X;
+				//this.Y.Value += m.Row2.Y;
 			}
 		}
 	}
