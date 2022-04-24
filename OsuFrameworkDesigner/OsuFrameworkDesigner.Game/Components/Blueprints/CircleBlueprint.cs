@@ -7,6 +7,7 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 	PointHandle sweepEndHandle;
 	PointHandle sweepStartHandle;
 	float sweepHandleRadius;
+	float fillHandleAngle;
 
 	protected float ToScaledAngle ( float radians ) {
 		var cos = MathF.Cos( radians ) / TransformProps.Width.Value;
@@ -61,6 +62,7 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 			var pos = ToTargetSpace( e.ScreenSpaceMousePosition ) - TransformProps.Size / 2;
 			var (x, y) = pos;
 			var angle = ( MathF.Atan2( y / TransformProps.Height.Value, x / TransformProps.Width.Value ) + MathF.PI / 2 ).Mod( MathF.Tau );
+			fillHandleAngle = angle;
 			angle = ToScaledAngle( angle );
 
 			Value.Fill.Value = Math.Clamp( 1 - pos.Length / RadiusAtAngle( angle ), 0, 1 );
@@ -89,7 +91,33 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 		offset = new Vector2( 0, -clamp( sweepRadius, minSweepRadius, maxSweepRadius ) ).Rotate( angle );
 		sweepStartHandle.Position = TargetToLocalSpace( offset + TransformProps.Size / 2 );
 
-		angle = ToScaledAngle( 0 );
+		float handleAngle;
+		if ( Value.SweepStart.Value == Value.SweepEnd.Value ) {
+			handleAngle = Value.SweepStart.Value * MathF.Tau;
+		}
+		else {
+			var delta = Value.SweepStart.Value.WrappedDistanceTo( Value.SweepEnd, 1 ) * MathF.Tau;
+			if ( delta == 0 )
+				handleAngle = ( Value.SweepStart.Value + 0.5f ) * MathF.Tau;
+			else if ( ( delta < 0 ) == ( Value.SweepStart.Value > Value.SweepEnd.Value ) )
+				handleAngle = Value.SweepStart.Value * MathF.Tau + delta / 2;
+			else
+				handleAngle = ( Value.SweepStart.Value + 0.5f ) * MathF.Tau + delta / 2;
+		}
+
+		if ( fillHandle.IsDragged ) {
+			var maxDistance = handleAngle.AngleTo( Value.SweepStart.Value * MathF.Tau ).Abs();
+			var delta = handleAngle.AngleTo( fillHandleAngle );
+
+			if ( delta.Abs() > maxDistance ) {
+				handleAngle += MathF.CopySign( maxDistance, delta );
+			}
+			else {
+				handleAngle = fillHandleAngle;
+			}
+		}
+
+		angle = ToScaledAngle( handleAngle );
 		maxSweepRadius = RadiusAtAngle( angle );
 		sweepRadius = maxSweepRadius * ( 1 - fill );
 		offset = new Vector2( 0, -sweepRadius ).Rotate( angle );

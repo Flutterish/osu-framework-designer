@@ -20,6 +20,11 @@ public class CircleComponent : CompositeDrawable, IComponent {
 
 		(SweepStart, SweepEnd).BindValueChanged( ( s, e ) => {
 			var delta = s.WrappedDistanceTo( e, 1 );
+
+			if ( delta == 0 && s != e ) {
+				delta = 2;
+			}
+
 			if ( delta < 0 ) {
 				if ( e < s ) {
 					delta = -delta;
