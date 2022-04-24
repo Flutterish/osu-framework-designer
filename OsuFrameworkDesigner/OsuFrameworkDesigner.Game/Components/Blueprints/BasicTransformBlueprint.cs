@@ -209,38 +209,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			isShearing = InputManager.CurrentState.Keyboard.ControlPressed;
 		}
 
-		if ( isShearing ) {
-			box.Left.CursorRotation = Rotation;
-			box.Right.CursorRotation = Rotation;
-			box.Top.CursorRotation = Rotation + 90;
-			box.Bottom.CursorRotation = Rotation + 90;
-
-			box.Left.CursorStyle = Cursor.CursorStyle.Shear;
-			box.Right.CursorStyle = Cursor.CursorStyle.Shear;
-			box.Top.CursorStyle = Cursor.CursorStyle.Shear;
-			box.Bottom.CursorStyle = Cursor.CursorStyle.Shear;
-		}
-		else {
-			box.Left.CursorRotation = Rotation;
-			box.Right.CursorRotation = Rotation;
-			box.Top.CursorRotation = Rotation;
-			box.Bottom.CursorRotation = Rotation;
-
-			box.Left.CursorStyle = Cursor.CursorStyle.ResizeHorizontal;
-			box.Right.CursorStyle = Cursor.CursorStyle.ResizeHorizontal;
-			box.Top.CursorStyle = Cursor.CursorStyle.ResizeVertical;
-			box.Bottom.CursorStyle = Cursor.CursorStyle.ResizeVertical;
-		}
-
-		box.TopRight.CursorRotation = Rotation;
-		box.TopLeft.CursorRotation = Rotation;
-		box.BottomRight.CursorRotation = Rotation;
-		box.BottomLeft.CursorRotation = Rotation;
-
-		box.FarTopLeft.CursorRotation = Rotation;
-		box.FarTopRight.CursorRotation = Rotation + 90;
-		box.FarBottomRight.CursorRotation = Rotation + 180;
-		box.FarBottomLeft.CursorRotation = Rotation + 270;
+		box.UpdateCursorStyles( Rotation, isShearing, Shear );
 
 		if ( Height < 0 ) {
 			var cos = MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI );

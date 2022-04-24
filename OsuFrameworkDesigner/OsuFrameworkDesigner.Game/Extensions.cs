@@ -161,6 +161,12 @@ public static class Extensions {
 		y = self.Y;
 	}
 
+	public static float ToDegrees ( this float radians )
+		=> radians / MathF.PI * 180;
+
+	public static float ToRadians ( this float degrees )
+		=> degrees / 180 * MathF.PI;
+
 	/// <summary>
 	/// Binds an event to both bindables
 	/// </summary>

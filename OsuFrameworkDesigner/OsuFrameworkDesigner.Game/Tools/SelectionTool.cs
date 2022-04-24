@@ -236,7 +236,6 @@ public class SelectionBox : Handle {
 		AddInternal( TopRight = new CornerHandle { Anchor = Anchor.TopRight, CursorStyle = CursorStyle.ResizeSW } );
 		AddInternal( BottomLeft = new CornerHandle { Anchor = Anchor.BottomLeft, CursorStyle = CursorStyle.ResizeSW } );
 		AddInternal( BottomRight = new CornerHandle { Anchor = Anchor.BottomRight, CursorStyle = CursorStyle.ResizeNW } );
-
 	}
 
 	[BackgroundDependencyLoader]
@@ -244,5 +243,63 @@ public class SelectionBox : Handle {
 		backgroundColor.BindTo( colours.Selection );
 		backgroundColor.BindValueChanged( v => border.BorderColour = v.NewValue, true );
 		FinishTransforms( true );
+	}
+
+	// Notes about shear:
+	//	given the origin is at (x,y), the point at (x + dx, y) is translated so that:
+	//		X += dx * shearX * shearY
+	//		Y -= dx * shearY
+	//	given the origin is at (x,y), the point at (x, y + dy) is translated so that:
+	//		X -= dy * shearX
+	//		Y stays constant
+	//	given the origin is at (x,y), the point at (x + dx, y + dy) is translated so that:
+	//		X += dx * shearX * shearY - dy * shearX
+	//		Y -= dx * shearY
+	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
+	public void UpdateCursorStyles ( float rotation, bool isShearing, Vector2 shear = default ) {
+		var rightX = 1f + shear.X * shear.Y;
+		var rightY = -shear.Y;
+		var rightAngle = MathF.Atan2( rightY, rightX ).ToDegrees();
+
+		var bottomX = -shear.X;
+		var bottomY = 1f;
+		var bottomAngle = MathF.Atan2( bottomY, bottomX ).ToDegrees() + 90;
+
+		var diagX = rightX + bottomX;
+		var diagY = rightY + bottomY;
+		var diagAngle = MathF.Atan2( diagY, diagX ).ToDegrees() - 45;
+
+		if ( isShearing ) {
+			Left.CursorRotation = rotation + bottomAngle;
+			Right.CursorRotation = rotation + bottomAngle;
+			Top.CursorRotation = rotation + 90 + rightAngle;
+			Bottom.CursorRotation = rotation + 90 + rightAngle;
+
+			Left.CursorStyle = CursorStyle.Shear;
+			Right.CursorStyle = CursorStyle.Shear;
+			Top.CursorStyle = CursorStyle.Shear;
+			Bottom.CursorStyle = CursorStyle.Shear;
+		}
+		else {
+			Left.CursorRotation = rotation + rightAngle;
+			Right.CursorRotation = rotation + rightAngle;
+			Top.CursorRotation = rotation + bottomAngle;
+			Bottom.CursorRotation = rotation + bottomAngle;
+
+			Left.CursorStyle = CursorStyle.ResizeHorizontal;
+			Right.CursorStyle = CursorStyle.ResizeHorizontal;
+			Top.CursorStyle = CursorStyle.ResizeVertical;
+			Bottom.CursorStyle = CursorStyle.ResizeVertical;
+		}
+
+		TopRight.CursorRotation = rotation + diagAngle;
+		TopLeft.CursorRotation = rotation + diagAngle;
+		BottomRight.CursorRotation = rotation + diagAngle;
+		BottomLeft.CursorRotation = rotation + diagAngle;
+
+		FarTopLeft.CursorRotation = rotation;
+		FarTopRight.CursorRotation = rotation + 90;
+		FarBottomRight.CursorRotation = rotation + 180;
+		FarBottomLeft.CursorRotation = rotation + 270;
 	}
 }
