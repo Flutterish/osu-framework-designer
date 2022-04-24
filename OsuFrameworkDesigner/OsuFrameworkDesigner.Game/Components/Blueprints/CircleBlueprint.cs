@@ -40,7 +40,7 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 
 			if ( ( Value.SweepEnd - Value.SweepStart ).Abs() > 1 ) {
 				var delta = Value.SweepStart.Value.WrappedDistanceTo( Value.SweepEnd, 1 );
-				Value.SweepEnd.Value -= delta > 0 ? 1 : -1;
+				(Value.SweepStart.Value, Value.SweepEnd.Value) = (Value.SweepEnd.Value, Value.SweepEnd.Value + ( delta < 0 ? 1 : -1 ));
 			}
 		};
 
@@ -54,7 +54,7 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 
 			if ( ( Value.SweepEnd - Value.SweepStart ).Abs() > 1 ) {
 				var delta = Value.SweepStart.Value.WrappedDistanceTo( Value.SweepEnd, 1 );
-				Value.SweepStart.Value += delta > 0 ? 1 : -1;
+				(Value.SweepStart.Value, Value.SweepEnd.Value) = (Value.SweepStart.Value + ( delta > 0 ? 1 : -1 ), Value.SweepStart.Value);
 			}
 		};
 
