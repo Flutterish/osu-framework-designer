@@ -37,4 +37,7 @@ public class Prop<T> : Bindable<T>, IProp {
 	public bool Groupable { get; init; } = false;
 	public Type Type => typeof( T );
 	object? IProp.Value => Value;
+
+	public static implicit operator T ( Prop<T> prop )
+		=> prop.Value;
 }

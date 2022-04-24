@@ -81,6 +81,7 @@ public interface IHasMatrix {
 				MatrixExtensions.RotateFromRight( ref m, -rot );
 				Rotation.Value = rot * 180 / MathF.PI;
 
+				// TODO extract shear
 				// extract shear and scale
 				// [ X + Xxy -Xx ] = [ e f ]
 				// [ -Yy     Y   ]   [ g h ]

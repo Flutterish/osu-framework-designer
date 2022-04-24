@@ -121,6 +121,31 @@ public class TransformProps : IEnumerable<IProp> {
 	// if you ever encounter shear being fucky in the X axis when the Y axis has a non-zero value, this is why
 	public Vector2 Shear => new( ShearX.Value, ShearY.Value );
 
+	public Vector2 PositionAtRelative ( Vector2 relativePosition ) {
+		var x = X.Value;
+		var y = Y.Value;
+
+		var deltaY = relativePosition.Y - OriginY.Value;
+
+		var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+		x += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
+		y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
+
+		var deltaX = relativePosition.X - OriginX.Value;
+
+		cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+		sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+		x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
+		y += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
+		// shear is non-commutative
+		var total = Shear.X * Shear.Y;
+		x += cos * total * deltaX * EffectiveWidth;
+		y += sin * total * deltaX * EffectiveWidth;
+
+		return new( x, y );
+	}
+
 	public Vector2 TopLeft {
 		get {
 			var x = X.Value;
@@ -133,6 +158,33 @@ public class TransformProps : IEnumerable<IProp> {
 			y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
 
 			var deltaX = -OriginX.Value;
+			cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
+			sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
+			x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
+			y += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
+			// shear is non-commutative
+			var total = Shear.X * Shear.Y;
+			x += cos * total * deltaX * EffectiveWidth;
+			y += sin * total * deltaX * EffectiveWidth;
+
+			return new( x, y );
+		}
+	}
+
+	public Vector2 Centre {
+		get {
+			var x = X.Value;
+			var y = Y.Value;
+
+			var deltaY = 0.5f - OriginY.Value;
+
+			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
+			x += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
+			y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
+
+			var deltaX = 0.5f - OriginX.Value;
+
 			cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
 			sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
 			x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
@@ -386,6 +438,9 @@ public class TransformProps : IEnumerable<IProp> {
 
 	public Vector2 ToLocalSpace ( Vector2 contentSpace )
 		=> Vector2Extensions.Transform( contentSpace, DrawInfo.MatrixInverse );
+
+	public Vector2 ToContentSpace ( Vector2 localSpace )
+		=> Vector2Extensions.Transform( localSpace, DrawInfo.Matrix );
 
 	public IEnumerator<IProp> GetEnumerator () {
 		yield return X;

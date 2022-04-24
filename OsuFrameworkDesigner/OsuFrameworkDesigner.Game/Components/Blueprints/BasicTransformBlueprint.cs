@@ -22,13 +22,19 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
 	/// </summary>
 	public Vector2 ToTargetOriginSpace ( Vector2 screenSpacePosition )
-		=> TransformProps.Position + ToTargetSpace( screenSpacePosition );
+		=> TransformProps.Position - TransformProps.Size * TransformProps.RelativeOrigin + ToTargetSpace( screenSpacePosition );
 
 	/// <summary>
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the top left of the drawable
 	/// </summary>
 	public Vector2 ToTargetTopLeftSpace ( Vector2 screenSpacePosition )
-		=> TransformProps.Position - TransformProps.RelativeOrigin * TransformProps.Size + ToTargetSpace( screenSpacePosition );
+		=> TransformProps.Position + ToTargetSpace( screenSpacePosition );
+
+	public Vector2 ContentToLocalSpace ( Vector2 contentSpace )
+		=> ToLocalSpace( Composer.ContentToScreenSpace( contentSpace ) );
+
+	public Vector2 TargetToLocalSpace ( Vector2 local )
+		=> ContentToLocalSpace( TransformProps.ToContentSpace( local ) );
 
 	public Vector2 Unshear ( Vector2 localPosition ) {
 		var lx = localPosition.X;
@@ -85,22 +91,22 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		}
 
 		SelectionBox.TopLeft.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 			setLeft( e.AltPressed ? x : x.Round() );
 			setTop( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.TopRight.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 			setRight( e.AltPressed ? x : x.Round() );
 			setTop( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.BottomLeft.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 			setLeft( e.AltPressed ? x : x.Round() );
 			setBottom( e.AltPressed ? y : y.Round() );
 		};
 		SelectionBox.BottomRight.Dragged += e => {
-			var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 			setRight( e.AltPressed ? x : x.Round() );
 			setBottom( e.AltPressed ? y : y.Round() );
 		};
@@ -111,7 +117,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.ShearBottom( x - lx );
 			}
 			else {
-				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 				setBottom( e.AltPressed ? y : y.Round() );
 			}
 		};
@@ -122,7 +128,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.ShearTop( x - lx );
 			}
 			else {
-				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 				setTop( e.AltPressed ? y : y.Round() );
 			}
 		};
@@ -133,7 +139,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.ShearLeft( y - ly );
 			}
 			else {
-				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 				setLeft( e.AltPressed ? x : x.Round() );
 			}
 		};
@@ -144,7 +150,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				TransformProps.ShearRight( y - ly );
 			}
 			else {
-				var (x, y) = ToTargetTopLeftSpace( e.ScreenSpaceMousePosition );
+				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
 				setRight( e.AltPressed ? x : x.Round() );
 			}
 		};

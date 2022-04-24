@@ -5,6 +5,7 @@ global using osu.Framework.Graphics.Containers;
 global using osu.Framework.Graphics.Shapes;
 global using OsuFrameworkDesigner.Game.Dependencies;
 global using osuTK;
+global using osuTK.Graphics;
 global using System;
 global using System.Collections.Generic;
 global using System.Linq;
@@ -170,6 +171,31 @@ public static class Extensions {
 
 	public static float ToRadians ( this float degrees )
 		=> degrees / 180 * MathF.PI;
+
+	public static float Mod ( this float v, float mod ) {
+		v = v % mod;
+		if ( v < 0 )
+			return mod + v;
+		else
+			return v;
+	}
+
+	public static float WrappedDistanceTo ( this float from, float to, float unit )
+		=> Mod( to - from + unit / 2, unit ) - unit / 2;
+	public static float AngleTo ( this float from, float to )
+		=> Mod( to - from + MathF.PI, MathF.Tau ) - MathF.PI;
+
+	public static float ClosestEquivalentWrappedValue ( this float current, float target, float unit )
+		=> current + current.WrappedDistanceTo( target, unit );
+	public static float ClosestEquivalentAngle ( this float current, float target )
+		=> current + current.AngleTo( target );
+
+	public static Vector2 Rotate ( this Vector2 vector, float radians ) {
+		var cos = MathF.Cos( radians );
+		var sin = MathF.Sin( radians );
+
+		return new Vector2( vector.X * cos - vector.Y * sin, vector.X * sin + vector.Y * cos );
+	}
 
 	/// <summary>
 	/// Binds an event to both bindables

@@ -6,7 +6,6 @@ using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Cursor;
 using OsuFrameworkDesigner.Game.Graphics;
-using osuTK.Graphics;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
