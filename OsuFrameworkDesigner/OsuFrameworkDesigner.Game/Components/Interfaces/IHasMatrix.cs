@@ -64,35 +64,8 @@ public interface IHasMatrix {
 				return matrix;
 			}
 			set {
-				// M = T*R*Z*S*O
-				var m = value;
-
-				var Tx = m.Row2.X;
-				var Ty = m.Row2.Y;
-				m.Row2.X = 0;
-				m.Row2.Y = 0;
-
-				var a = m.Row0.X;
-				var b = m.Row0.Y;
-
-				var Sx = MathF.Sqrt( a * a + b * b );
-				var theta = MathF.Atan2( b / Sx, a / Sx );
-
-				MatrixExtensions.RotateFromRight( ref m, -theta );
-
-				var c = m.Row1.X;
-				var d = m.Row1.Y;
-
-				var Sy = d;
-				var Zx = -c / Sy;
-
-				X.Value = Tx;
-				Y.Value = Ty;
-				Rotation.Value = theta / MathF.PI * 180;
-				ScaleX.Value = Sx;
-				ScaleY.Value = Sy;
-				ShearX.Value = Zx;
-				ShearY.Value = 0;
+				((X.Value, Y.Value), (ScaleX.Value, ScaleY.Value), (ShearX.Value, ShearY.Value), Rotation.Value) = value.Decompose();
+				Rotation.Value *= 180 / MathF.PI;
 			}
 		}
 	}

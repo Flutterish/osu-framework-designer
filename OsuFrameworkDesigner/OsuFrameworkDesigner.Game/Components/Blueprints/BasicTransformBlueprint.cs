@@ -1,5 +1,4 @@
-﻿using osu.Framework.Graphics.Primitives;
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;

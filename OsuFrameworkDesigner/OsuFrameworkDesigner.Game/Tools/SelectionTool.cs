@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Extensions.PolygonExtensions;
-using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Blueprints;

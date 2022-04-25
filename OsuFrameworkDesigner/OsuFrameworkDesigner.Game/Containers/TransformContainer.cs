@@ -1,6 +1,4 @@
-﻿using osu.Framework.Graphics.Primitives;
-
-namespace OsuFrameworkDesigner.Game.Containers;
+﻿namespace OsuFrameworkDesigner.Game.Containers;
 
 public class TransformContainer : TransformContainer<Drawable> { }
 public class TransformContainer<T> : UnmaskableContainer<T> where T : Drawable {

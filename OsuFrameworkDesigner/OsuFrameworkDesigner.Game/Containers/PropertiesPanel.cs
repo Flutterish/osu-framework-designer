@@ -43,7 +43,7 @@ public class PropertiesPanel : CompositeDrawable {
 			componentCache.Validate();
 
 			items.Clear();
-			foreach ( var category in Components.SelectMany( Extensions.GetNestedProperties ).GroupBy( x => x.Category ) ) {
+			foreach ( var category in Components.SelectMany( c => c.GetNestedProperties() ).GroupBy( x => x.Category ) ) {
 				items.Add( new DesignerSpriteText { Text = category.Key, Font = DesignerFont.Bold( 18 ), Colour = Colour4.Black, Alpha = 0.5f, RelativeSizeAxes = Axes.X } );
 
 				foreach ( var prop in category.GroupBy( x => (x.Name, x.Type) ) ) {
