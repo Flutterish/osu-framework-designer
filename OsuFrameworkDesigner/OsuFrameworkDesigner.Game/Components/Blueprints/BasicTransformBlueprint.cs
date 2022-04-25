@@ -89,6 +89,36 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 			else TransformProps.SetRightEdge( x );
 		}
+		void shearLeft ( float dy ) {
+			if ( ResizingScales ) {
+				var w = TransformProps.Width.Value;
+				var h = TransformProps.Height.Value;
+				TransformProps.ShearLeft( dy );
+				TransformProps.ScaleX.Value *= TransformProps.Width.Value / w;
+				TransformProps.ScaleY.Value *= TransformProps.Height.Value / h;
+				TransformProps.Width.Value = w;
+				TransformProps.Height.Value = h;
+			}
+			else TransformProps.ShearLeft( dy );
+		}
+		void shearRight ( float dy ) {
+			if ( ResizingScales ) {
+				var w = TransformProps.Width.Value;
+				var h = TransformProps.Height.Value;
+				TransformProps.ShearRight( dy );
+				TransformProps.ScaleX.Value *= TransformProps.Width.Value / w;
+				TransformProps.ScaleY.Value *= TransformProps.Height.Value / h;
+				TransformProps.Width.Value = w;
+				TransformProps.Height.Value = h;
+			}
+			else TransformProps.ShearRight( dy );
+		}
+		void shearTop ( float dx ) {
+			TransformProps.ShearTop( dx );
+		}
+		void shearBottom ( float dx ) {
+			TransformProps.ShearBottom( dx );
+		}
 
 		SelectionBox.TopLeft.Dragged += e => {
 			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
@@ -114,7 +144,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
-				TransformProps.ShearBottom( x - lx );
+				shearBottom( x - lx );
 			}
 			else {
 				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
@@ -125,7 +155,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
-				TransformProps.ShearTop( x - lx );
+				shearTop( x - lx );
 			}
 			else {
 				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
@@ -136,7 +166,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
-				TransformProps.ShearLeft( y - ly );
+				shearLeft( y - ly );
 			}
 			else {
 				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
@@ -147,7 +177,7 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			if ( isShearing ) {
 				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
 				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
-				TransformProps.ShearRight( y - ly );
+				shearRight( y - ly );
 			}
 			else {
 				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
