@@ -67,48 +67,32 @@ public interface IHasMatrix {
 				// M = T*R*Z*S*O
 				var m = value;
 
-				// extract translate
-				this.X.Value = m.Row2.X;
-				this.Y.Value = m.Row2.Y;
-
+				var Tx = m.Row2.X;
+				var Ty = m.Row2.Y;
 				m.Row2.X = 0;
 				m.Row2.Y = 0;
 
-				// extract rotation
-				var cos = m.Column0.X;
-				var sin = m.Column1.X;
-				var rot = MathF.Atan2( sin, cos );
-				MatrixExtensions.RotateFromRight( ref m, -rot );
-				Rotation.Value = rot * 180 / MathF.PI;
+				var a = m.Row0.X;
+				var b = m.Row0.Y;
 
-				// TODO extract shear
-				// extract shear and scale
-				// [ X + Xxy -Xx ] = [ e f ]
-				// [ -Yy     Y   ]   [ g h ]
-				//
-				// Y = h
-				// -Yy = g -> y = -g/Y
-				//
-				// -Xx = f -> x = -f/X
-				// X + -X(f/X)y = e
-				// X = e + fy
+				var Sx = MathF.Sqrt( a * a + b * b );
+				var theta = MathF.Atan2( b / Sx, a / Sx );
 
-				var e = m.Row0.X;
-				var f = m.Row1.X;
-				var g = m.Row0.Y;
-				var h = m.Row1.Y;
+				MatrixExtensions.RotateFromRight( ref m, -theta );
 
-				var Y = h;
-				var y = -( g / Y );
-				var X = e + f * y;
-				//var x = -(f / X);
+				var c = m.Row1.X;
+				var d = m.Row1.Y;
 
-				//ShearX.Value = x;
-				//ShearY.Value = y;
-				ScaleX.Value = X;
-				ScaleY.Value = Y;
-				//this.X.Value += m.Row2.X;
-				//this.Y.Value += m.Row2.Y;
+				var Sy = d;
+				var Zx = -c / Sy;
+
+				X.Value = Tx;
+				Y.Value = Ty;
+				Rotation.Value = theta / MathF.PI * 180;
+				ScaleX.Value = Sx;
+				ScaleY.Value = Sy;
+				ShearX.Value = Zx;
+				ShearY.Value = 0;
 			}
 		}
 	}
