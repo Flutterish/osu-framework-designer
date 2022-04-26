@@ -41,4 +41,11 @@ public class LineBlueprint : Blueprint<IComponent> {
 			Value.EndY.Value = pos.Y + dragDeltaHandle.Y;
 		};
 	}
+
+	protected override void Update () {
+		base.Update();
+
+		start.TooltipText = $"{Value.StartX.Value:0}, {Value.StartY.Value:0}";
+		end.TooltipText = $"{Value.EndX.Value:0}, {Value.EndY.Value:0}";
+	}
 }

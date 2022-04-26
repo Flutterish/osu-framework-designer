@@ -1,3 +1,4 @@
+using osu.Framework.Graphics.Cursor;
 using osu.Framework.Screens;
 using OsuFrameworkDesigner.Game.Containers;
 using OsuFrameworkDesigner.Game.Cursor;
@@ -9,11 +10,14 @@ public class DesignerScreen : Screen {
 	Composer composer;
 	AssetsPanel assetsPanel;
 	PropertiesPanel propertiesPanel;
+	DesignerCursorContainer cursorContainer;
 
 	public DesignerScreen () {
 		composer = new Composer();
-		AddInternal( new DesignerCursorContainer {
-			Child = new GridContainer {
+		cursorContainer = new DesignerCursorContainer().Fill();
+
+		AddInternal( cursorContainer.WithChild( new TooltipContainer( cursorContainer.CursorContainer ) {
+			new GridContainer {
 				RowDimensions = new Dimension[] {
 					new( GridSizeMode.AutoSize ),
 					new()
@@ -36,7 +40,7 @@ public class DesignerScreen : Screen {
 					}.Fill() }
 				}
 			}.Fill()
-		}.Fill() );
+		}.Fill() ) );
 
 		composer.Tool.BindTo( topBar.Tool );
 		propertiesPanel.Components.BindTo( composer.SelectionTool.Selection );

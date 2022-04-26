@@ -1,9 +1,11 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Graphics.Cursor;
+using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using OsuFrameworkDesigner.Game.Cursor;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
-public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation {
+public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, IHasTooltip {
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		DragStarted?.Invoke( e );
 		return true;
@@ -29,6 +31,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation {
 
 	public CursorStyle CursorStyle { get; set; }
 	public float CursorRotation { get; set; }
+	public LocalisableString TooltipText { get; set; }
 }
 
 public class CornerHandle : Handle {

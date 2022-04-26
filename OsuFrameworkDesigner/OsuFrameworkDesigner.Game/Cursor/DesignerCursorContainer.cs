@@ -5,10 +5,10 @@ using osu.Framework.Input;
 namespace OsuFrameworkDesigner.Game.Cursor;
 
 public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorContainer, IUsesCursorStyle> {
-	protected override Container<Drawable> Content => cursorContainer;
-	ShapedCursorContainer cursorContainer;
+	protected override Container<Drawable> Content => CursorContainer;
+	public readonly ShapedCursorContainer CursorContainer;
 	public DesignerCursorContainer () {
-		AddInternal( cursorContainer = new ShapedCursorContainer().Fill() );
+		AddInternal( CursorContainer = new ShapedCursorContainer().Fill() );
 	}
 
 	InputManager? inputManager;
@@ -20,16 +20,16 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			?? FindTargets().FirstOrDefault();
 
 		if ( target is IUsesCursorStyle cursorStyle ) {
-			cursorContainer.Style = cursorStyle.CursorStyle;
-			cursorContainer.CursorRotation = ( cursorStyle as IUsesCursorRotation )?.CursorRotation ?? 0;
+			CursorContainer.Style = cursorStyle.CursorStyle;
+			CursorContainer.CursorRotation = ( cursorStyle as IUsesCursorRotation )?.CursorRotation ?? 0;
 		}
 		else {
-			cursorContainer.Style = CursorStyle.Default;
-			cursorContainer.CursorRotation = 0;
+			CursorContainer.Style = CursorStyle.Default;
+			CursorContainer.CursorRotation = 0;
 		}
 	}
 
-	private class ShapedCursorContainer : CursorContainer {
+	public class ShapedCursorContainer : CursorContainer {
 		SpriteIcon cursor = null!;
 		private Dictionary<CursorStyle, (IconUsage icon, Vector2 offset, float rotation, Anchor origin, Vector2 scale)> cursors = new() {
 			[CursorStyle.Default] = (FontAwesome.Solid.MousePointer, new( -0.2f, 0 ), 0, Anchor.TopLeft, new( 1 )),
