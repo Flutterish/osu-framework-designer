@@ -113,4 +113,41 @@ public static class MathExtensions {
 			rotation: theta
 		);
 	}
+
+	/// <summary>
+	/// Decomposes a quad as if it was a matrix where
+	/// (0,0) maps to top left,
+	/// (0,1) maps to top right,
+	/// (1,0) maps to bottom left and
+	/// (1,1) maps to bottom right.
+	/// The bottom left vertex is unused as it can possibly result in an invalid 3x3 matrix
+	/// </summary>
+	public static (Vector2 translation, Vector2 scale, Vector2 shear, float rotation) Decompose ( this Quad quad ) {
+		//     [ cosθSx              sinθSx             0 ][ x ]   [ x(cosθSx) - y(cosθSyZx + sinθSy) + Tx ]
+		// M = [ -cosθSyZx - sinθSy  cosθSy - sinθSyZx  0 ][ y ] = [ x(sinθSx) + y(cosθSy - sinθSyZx) + Ty ]
+		//     [ Tx                  Ty                 1 ][ 1 ]   [ 1                                     ]
+
+		var (Tx, Ty) = quad.TopLeft;
+
+		// [ x` ]   [ x(cosθSx) - y(cosθSyZx + sinθSy) ]
+		// [ y` ] = [ x(sinθSx) + y(cosθSy - sinθSyZx) ]
+
+		var tr = quad.TopRight - quad.TopLeft;
+		var br = quad.BottomRight - quad.TopLeft;
+
+		var Sx = tr.Length;
+		var theta = MathF.Atan2( tr.Y, tr.X );
+
+		br = br.Rotate( -theta );
+
+		var Sy = br.Y;
+		var Zx = ( Sx - br.X ) / Sy;
+
+		return (
+			translation: new( Tx, Ty ),
+			scale: new( Sx, Sy ),
+			shear: new( Zx, 0 ),
+			rotation: theta
+		);
+	}
 }

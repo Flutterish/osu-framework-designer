@@ -1,4 +1,6 @@
-﻿namespace OsuFrameworkDesigner.Game.Components;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+
+namespace OsuFrameworkDesigner.Game.Components;
 
 public class ArrowComponent : LineComponent {
 	Box arrowHeadLeft;
@@ -26,5 +28,13 @@ public class ArrowComponent : LineComponent {
 			arrowHeadRight.Width =
 			arrowHeadLeft.Width = v.NewValue * 10;
 		}, true );
+	}
+
+	protected override Quad ComputeScreenSpaceDrawQuad () {
+		var box = DrawRectangle.Yield()
+			.Append( arrowHeadLeft.ToParentSpace( arrowHeadLeft.DrawRectangle ).AABBFloat )
+			.Append( arrowHeadRight.ToParentSpace( arrowHeadLeft.DrawRectangle ).AABBFloat )
+			.GetBoundingBox( x => x );
+		return ToScreenSpace( box );
 	}
 }

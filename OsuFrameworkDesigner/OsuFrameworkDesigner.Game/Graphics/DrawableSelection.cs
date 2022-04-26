@@ -22,14 +22,8 @@ public class DrawableSelection : CompositeDrawable {
 		if ( selection is null )
 			return;
 
-		var topLeft = Parent.ToLocalSpace( selection.ScreenSpaceDrawQuad.TopLeft );
-		Position = topLeft;
-		var a = Parent.ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
-		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
-		var scale = ( a - b ).Length;
-		Size = selection.DrawSize * selection.Scale * scale;
-		Shear = selection.Shear;
-		Rotation = selection.Rotation;
+		(Position, Size, Shear, var rot) = Parent.ToLocalSpace( selection.ScreenSpaceDrawQuad ).Decompose();
+		Rotation = rot / MathF.PI * 180;
 	}
 
 	public void Apply ( Drawable drawable ) {
