@@ -8,7 +8,9 @@ public class LineBlueprint : Blueprint<IComponent> {
 
 	PointHandle start;
 	PointHandle end;
+	Handle move;
 	public LineBlueprint ( LineComponent value ) : base( value ) {
+		AddInternal( move = new Handle().Fill() );
 		AddInternal( start = new PointHandle { Anchor = Anchor.CentreLeft, CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 		AddInternal( end = new PointHandle { Anchor = Anchor.CentreRight, CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 
@@ -20,6 +22,23 @@ public class LineBlueprint : Blueprint<IComponent> {
 		end.Dragged += e => {
 			var pos = Composer.ToContentSpace( e.ScreenSpaceMousePosition );
 			(Value.EndX.Value, Value.EndY.Value) = e.AltPressed ? pos : pos.Round();
+		};
+
+		Vector2 dragHandle = Vector2.Zero;
+		Vector2 dragDeltaHandle = Vector2.Zero;
+		move.DragStarted += e => {
+			dragHandle = new( Value.StartX.Value, Value.StartY.Value );
+			dragDeltaHandle = new Vector2( Value.EndX.Value, Value.EndY.Value ) - dragHandle;
+		};
+		move.Dragged += e => {
+			var pos = dragHandle + Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
+			if ( !e.AltPressed )
+				pos = pos.Round();
+
+			Value.StartX.Value = pos.X;
+			Value.StartY.Value = pos.Y;
+			Value.EndX.Value = pos.X + dragDeltaHandle.X;
+			Value.EndY.Value = pos.Y + dragDeltaHandle.Y;
 		};
 	}
 }
