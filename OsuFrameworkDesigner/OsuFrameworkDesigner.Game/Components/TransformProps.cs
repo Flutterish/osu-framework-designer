@@ -436,6 +436,12 @@ public class TransformProps : IEnumerable<IProp> {
 		}
 	}
 
+	public void SetMatrix ( Matrix3 matrix ) {
+		float rot;
+		((X.Value, Y.Value), (ScaleX.Value, ScaleY.Value), (ShearX.Value, ShearY.Value), rot) = matrix.Decompose();
+		Rotation.Value = rot * 180 / MathF.PI;
+	}
+
 	public Vector2 ToLocalSpace ( Vector2 contentSpace )
 		=> Vector2Extensions.Transform( contentSpace, DrawInfo.MatrixInverse );
 

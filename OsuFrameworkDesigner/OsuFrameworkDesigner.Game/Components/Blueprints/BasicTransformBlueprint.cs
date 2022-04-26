@@ -233,6 +233,23 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		TransformProps.Normalize();
 	}
 
+	protected void DisableAllHandles () {
+		SelectionBox.Top.Alpha =
+		SelectionBox.Bottom.Alpha =
+		SelectionBox.Left.Alpha =
+		SelectionBox.Right.Alpha =
+		SelectionBox.TopLeft.Alpha =
+		SelectionBox.TopRight.Alpha =
+		SelectionBox.BottomLeft.Alpha =
+		SelectionBox.BottomRight.Alpha =
+		SelectionBox.FarTopLeft.Alpha =
+		SelectionBox.FarTopRight.Alpha =
+		SelectionBox.FarBottomLeft.Alpha =
+		SelectionBox.FarBottomRight.Alpha =
+		OriginHandle.Alpha =
+			0;
+	}
+
 	protected override void Update () {
 		base.Update();
 		updateOrigin();

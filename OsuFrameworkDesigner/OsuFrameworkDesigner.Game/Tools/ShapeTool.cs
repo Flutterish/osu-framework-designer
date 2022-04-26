@@ -5,36 +5,29 @@ namespace OsuFrameworkDesigner.Game.Tools;
 
 public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	protected abstract T CreateShape ();
-	protected virtual void UpdateShape ( T shape ) { }
+	protected virtual void UpdateShape ( T shape, Vector2 start, Vector2 end ) { }
 
 	T? shape;
 	Vector2 dragStartPosition;
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		dragStartPosition = Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
 		Composer.Add( shape = CreateShape().With( s => {
-			s.Position = e.AltPressed ? dragStartPosition : dragStartPosition.Round();
 			s.Colour = Colour4.Green;
 		} ) );
 
-		UpdateShape( shape );
+		var pos = e.AltPressed ? dragStartPosition : dragStartPosition.Round();
+		UpdateShape( shape, pos, pos );
 		return true;
 	}
 
-	protected virtual Vector2 SizeAt ( Vector2 cursorDelta ) {
-		return cursorDelta;
-	}
 	protected override void OnDrag ( DragEvent e ) {
-		var size = SizeAt( Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - dragStartPosition );
+		var end = Composer.ToContentSpace( e.ScreenSpaceMousePosition );
 		if ( e.AltPressed ) {
-			shape!.Position = dragStartPosition;
-			shape.Size = size;
+			UpdateShape( shape!, dragStartPosition, end );
 		}
 		else {
-			shape!.Position = dragStartPosition.Round();
-			shape.Size = size.Round();
+			UpdateShape( shape!, dragStartPosition.Round(), end.Round() );
 		}
-
-		UpdateShape( shape );
 	}
 
 	protected override void OnDragEnd ( DragEndEvent e ) {

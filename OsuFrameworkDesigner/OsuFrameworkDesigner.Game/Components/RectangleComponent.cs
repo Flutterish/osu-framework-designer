@@ -40,8 +40,7 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 	}
 
 	public Blueprint<IComponent> CreateBlueprint ()
-		=> new RectangleBlueprint( this, TransformProps );
+		=> new RectangleBlueprint( this );
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius );
-
 }

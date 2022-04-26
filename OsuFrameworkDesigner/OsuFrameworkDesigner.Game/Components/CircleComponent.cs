@@ -60,5 +60,5 @@ public class CircleComponent : CompositeDrawable, IComponent {
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
 	public Blueprint<IComponent> CreateBlueprint ()
-		=> new CircleBlueprint( this, TransformProps );
+		=> new CircleBlueprint( this );
 }

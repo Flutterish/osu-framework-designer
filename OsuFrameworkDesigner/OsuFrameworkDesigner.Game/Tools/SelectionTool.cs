@@ -59,14 +59,9 @@ public class SelectionTool : Tool {
 
 			var origin = selectionComponent.TransformProps.Position;
 			perform( IHasMatrix.From, ( i, c ) => {
-				var pos = IHasPosition.From( c )!;
-				pos.X.Value += delta.X - origin.X;
-				pos.Y.Value += delta.Y - origin.Y;
-
+				i.Offset( delta - origin );
 				i.Matrix *= matrix;
-
-				pos.X.Value += origin.X;
-				pos.Y.Value += origin.Y;
+				i.Offset( origin );
 			} );
 
 			lastPosition = selectionComponent.TransformProps.Position;

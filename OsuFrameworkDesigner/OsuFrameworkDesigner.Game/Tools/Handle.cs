@@ -17,6 +17,12 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation {
 		DragEnded?.Invoke( e );
 	}
 
+	public void ClearEvents () {
+		DragStarted = null;
+		Dragged = null;
+		DragEnded = null;
+	}
+
 	public event Action<DragStartEvent>? DragStarted;
 	public event Action<DragEvent>? Dragged;
 	public event Action<DragEndEvent>? DragEnded;
