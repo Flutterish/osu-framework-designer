@@ -46,7 +46,7 @@ public class PolygonDrawable : Drawable {
 		var b1 = -vertex.Y + vertex.X / m2;
 		var d = m2 + 1 / m2;
 
-		var x = (b1 - q) / d;
+		var x = ( b1 - q ) / d;
 		var y = m2 * x;
 		return MathF.Sqrt( x * x + y * y ) * MathF.Max( DrawWidth, DrawHeight );
 	}
