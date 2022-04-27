@@ -33,7 +33,7 @@ public class PolygonBlueprint : BasicTransformBlueprint<PolygonComponent> {
 			pos = Vector2.Divide( pos, scale );
 			var angle = MathF.Atan2( pos.Y, pos.X ) + MathF.PI / 2;
 
-			Value.CornerCount.Value = Math.Clamp( ( MathF.Tau / angle ).Round(), 3, 60 );
+			Value.CornerCount.Value = (int)Math.Clamp( MathF.Tau / angle, 3, 60 );
 		};
 	}
 

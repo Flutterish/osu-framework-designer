@@ -62,19 +62,22 @@ public class PropertiesPanel : CompositeDrawable {
 
 	Drawable createEditField ( Type type, IEnumerable<IProp> props ) {
 		if ( type == typeof( float ) ) {
-			return new FloatEditField( props.First().Name, props );
+			return new FloatEditField( props.First().Name, props.OfType<IProp<float>>() );
+		}
+		else if ( type == typeof( int ) ) {
+			return new IntEditField( props.First().Name, props.OfType<IProp<int>>() );
 		}
 
 		throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
 	}
 }
 
-public class FloatEditField : FillFlowContainer {
+public abstract class TextEditField<T> : FillFlowContainer {
 	DesignerSpriteText title;
 	BasicTextBox textBox;
-	IEnumerable<IProp> props;
+	IEnumerable<IProp<T>> props;
 
-	public FloatEditField ( string title, IEnumerable<IProp> props ) {
+	public TextEditField ( string title, IEnumerable<IProp<T>> props ) {
 		RelativeSizeAxes = Axes.X;
 		Height = 40;
 		Width = 0.5f;
@@ -96,33 +99,35 @@ public class FloatEditField : FillFlowContainer {
 
 		this.props = props;
 		updateValue();
-		foreach ( Prop<float> i in props ) {
+		foreach ( var i in props ) {
 			i.ValueChanged += onValueChanged;
 		}
 
 		textBox.CommitOnFocusLost = true;
 		textBox.OnCommit += ( _, _ ) => {
-			if ( !float.TryParse( textBox.Current.Value, out var value ) ) {
+			if ( !TryParse( textBox.Current.Value, out var value ) ) {
 				updateValue();
 				return;
 			}
 
 			ignoreUpdates = true;
-			foreach ( Prop<float> i in props ) {
+			foreach ( var i in props ) {
 				i.Value = value;
 			}
 			ignoreUpdates = false;
+
+			updateValue();
 		};
 	}
 
 	bool ignoreUpdates;
-	private void onValueChanged ( ValueChangedEvent<float> e ) {
+	private void onValueChanged ( ValueChangedEvent<T> e ) {
 		if ( !ignoreUpdates ) updateValue();
 	}
 
 	void updateValue () {
 		var v = props.First().Value;
-		if ( props.All( x => EqualityComparer<object>.Default.Equals( x.Value, v ) ) )
+		if ( props.All( x => AreValuesEqual( x.Value, v ) ) )
 			textBox.Text = $"{v:0.##}";
 		else
 			textBox.Text = "Mixed";
@@ -136,8 +141,31 @@ public class FloatEditField : FillFlowContainer {
 
 	protected override void Dispose ( bool isDisposing ) {
 		base.Dispose( isDisposing );
-		foreach ( IBindable<float> i in props ) {
+		foreach ( IBindable<T> i in props ) {
 			i.ValueChanged -= onValueChanged;
 		}
 	}
+
+	protected abstract bool TryParse ( string s, out T value );
+	protected virtual string Format ( T value )
+		=> $"{value}";
+	protected virtual bool AreValuesEqual ( T a, T b )
+		=> EqualityComparer<object>.Default.Equals( a, b );
+}
+
+public class FloatEditField : TextEditField<float> {
+	public FloatEditField ( string title, IEnumerable<IProp<float>> props ) : base( title, props ) { }
+
+	protected override bool TryParse ( string s, out float value )
+		=> float.TryParse( s, out value );
+
+	protected override string Format ( float value )
+		=> $"{value:0.##}";
+}
+
+public class IntEditField : TextEditField<int> {
+	public IntEditField ( string title, IEnumerable<IProp<int>> props ) : base( title, props ) { }
+
+	protected override bool TryParse ( string s, out int value )
+		=> int.TryParse( s, out value );
 }

@@ -19,7 +19,11 @@ public interface IProp : IBindable {
 	object? Value { get; }
 }
 
-public class Prop<T> : Bindable<T>, IProp {
+public interface IProp<T> : IProp, IBindable<T> {
+	new T Value { get; set; }
+}
+
+public class Prop<T> : Bindable<T>, IProp<T> {
 	public Prop ( [CallerMemberName] string name = "" ) { Name = name; }
 	public Prop ( T @default, [CallerMemberName] string name = "" ) : base( @default ) { Name = name; }
 

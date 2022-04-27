@@ -9,14 +9,14 @@ public class PolygonComponent : CompositeDrawable, IComponent {
 
 	public readonly TransformProps TransformProps;
 	new public readonly Prop<float> CornerRadius = new( "Radius" ) { Category = "Corners" };
-	public readonly Prop<float> CornerCount = new( 3, "Count" ) { Category = "Corners" };
+	public readonly Prop<int> CornerCount = new( 3, "Count" ) { Category = "Corners" };
 
 	public PolygonComponent () {
 		TransformProps = new( this );
 		AddInternal( Polygon = new PolygonDrawable().Fill() );
 
 		CornerRadius.BindValueChanged( v => Polygon.CornerRadius = v.NewValue );
-		CornerCount.BindValueChanged( v => Polygon.SideCount = (int)v.NewValue );
+		CornerCount.BindValueChanged( v => Polygon.SideCount = v.NewValue );
 	}
 
 	public Blueprint<IComponent> CreateBlueprint ()
