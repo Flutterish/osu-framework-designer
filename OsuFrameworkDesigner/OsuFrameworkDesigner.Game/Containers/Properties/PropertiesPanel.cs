@@ -4,6 +4,7 @@ using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Containers.Properties;
 using OsuFrameworkDesigner.Game.Graphics;
+using System.IO;
 
 namespace OsuFrameworkDesigner.Game.Containers;
 
@@ -42,6 +43,14 @@ public class PropertiesPanel : CompositeDrawable {
 		if ( !componentCache.IsValid ) {
 			componentCache.Validate();
 
+			foreach ( var i in rentedFields ) {
+				i.free( i.field );
+				i.pool.Push( i.field );
+
+				items.Remove( i.field );
+			}
+			rentedFields.Clear();
+
 			items.Clear();
 			foreach ( var category in Components.SelectMany( c => c.GetNestedProperties() ).GroupBy( x => x.Category ) ) {
 				items.Add( new DesignerSpriteText { Text = category.Key, Font = DesignerFont.Bold( 18 ), Colour = Colour4.Black, Alpha = 0.5f, RelativeSizeAxes = Axes.X } );
@@ -60,23 +69,46 @@ public class PropertiesPanel : CompositeDrawable {
 		}
 	}
 
+	static (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free) createField<TField, T> 
+		( Action<TField, IEnumerable<IProp<T>>, string> apply, Action<TField> free ) where TField : Drawable, new() {
+		return (
+			() => new TField(),
+			(f, p, t) => apply((TField)f, p.OfType<IProp<T>>(), t),
+			f => free( (TField)f )
+		);
+	}
+
+	List<(Drawable field, Action<Drawable> free, Stack<Drawable> pool)> rentedFields = new();
+	Dictionary<Type, Stack<Drawable>> editFieldPool = new();
+	static readonly Dictionary<Type, (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free)> editFieldFactory = new() {
+		[typeof(float)] = createField<FloatEditField, float>( 
+			(f, p, t) => { f.Title = t; f.Apply( p ); },
+			f => f.Free()
+		),
+		[typeof(int)] = createField<IntEditField, int>( 
+			(f, p, t) => { f.Title = t; f.Apply( p ); },
+			f => f.Free()
+		),
+		[typeof(Colour4)] = createField<ColourEditField, Colour4>( 
+			(f, p, t) => f.Apply( p ),
+			f => f.Free()
+		),
+	};
 	Drawable createEditField ( Type type, IEnumerable<IProp> props ) {
-		if ( type == typeof( float ) ) {
-			var field = new FloatEditField { Title = props.First().Name };
-			field.Apply( props.OfType<IProp<float>>() );
-			return field;
-		}
-		else if ( type == typeof( int ) ) {
-			var field = new IntEditField { Title = props.First().Name };
-			field.Apply( props.OfType<IProp<int>>() );
-			return field;
-		}
-		else if ( type == typeof( Colour4 ) ) {
-			var field = new ColourEditField();
-			field.Apply( props.OfType<IProp<Colour4>>() );
-			return field;
+		if ( !editFieldPool.TryGetValue( type, out var stack ) ) {
+			editFieldPool.Add( type, stack = new() );
 		}
 
-		throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
+		if ( !editFieldFactory.TryGetValue( type, out var factory ) ) {
+			throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
+		}
+
+		if ( !stack.TryPop( out var field ) ) {
+			field = factory.create();
+		}
+
+		factory.apply( field, props, props.First().Name );
+		rentedFields.Add( (field, factory.free, stack) );
+		return field;
 	}
 }
