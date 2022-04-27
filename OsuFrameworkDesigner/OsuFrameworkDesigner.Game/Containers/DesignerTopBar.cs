@@ -31,7 +31,8 @@ public class DesignerTopBar : CompositeDrawable {
 						new ToolButton( composer.RectangleTool ) { Icon = FontAwesome.Regular.Square },
 						new ToolButton( new CircleTool() ) { Icon = FontAwesome.Regular.Circle },
 						new ToolButton( new LineTool() ) { Icon = FontAwesome.Solid.Minus },
-						new ToolButton( new ArrowTool() ) { Icon = FontAwesome.Solid.ArrowRight }
+						new ToolButton( new ArrowTool() ) { Icon = FontAwesome.Solid.ArrowRight },
+						new ToolButton( new PolygonTool() ) { Icon = FontAwesome.Solid.Shapes }
 					).WithEachChild<FillFlowContainer, ToolButton>( (child, children) => {
 						child.Selected.BindValueChanged( v => {
 							if ( v.NewValue ) Tool.Value = child.Tool;

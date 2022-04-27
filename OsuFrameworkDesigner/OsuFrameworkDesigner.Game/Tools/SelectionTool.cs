@@ -52,6 +52,8 @@ public class SelectionTool : Tool {
 	protected override void Update () {
 		base.Update();
 
+		// TODO this can result in divergence due to numerical dissipation
+		// to fix, we should save the initial matrices and work with a global delta rather than a per-frame one
 		if ( matrixChanged ) {
 			var drawInfo = selectionComponent.TransformProps.LocalDrawInfo;
 			var matrix = lastMatrices.MatrixInverse * drawInfo.Matrix;
