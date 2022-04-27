@@ -1,6 +1,8 @@
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Screens;
 using OsuFrameworkDesigner.Game.Containers;
+using OsuFrameworkDesigner.Game.Containers.Assets;
+using OsuFrameworkDesigner.Game.Containers.Properties;
 using OsuFrameworkDesigner.Game.Cursor;
 
 namespace OsuFrameworkDesigner.Game;
@@ -46,5 +48,9 @@ public class DesignerScreen : Screen {
 
 		composer.Tool.BindTo( topBar.Tool );
 		propertiesPanel.Components.BindTo( composer.SelectionTool.Selection );
+		composer.ComponentAdded += assetsPanel.AddComponent;
+		composer.ComponentRemoved += assetsPanel.RemoveComponent;
+		assetsPanel.Selection.BindTo( composer.SelectionTool.Selection );
+		assetsPanel.SelectionChanged += s => topBar.Tool.Value = composer.SelectionTool;
 	}
 }

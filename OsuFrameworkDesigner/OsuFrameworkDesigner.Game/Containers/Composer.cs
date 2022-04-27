@@ -37,13 +37,22 @@ public class Composer : CompositeDrawable {
 	public IEnumerable<IComponent> ComponentsReverse => components.Children.Reverse().OfType<IComponent>();
 	public void Add<T> ( T component ) where T : Drawable, IComponent {
 		components.Add( component );
+		ComponentAdded?.Invoke( component, null );
 	}
 	public void Remove<T> ( T component ) where T : Drawable, IComponent {
 		components.Remove( component );
+		ComponentRemoved?.Invoke( component, null );
 	}
 	public void RemoveRange ( IEnumerable<IComponent> components ) {
-		this.components.RemoveRange( components.OfType<Drawable>() );
+		foreach ( var i in components ) {
+			this.components.Remove( i.AsDrawable() );
+			ComponentRemoved?.Invoke( i, null );
+		}
 	}
+
+	public delegate void HierarchyChangedHandler ( IComponent component, IComponent? parent );
+	public event HierarchyChangedHandler? ComponentRemoved;
+	public event HierarchyChangedHandler? ComponentAdded;
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;

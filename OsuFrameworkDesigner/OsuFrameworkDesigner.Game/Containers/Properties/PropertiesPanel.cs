@@ -2,11 +2,10 @@
 using osu.Framework.Extensions.TypeExtensions;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
-using OsuFrameworkDesigner.Game.Containers.Properties;
+using OsuFrameworkDesigner.Game.Containers.Assets;
 using OsuFrameworkDesigner.Game.Graphics;
-using System.IO;
 
-namespace OsuFrameworkDesigner.Game.Containers;
+namespace OsuFrameworkDesigner.Game.Containers.Properties;
 
 public class PropertiesPanel : CompositeDrawable {
 	Box background;
@@ -17,12 +16,14 @@ public class PropertiesPanel : CompositeDrawable {
 		RelativeSizeAxes = Axes.Y;
 		Width = 300;
 		AddInternal( background = new Box().Fill() );
-		AddInternal( items = new FillFlowContainer {
-			Direction = FillDirection.Full,
-			AutoSizeAxes = Axes.Y,
-			RelativeSizeAxes = Axes.X,
-			Padding = new( 10 )
-		} );
+		AddInternal( new BasicScrollContainer {
+			Child = items = new FillFlowContainer {
+				Direction = FillDirection.Full,
+				AutoSizeAxes = Axes.Y,
+				RelativeSizeAxes = Axes.X,
+				Padding = new( 10 )
+			}
+		}.Fill() );
 
 		Components.BindCollectionChanged( ( _, _ ) => componentCache.Invalidate() );
 	}
@@ -43,11 +44,11 @@ public class PropertiesPanel : CompositeDrawable {
 		if ( !componentCache.IsValid ) {
 			componentCache.Validate();
 
-			foreach ( var i in rentedFields ) {
-				i.free( i.field );
-				i.pool.Push( i.field );
+			foreach ( var (field, free, pool) in rentedFields ) {
+				free( field );
+				pool.Push( field );
 
-				items.Remove( i.field );
+				items.Remove( field );
 			}
 			rentedFields.Clear();
 
@@ -57,9 +58,7 @@ public class PropertiesPanel : CompositeDrawable {
 
 				foreach ( var prop in category.GroupBy( x => (x.Name, x.Type) ) ) {
 					var ungroupable = prop.Where( x => !x.Groupable );
-					if ( ungroupable.Any() ) {
-						items.Add( createEditField( prop.Key.Type, ungroupable ) );
-					}
+					if ( ungroupable.Any() ) items.Add( createEditField( prop.Key.Type, ungroupable ) );
 
 					foreach ( var i in prop.Where( x => x.Groupable ).GroupBy( x => x.Value ) ) {
 						items.Add( createEditField( prop.Key.Type, i ) );
@@ -69,11 +68,11 @@ public class PropertiesPanel : CompositeDrawable {
 		}
 	}
 
-	static (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free) createField<TField, T> 
+	static (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free) createField<TField, T>
 		( Action<TField, IEnumerable<IProp<T>>, string> apply, Action<TField> free ) where TField : Drawable, new() {
 		return (
 			() => new TField(),
-			(f, p, t) => apply((TField)f, p.OfType<IProp<T>>(), t),
+			( f, p, t ) => apply( (TField)f, p.OfType<IProp<T>>(), t ),
 			f => free( (TField)f )
 		);
 	}
@@ -81,31 +80,25 @@ public class PropertiesPanel : CompositeDrawable {
 	List<(Drawable field, Action<Drawable> free, Stack<Drawable> pool)> rentedFields = new();
 	Dictionary<Type, Stack<Drawable>> editFieldPool = new();
 	static readonly Dictionary<Type, (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free)> editFieldFactory = new() {
-		[typeof(float)] = createField<FloatEditField, float>( 
-			(f, p, t) => { f.Title = t; f.Apply( p ); },
+		[typeof( float )] = createField<FloatEditField, float>(
+			( f, p, t ) => { f.Title = t; f.Apply( p ); },
 			f => f.Free()
 		),
-		[typeof(int)] = createField<IntEditField, int>( 
-			(f, p, t) => { f.Title = t; f.Apply( p ); },
+		[typeof( int )] = createField<IntEditField, int>(
+			( f, p, t ) => { f.Title = t; f.Apply( p ); },
 			f => f.Free()
 		),
-		[typeof(Colour4)] = createField<ColourEditField, Colour4>( 
-			(f, p, t) => f.Apply( p ),
+		[typeof( Colour4 )] = createField<ColourEditField, Colour4>(
+			( f, p, t ) => f.Apply( p ),
 			f => f.Free()
 		),
 	};
 	Drawable createEditField ( Type type, IEnumerable<IProp> props ) {
-		if ( !editFieldPool.TryGetValue( type, out var stack ) ) {
-			editFieldPool.Add( type, stack = new() );
-		}
+		if ( !editFieldPool.TryGetValue( type, out var stack ) ) editFieldPool.Add( type, stack = new() );
 
-		if ( !editFieldFactory.TryGetValue( type, out var factory ) ) {
-			throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
-		}
+		if ( !editFieldFactory.TryGetValue( type, out var factory ) ) throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
 
-		if ( !stack.TryPop( out var field ) ) {
-			field = factory.create();
-		}
+		if ( !stack.TryPop( out var field ) ) field = factory.create();
 
 		factory.apply( field, props, props.First().Name );
 		rentedFields.Add( (field, factory.free, stack) );

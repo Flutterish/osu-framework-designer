@@ -1,13 +1,12 @@
 ﻿using osu.Framework.Graphics.UserInterface;
-using OsuFrameworkDesigner.Game.Containers.Properties;
 using OsuFrameworkDesigner.Game.Graphics;
 
-namespace OsuFrameworkDesigner.Game.Containers;
+namespace OsuFrameworkDesigner.Game.Containers.Properties;
 
 public abstract class TextEditField<T> : EditField<T> {
 	DesignerSpriteText title;
 	BasicTextBox textBox;
-	
+
 	public string Title {
 		set => title.Text = value.ToString()[0..1];
 	}
