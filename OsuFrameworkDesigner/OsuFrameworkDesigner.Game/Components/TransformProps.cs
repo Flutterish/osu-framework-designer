@@ -67,7 +67,7 @@ public class TransformProps : IEnumerable<IProp> {
 		} );
 	}
 
-	public void CopyProps ( Drawable drawable ) {
+	public virtual void CopyProps ( Drawable drawable ) {
 		X.Value = drawable.X;
 		Y.Value = drawable.Y;
 		Width.Value = drawable.Width;
@@ -448,7 +448,7 @@ public class TransformProps : IEnumerable<IProp> {
 	public Vector2 ToContentSpace ( Vector2 localSpace )
 		=> Vector2Extensions.Transform( localSpace, DrawInfo.Matrix );
 
-	public IEnumerator<IProp> GetEnumerator () {
+	public virtual IEnumerator<IProp> GetEnumerator () {
 		yield return X;
 		yield return Y;
 		yield return Width;

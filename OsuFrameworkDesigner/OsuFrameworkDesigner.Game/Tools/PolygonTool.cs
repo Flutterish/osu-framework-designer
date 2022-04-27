@@ -11,5 +11,7 @@ public class PolygonTool : ShapeTool<PolygonComponent> {
 		shape.TransformProps.Y.Value = start.Y;
 		shape.TransformProps.Width.Value = end.X - start.X;
 		shape.TransformProps.Height.Value = end.Y - start.Y;
+
+		shape.TransformProps.CopyProps( shape );
 	}
 }

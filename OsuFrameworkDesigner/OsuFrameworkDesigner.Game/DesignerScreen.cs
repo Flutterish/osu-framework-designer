@@ -17,28 +17,30 @@ public class DesignerScreen : Screen {
 		cursorContainer = new DesignerCursorContainer().Fill();
 
 		AddInternal( cursorContainer.WithChild( new TooltipContainer( cursorContainer.CursorContainer ) {
-			new GridContainer {
-				RowDimensions = new Dimension[] {
-					new( GridSizeMode.AutoSize ),
-					new()
-				},
-				Content = new Drawable[][] {
-					new Drawable[] { topBar = new DesignerTopBar( composer ) },
-					new Drawable[] { new GridContainer {
-						ColumnDimensions = new Dimension[] {
-							new( GridSizeMode.AutoSize ),
-							new(),
-							new( GridSizeMode.AutoSize )
-						},
-						Content = new Drawable[][] {
-							new Drawable[] {
-								assetsPanel = new AssetsPanel(),
-								composer,
-								propertiesPanel = new PropertiesPanel()
+			new DesignerPopoverContainer {
+				new GridContainer {
+					RowDimensions = new Dimension[] {
+						new( GridSizeMode.AutoSize ),
+						new()
+					},
+					Content = new Drawable[][] {
+						new Drawable[] { topBar = new DesignerTopBar( composer ) },
+						new Drawable[] { new GridContainer {
+							ColumnDimensions = new Dimension[] {
+								new( GridSizeMode.AutoSize ),
+								new(),
+								new( GridSizeMode.AutoSize )
+							},
+							Content = new Drawable[][] {
+								new Drawable[] {
+									assetsPanel = new AssetsPanel(),
+									composer,
+									propertiesPanel = new PropertiesPanel()
+								}
 							}
-						}
-					}.Fill() }
-				}
+						}.Fill() }
+					}
+				}.Fill()
 			}.Fill()
 		}.Fill() ) );
 

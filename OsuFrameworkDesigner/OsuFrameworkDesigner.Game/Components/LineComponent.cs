@@ -12,6 +12,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
 	public readonly Prop<float> StartY = new( "Y" ) { Category = "Start" };
 	public readonly Prop<float> EndX = new( "X" ) { Category = "End" };
 	public readonly Prop<float> EndY = new( "Y" ) { Category = "End" };
+	public readonly Prop<Colour4> FillColour = new( Colour4.Green, "Colour" ) { Category = "Fill", Groupable = true };
 
 	public LineComponent () {
 		Origin = Anchor.CentreLeft;
@@ -32,6 +33,8 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
 
 			updateRotation();
 		} );
+
+		FillColour.ValueChanged += v => Colour = v.NewValue;
 	}
 
 	void updateRotation () {
@@ -43,9 +46,9 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
 		=> new LineBlueprint( this );
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties =>
-		StartX.Yield().Append( StartY )
+		StartX.Yield<IProp>().Append( StartY )
 		.Append( EndX ).Append( EndY )
-		.Append( Radius );
+		.Append( Radius ).Append( FillColour );
 
 	public Matrix3 Matrix {
 		get {

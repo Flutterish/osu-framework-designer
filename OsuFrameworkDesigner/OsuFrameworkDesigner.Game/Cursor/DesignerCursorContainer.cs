@@ -74,3 +74,7 @@ public class DesignerCursorContainer : CursorEffectContainer<DesignerCursorConta
 			};
 	}
 }
+
+public class DesignerPopoverContainer : PopoverContainer {
+
+}

@@ -7,7 +7,7 @@ namespace OsuFrameworkDesigner.Game.Components;
 public class CircleComponent : CompositeDrawable, IComponent {
 	TwoSidedCircularProgress circle;
 
-	public readonly TransformProps TransformProps;
+	public readonly DrawableProps TransformProps;
 	public readonly Prop<float> Fill = new( 1 ) { Category = "Shape" };
 	public readonly Prop<float> SweepEnd = new( 1, "End" ) { Category = "Shape" };
 	public readonly Prop<float> SweepStart = new( 0, "Start" ) { Category = "Shape" };

@@ -13,5 +13,7 @@ public class CircleTool : ShapeTool<CircleComponent> {
 		var r = ( end - start ).Length * 2;
 		shape.TransformProps.Width.Value = r;
 		shape.TransformProps.Height.Value = r;
+
+		shape.TransformProps.CopyProps( shape );
 	}
 }

@@ -7,7 +7,7 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 	Box box;
 	Container? roundedContainer;
 
-	public readonly TransformProps TransformProps;
+	public readonly DrawableProps TransformProps;
 	new public readonly Prop<float> CornerRadius = new( "Radius" ) { Category = "Corners" };
 
 	public RectangleComponent () {

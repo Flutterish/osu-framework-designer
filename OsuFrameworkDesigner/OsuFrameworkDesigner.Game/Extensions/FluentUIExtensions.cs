@@ -7,15 +7,17 @@ public static class FluentUIExtensions {
 		return self;
 	}
 
-	public static T FillX<T> ( this T self ) where T : Container<Drawable> {
+	public static T FillX<T> ( this T self ) where T : Drawable {
 		self.RelativeSizeAxes = Axes.X;
-		self.AutoSizeAxes = Axes.Y;
+		if ( self is Container<Drawable> c )
+			c.AutoSizeAxes = Axes.Y;
 		return self;
 	}
 
-	public static T FillY<T> ( this T self ) where T : Container<Drawable> {
+	public static T FillY<T> ( this T self ) where T : Drawable {
 		self.RelativeSizeAxes = Axes.Y;
-		self.AutoSizeAxes = Axes.X;
+		if ( self is Container<Drawable> c )
+			c.AutoSizeAxes = Axes.X;
 		return self;
 	}
 
@@ -67,9 +69,8 @@ public static class FluentUIExtensions {
 		return container;
 	}
 
-	public static TContainer WithChildren<TContainer, TChild> ( this TContainer container, params TChild[] children )
-			where TContainer : IContainerCollection<TChild>
-			where TChild : Drawable {
+	public static TContainer WithChildren<TContainer> ( this TContainer container, params Drawable[] children )
+			where TContainer : IContainerCollection<Drawable> {
 		container.Children = children;
 
 		return container;

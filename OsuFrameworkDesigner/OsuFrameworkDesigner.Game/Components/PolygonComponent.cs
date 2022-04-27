@@ -7,7 +7,7 @@ namespace OsuFrameworkDesigner.Game.Components;
 public class PolygonComponent : CompositeDrawable, IComponent {
 	public readonly PolygonDrawable Polygon;
 
-	public readonly TransformProps TransformProps;
+	public readonly DrawableProps TransformProps;
 	new public readonly Prop<float> CornerRadius = new( "Radius" ) { Category = "Corners" };
 	public readonly Prop<int> CornerCount = new( 3, "Count" ) { Category = "Corners" };
 
