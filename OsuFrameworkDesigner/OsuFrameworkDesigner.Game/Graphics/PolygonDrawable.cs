@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Batches;
+﻿using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Graphics.Batches;
 using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Textures;
@@ -82,7 +83,7 @@ public class PolygonDrawable : Drawable {
 				vertexBatch.AddAction( v );
 			};
 			vertexAction( new TexturedVertex2D {
-				Colour = DrawColourInfo.Colour,
+				Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
 				Position = Vector2Extensions.Transform( centre, matrix )
 			} );
 
@@ -117,14 +118,14 @@ public class PolygonDrawable : Drawable {
 					for ( int k = 0; k < SMOOTHING_PER_VERTEX; k++ ) {
 						var angle = ( cornerAngle / ( SMOOTHING_PER_VERTEX - 1 ) * k ) - cornerAngle / 2;
 						vertexAction( new TexturedVertex2D {
-							Colour = DrawColourInfo.Colour,
+							Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
 							Position = Vector2Extensions.Transform( cornerCentre + up.Rotate( angle ), matrix )
 						} );
 					}
 				}
 				else {
 					vertexAction( new TexturedVertex2D {
-						Colour = DrawColourInfo.Colour,
+						Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
 						Position = Vector2Extensions.Transform( centre + vertex, matrix )
 					} );
 				}
