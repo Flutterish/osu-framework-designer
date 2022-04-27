@@ -33,22 +33,12 @@ public class PolygonDrawable : Drawable {
 	}
 
 	public float CornerRadiusAtDistance ( float distance ) {
-		var q = distance / MathF.Max( DrawWidth, DrawHeight );
-		if ( q > 0.5f ) {
-			return 0;
-		}
-
 		var vertex = new Vector2( 0, -0.5f );
 		var theta = MathF.Tau / sideCount;
-		var vertexDelta = vertex.Rotate( theta ) - vertex;
-		var m1 = vertexDelta.X / -vertexDelta.Y;
-		var m2 = -m1;
-		var b1 = -vertex.Y + vertex.X / m2;
-		var d = m2 + 1 / m2;
 
-		var x = ( b1 - q ) / d;
-		var y = m2 * x;
-		return MathF.Sqrt( x * x + y * y ) * MathF.Max( DrawWidth, DrawHeight );
+		var vertexDelta = vertex.Rotate( theta ) - vertex;
+
+		return MathExtensions.RoundedTriangleRadius( -vertex.Y, -vertexDelta.Y / vertexDelta.X, distance / MathF.Max( DrawWidth, DrawHeight ) ) * MathF.Max( DrawWidth, DrawHeight );
 	}
 
 	public float CornerCentreDistance {
@@ -57,23 +47,9 @@ public class PolygonDrawable : Drawable {
 			var theta = MathF.Tau / sideCount;
 
 			var vertexDelta = vertex.Rotate( theta ) - vertex;
-			var m1 = vertexDelta.X / -vertexDelta.Y;
-			var m2 = -m1;
-			var b1 = -vertex.Y + vertex.X / m2;
-			var d = m2 + 1 / m2;
-			var r = cornerRadius / MathF.Max( DrawWidth, DrawHeight );
 
-			var m = 1 + m2 * m2;
-			var n = -2 * b1 - 2 * m2 * m2 * b1;
-			var o = b1 * b1 + m2 * m2 * b1 * b1 - d * d * r * r;
-			var root = MathF.Sqrt( n * n - 4 * m * o );
-			var b2 = MathF.Min( ( root - n ) / 2 / m, ( -root - n ) / 2 / m );
-
-			if ( b2 < 0 ) {
-				return 0;
-			}
-
-			return b2 * MathF.Max( DrawWidth, DrawHeight ) * 2;
+			var (h, r, a) = MathExtensions.RoundTriangle( -vertex.Y, -vertexDelta.Y / vertexDelta.X, cornerRadius / MathF.Max( DrawWidth, DrawHeight ) );
+			return h * MathF.Max( DrawWidth, DrawHeight ) * 2;
 		}
 	}
 
@@ -135,32 +111,13 @@ public class PolygonDrawable : Drawable {
 			} );
 
 			var vertexDelta = vertex.Rotate( theta ) - vertex;
-			var m1 = vertexDelta.X / -vertexDelta.Y;
-			var m2 = -m1;
-			var b1 = -vertex.Y + vertex.X / m2;
-			var d = m2 + 1 / m2;
-			var r = cornerRadius;
-
-			var m = 1 + m2 * m2;
-			var n = -2 * b1 - 2 * m2 * m2 * b1;
-			var o = b1 * b1 + m2 * m2 * b1 * b1 - d * d * r * r;
-			var root = MathF.Sqrt( n * n - 4 * m * o );
-			var b2 = MathF.Min( ( root - n ) / 2 / m, ( -root - n ) / 2 / m );
-
-			var cornerAngle = 2 * ( MathF.PI / 2 - MathF.Atan2( m2, 1 ) );
-			var cappedCornerRadius = cornerRadius;
-			if ( b2 < 0 ) {
-				b2 = 0;
-				var x = b1 / d;
-				var y = m2 * x;
-				cappedCornerRadius = MathF.Sqrt( x * x + y * y );
-			}
+			var (height, cornerRadius, cornerAngle) = MathExtensions.RoundTriangle( -vertex.Y, -vertexDelta.Y / vertexDelta.X, this.cornerRadius );
 
 			loopEnd = null;
 			for ( int i = 0; i < sideCount; i++ ) {
-				if ( cappedCornerRadius > 0 ) {
-					var cornerCentre = centre + b2 * vertex.Normalized();
-					var up = vertex.Normalized() * cappedCornerRadius;
+				if ( cornerRadius > 0 ) {
+					var cornerCentre = centre + height * vertex.Normalized();
+					var up = vertex.Normalized() * cornerRadius;
 
 					for ( int k = 0; k < SMOOTHING_PER_VERTEX; k++ ) {
 						var angle = ( cornerAngle / ( SMOOTHING_PER_VERTEX - 1 ) * k ) - cornerAngle / 2;

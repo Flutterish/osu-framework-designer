@@ -165,4 +165,56 @@ public static class MathExtensions {
 
 		return IHasMatrix.CreateMatrix( translation, scale, shear, rotation );
 	}
+
+	/// <summary>
+	/// Rounds the top corner of a isosceles triangle. If the returned height would be less than 0, both it and the radius are capped.
+	/// https://www.desmos.com/calculator/txty6davsf
+	/// </summary>
+	/// <returns>
+	/// The height and a possibly capped radius of the circle which rounds the triangle such that its tangent to the sides of the triangle.
+	/// Also, the angle in radians between the 2 radii of the circle connecting to the sides of the triangle.
+	/// </returns>
+	public static (float y, float radius, float angle) RoundTriangle ( float height, float sideSlope, float radius ) {
+		var m1 = 1 / sideSlope;
+		var m2 = -m1;
+		var b1 = height;
+		var d = m2 + 1 / m2;
+		var r = radius;
+
+		var m = 1 + m2 * m2;
+		var n = -2 * b1 - 2 * m2 * m2 * b1;
+		var o = b1 * b1 + m2 * m2 * b1 * b1 - d * d * r * r;
+		var root = MathF.Sqrt( n * n - 4 * m * o );
+		var b2 = MathF.Min( ( root - n ) / 2 / m, ( -root - n ) / 2 / m );
+
+		var cornerAngle = 2 * ( MathF.PI / 2 - MathF.Atan2( m2, 1 ) );
+		var cappedCornerRadius = radius;
+		if ( b2 < 0 ) {
+			b2 = 0;
+			var x = b1 / d;
+			var y = m2 * x;
+			cappedCornerRadius = MathF.Sqrt( x * x + y * y );
+		}
+
+		return (b2, cappedCornerRadius, cornerAngle);
+	}
+
+	/// <summary>
+	/// Given the computation from <see cref="RoundTriangle(float, float, float)"/>, computes the input radius given the output circle height
+	/// </summary>
+	public static float RoundedTriangleRadius ( float height, float sideSlope, float distance ) {
+		var q = distance;
+		if ( q > 0.5f ) {
+			return 0;
+		}
+
+		var m1 = 1 / sideSlope;
+		var m2 = -m1;
+		var b1 = height;
+		var d = m2 + 1 / m2;
+
+		var x = ( b1 - q ) / d;
+		var y = m2 * x;
+		return MathF.Sqrt( x * x + y * y );
+	}
 }
