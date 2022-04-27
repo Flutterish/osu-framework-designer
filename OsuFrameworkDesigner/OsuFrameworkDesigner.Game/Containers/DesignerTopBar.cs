@@ -28,7 +28,7 @@ public class DesignerTopBar : CompositeDrawable {
 				new Drawable[] {
 					toolSelection = new FillFlowContainer().FilledHorizontal().WithChildren(
 						new ToolButton( composer.SelectionTool ) { Icon = FontAwesome.Solid.MousePointer },
-						new ToolButton( composer.RectangleTool ) { Icon = FontAwesome.Regular.Square },
+						new ToolButton( new RectangleTool() ) { Icon = FontAwesome.Regular.Square },
 						new ToolButton( new CircleTool() ) { Icon = FontAwesome.Regular.Circle },
 						new ToolButton( new LineTool() ) { Icon = FontAwesome.Solid.Minus },
 						new ToolButton( new ArrowTool() ) { Icon = FontAwesome.Solid.ArrowRight },

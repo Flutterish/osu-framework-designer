@@ -18,7 +18,6 @@ public class Composer : CompositeDrawable {
 	UnmaskableContainer layerAbove;
 
 	public readonly SelectionTool SelectionTool = new();
-	public readonly RectangleTool RectangleTool = new();
 
 	public Composer () {
 		this.Fill();
