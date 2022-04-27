@@ -32,6 +32,53 @@ public class PolygonDrawable : Drawable {
 		}
 	}
 
+	public float CornerRadiusAtDistance ( float distance ) {
+		var q = distance / MathF.Max( DrawWidth, DrawHeight );
+		if ( q > 0.5f ) {
+			return 0;
+		}
+
+		var vertex = new Vector2( 0, -0.5f );
+		var theta = MathF.Tau / sideCount;
+		var vertexDelta = vertex.Rotate( theta ) - vertex;
+		var m1 = vertexDelta.X / -vertexDelta.Y;
+		var m2 = -m1;
+		var b1 = -vertex.Y + vertex.X / m2;
+		var d = m2 + 1 / m2;
+
+		var x = (b1 - q) / d;
+		var y = m2 * x;
+		return MathF.Sqrt( x * x + y * y ) * MathF.Max( DrawWidth, DrawHeight );
+	}
+
+	public float CornerCentreDistance {
+		get {
+			var vertex = new Vector2( 0, -0.5f );
+			var theta = MathF.Tau / sideCount;
+
+			var vertexDelta = vertex.Rotate( theta ) - vertex;
+			var m1 = vertexDelta.X / -vertexDelta.Y;
+			var m2 = -m1;
+			var b1 = -vertex.Y + vertex.X / m2;
+			var d = m2 + 1 / m2;
+			var r = cornerRadius / MathF.Max( DrawWidth, DrawHeight );
+
+			var m = 1 + m2 * m2;
+			var n = -2 * b1 - 2 * m2 * m2 * b1;
+			var o = b1 * b1 + m2 * m2 * b1 * b1 - d * d * r * r;
+			var root = MathF.Sqrt( n * n - 4 * m * o );
+			var b2 = MathF.Min( ( root - n ) / 2 / m, ( -root - n ) / 2 / m );
+
+			if ( b2 < 0 ) {
+				return 0;
+			}
+
+			return b2 * MathF.Max( DrawWidth, DrawHeight ) * 2;
+		}
+	}
+
+	public float MaxCornerRadius => CornerRadiusAtDistance( 0 );
+
 	IShader shader = null!;
 
 	[BackgroundDependencyLoader]
@@ -59,7 +106,7 @@ public class PolygonDrawable : Drawable {
 
 			shader = Source.shader;
 			sideCount = Math.Clamp( Source.sideCount, 3, MAX_SIDES );
-			cornerRadius = Source.cornerRadius / MathF.Min( Source.DrawWidth, Source.DrawHeight );
+			cornerRadius = Source.cornerRadius / MathF.Max( Source.DrawWidth, Source.DrawHeight );
 			matrix = Source.ScreenSpaceDrawQuad.AsMatrix();
 		}
 

@@ -5,7 +5,7 @@ using OsuFrameworkDesigner.Game.Graphics;
 namespace OsuFrameworkDesigner.Game.Components;
 
 public class PolygonComponent : CompositeDrawable, IComponent {
-	PolygonDrawable polygon;
+	public readonly PolygonDrawable Polygon;
 
 	public readonly TransformProps TransformProps;
 	new public readonly Prop<float> CornerRadius = new( "Radius" ) { Category = "Corners" };
@@ -13,10 +13,10 @@ public class PolygonComponent : CompositeDrawable, IComponent {
 
 	public PolygonComponent () {
 		TransformProps = new( this );
-		AddInternal( polygon = new PolygonDrawable().Fill() );
+		AddInternal( Polygon = new PolygonDrawable().Fill() );
 
-		CornerRadius.BindValueChanged( v => polygon.CornerRadius = v.NewValue );
-		CornerCount.BindValueChanged( v => polygon.SideCount = (int)v.NewValue );
+		CornerRadius.BindValueChanged( v => Polygon.CornerRadius = v.NewValue );
+		CornerCount.BindValueChanged( v => Polygon.SideCount = (int)v.NewValue );
 	}
 
 	public Blueprint<IComponent> CreateBlueprint ()
