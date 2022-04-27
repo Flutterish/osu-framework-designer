@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
+using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
 
@@ -10,6 +11,8 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	T? shape;
 	Vector2 dragStartPosition;
 	protected override bool OnDragStart ( DragStartEvent e ) {
+		dragFinished = false;
+
 		dragStartPosition = Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
 		Composer.Add( shape = CreateShape().With( s => {
 			s.Colour = Colour4.Green;
@@ -30,6 +33,14 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 		}
 	}
 
+	bool dragFinished = true; // due to drag end firing before mouse down, we need to keep track if it was interrupted or finished
+	protected override void Update () {
+		base.Update();
+
+		if ( !IsDragged ) {
+			dragFinished = true;
+		}
+	}
 	protected override void OnDragEnd ( DragEndEvent e ) {
 		Composer.SelectionTool.Selection.Add( shape! );
 		if ( !e.ShiftPressed ) {
@@ -39,5 +50,19 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 
 	public override void BeginUsing () {
 		Composer.SelectionTool.Selection.Clear();
+	}
+
+	protected override bool OnMouseDown ( MouseDownEvent e ) {
+		if ( e.Button is MouseButton.Right ) {
+			if ( shape != null && !dragFinished ) {
+				Composer.Remove( shape );
+				Composer.SelectionTool.Selection.Remove( shape );
+				shape = null;
+			}
+			Composer.Tool.Value = Composer.SelectionTool;
+			return true;
+		}
+
+		return base.OnMouseDown( e );
 	}
 }
