@@ -5,12 +5,16 @@ using OsuFrameworkDesigner.Game.Graphics;
 namespace OsuFrameworkDesigner.Game.Components;
 
 public class CircleComponent : CompositeDrawable, IComponent {
+	public static readonly PropDescription FillProto = PropDescriptions.FloatProp with { Name = "Fill", Category = "Shape" };
+	public static readonly PropDescription SweepEndProto = PropDescriptions.FloatProp with { Name = "End", Category = "Shape" };
+	public static readonly PropDescription SweepStartProto = PropDescriptions.FloatProp with { Name = "Start", Category = "Shape" };
+
 	TwoSidedCircularProgress circle;
 
 	public readonly DrawableProps TransformProps;
-	public readonly Prop<float> Fill = new( 1 ) { Category = "Shape" };
-	public readonly Prop<float> SweepEnd = new( 1, "End" ) { Category = "Shape" };
-	public readonly Prop<float> SweepStart = new( 0, "Start" ) { Category = "Shape" };
+	public readonly Prop<float> Fill = new( 1, FillProto );
+	public readonly Prop<float> SweepEnd = new( 1, SweepEndProto );
+	public readonly Prop<float> SweepStart = new( 0, SweepStartProto );
 
 	public CircleComponent () {
 		Origin = Anchor.Centre;

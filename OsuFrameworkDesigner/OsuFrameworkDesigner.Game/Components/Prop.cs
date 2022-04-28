@@ -1,21 +1,11 @@
-﻿using System.Runtime.CompilerServices;
+﻿using OsuFrameworkDesigner.Game.Containers.Properties;
+using System.Runtime.CompilerServices;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public interface IProp : IBindable {
-	/// <summary>
-	/// The name of the property. Properties with the same name and type, in the same category are merged
-	/// </summary>
-	string Name { get; }
-	/// <summary>
-	/// The category of the properrty. Properties are grouped by category
-	/// </summary>
-	string Category { get; }
-	/// <summary>
-	/// Whether this property should be grouped by same value (<see langword="true"/>) or be just one field (<see langword="false"/>)
-	/// </summary>
-	bool Groupable { get; }
-	Type Type { get; }
+public interface IProp {
+	PropDescription Prototype { get; }
+
 	object? Value { get; }
 }
 
@@ -24,25 +14,69 @@ public interface IProp<T> : IProp, IBindable<T> {
 }
 
 public class Prop<T> : Bindable<T>, IProp<T> {
-	public Prop ( [CallerMemberName] string name = "" ) { Name = name; }
-	public Prop ( T @default, [CallerMemberName] string name = "" ) : base( @default ) { Name = name; }
+	public Prop ( PropDescription proto ) { Prototype = proto; }
+	public Prop ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
+	public PropDescription Prototype { get; }
 
-	/// <summary>
-	/// The name of this property. It is automatically set to the caller member name.
-	/// <code>
-	/// public readonly Prop&lt;T&gt; MyValue = new(); // this will assign the name "MyValue"
-	/// </code>
-	/// </summary>
-	public string Name {
-		get => Description;
-		init => Description = value;
-	}
-
-	public string Category { get; init; } = "Ungrouped";
-	public bool Groupable { get; init; } = false;
-	public Type Type => typeof( T );
 	object? IProp.Value => Value;
 
 	public static implicit operator T ( Prop<T> prop )
 		=> prop.Value;
+}
+
+public sealed record PropDescription {
+	public PropDescription ( [CallerMemberName] string name = "" ) {
+		Name = name;
+	}
+
+	/// <summary>
+	/// The name of the property.
+	/// </summary>
+	public string Name { get; init; }
+	/// <summary>
+	/// The category of the property. Properties are grouped by category
+	/// </summary>
+	public string Category { get; init; } = "Ungrouped";
+	/// <summary>
+	/// Whether this property should be grouped by same value (<see langword="true"/>) or be just one field (<see langword="false"/>)
+	/// </summary>
+	public bool Groupable { get; init; }
+
+	public Func<PropDescription, Drawable> CreateEditField { get; init; } = null!;
+	public Action<Drawable, IEnumerable<IProp>> ApplyEditField { get; init; } = null!;
+	public Action<Drawable> FreeEditField { get; init; } = null!;
+
+	public string UnqualifiedName => Name.StartsWith( Category ) ? Name[Category.Length..] : Name;
+}
+
+public static class PropDescriptions {
+	public static readonly PropDescription FloatProp = new() {
+		CreateEditField = self => new FloatEditField { Title = self.UnqualifiedName },
+		ApplyEditField = ( f, props ) => ( (FloatEditField)f ).Apply( props.OfType<IProp<float>>() ),
+		FreeEditField = f => ( (FloatEditField)f ).Free()
+	};
+	public static readonly PropDescription IntProp = new() {
+		CreateEditField = self => new IntEditField { Title = self.UnqualifiedName },
+		ApplyEditField = ( f, props ) => ( (IntEditField)f ).Apply( props.OfType<IProp<int>>() ),
+		FreeEditField = f => ( (IntEditField)f ).Free()
+	};
+	public static readonly PropDescription ColourProp = new() {
+		CreateEditField = self => new ColourEditField(),
+		ApplyEditField = ( f, props ) => ( (ColourEditField)f ).Apply( props.OfType<IProp<Colour4>>() ),
+		FreeEditField = f => ( (ColourEditField)f ).Free()
+	};
+
+	public static readonly PropDescription X = FloatProp with { Name = "X", Category = "Basic" };
+	public static readonly PropDescription Y = FloatProp with { Name = "Y", Category = "Basic" };
+	public static readonly PropDescription Width = FloatProp with { Name = "Width", Category = "Basic" };
+	public static readonly PropDescription Height = FloatProp with { Name = "Height", Category = "Basic" };
+	public static readonly PropDescription Rotation = FloatProp with { Name = "Rotation", Category = "Basic" };
+	public static readonly PropDescription ScaleX = FloatProp with { Name = "X", Category = "Scale" };
+	public static readonly PropDescription ScaleY = FloatProp with { Name = "Y", Category = "Scale" };
+	public static readonly PropDescription ShearX = FloatProp with { Name = "X", Category = "Shear" };
+	public static readonly PropDescription ShearY = FloatProp with { Name = "Y", Category = "Shear" };
+	public static readonly PropDescription OriginX = FloatProp with { Name = "X", Category = "Origin" };
+	public static readonly PropDescription OriginY = FloatProp with { Name = "Y", Category = "Origin" };
+	public static readonly PropDescription FillColour = ColourProp with { Name = "Colour", Category = "Fill", Groupable = true };
+	public static readonly PropDescription CornerRadius = FloatProp with { Name = "Radius", Category = "Corners" };
 }

@@ -1,8 +1,6 @@
 ﻿using osu.Framework.Caching;
-using osu.Framework.Extensions.TypeExtensions;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
-using OsuFrameworkDesigner.Game.Containers.Assets;
 using OsuFrameworkDesigner.Game.Graphics;
 
 namespace OsuFrameworkDesigner.Game.Containers.Properties;
@@ -44,8 +42,8 @@ public class PropertiesPanel : CompositeDrawable {
 		if ( !componentCache.IsValid ) {
 			componentCache.Validate();
 
-			foreach ( var (field, free, pool) in rentedFields ) {
-				free( field );
+			foreach ( var (field, description, pool) in rentedFields ) {
+				description.FreeEditField( field );
 				pool.Push( field );
 
 				items.Remove( field );
@@ -53,55 +51,34 @@ public class PropertiesPanel : CompositeDrawable {
 			rentedFields.Clear();
 
 			items.Clear();
-			foreach ( var category in Components.SelectMany( c => c.GetNestedProperties() ).GroupBy( x => x.Category ) ) {
+			foreach ( var category in Components.SelectMany( c => c.GetNestedProperties() ).GroupBy( x => x.Prototype.Category ) ) {
 				items.Add( new DesignerSpriteText { Text = category.Key, Font = DesignerFont.Bold( 18 ), Colour = Colour4.Black, Alpha = 0.5f, RelativeSizeAxes = Axes.X } );
 
-				foreach ( var prop in category.GroupBy( x => (x.Name, x.Type) ) ) {
-					var ungroupable = prop.Where( x => !x.Groupable );
-					if ( ungroupable.Any() ) items.Add( createEditField( prop.Key.Type, ungroupable ) );
-
-					foreach ( var i in prop.Where( x => x.Groupable ).GroupBy( x => x.Value ) ) {
-						items.Add( createEditField( prop.Key.Type, i ) );
+				foreach ( var prop in category.GroupBy( x => x.Prototype ) ) {
+					if ( prop.Key.Groupable ) {
+						foreach ( var i in prop.GroupBy( x => x.Value ) ) {
+							items.Add( createEditField( prop.Key, i ) );
+						}
+					}
+					else {
+						items.Add( createEditField( prop.Key, prop ) );
 					}
 				}
 			}
 		}
 	}
 
-	static (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free) createField<TField, T>
-		( Action<TField, IEnumerable<IProp<T>>, string> apply, Action<TField> free ) where TField : Drawable, new() {
-		return (
-			() => new TField(),
-			( f, p, t ) => apply( (TField)f, p.OfType<IProp<T>>(), t ),
-			f => free( (TField)f )
-		);
-	}
+	List<(Drawable field, PropDescription description, Stack<Drawable> pool)> rentedFields = new();
+	Dictionary<PropDescription, Stack<Drawable>> editFieldPool = new();
+	Drawable createEditField ( PropDescription description, IEnumerable<IProp> props ) {
+		if ( !editFieldPool.TryGetValue( description, out var pool ) )
+			editFieldPool.Add( description, pool = new() );
 
-	List<(Drawable field, Action<Drawable> free, Stack<Drawable> pool)> rentedFields = new();
-	Dictionary<Type, Stack<Drawable>> editFieldPool = new();
-	static readonly Dictionary<Type, (Func<Drawable> create, Action<Drawable, IEnumerable<IProp>, string> apply, Action<Drawable> free)> editFieldFactory = new() {
-		[typeof( float )] = createField<FloatEditField, float>(
-			( f, p, t ) => { f.Title = t; f.Apply( p ); },
-			f => f.Free()
-		),
-		[typeof( int )] = createField<IntEditField, int>(
-			( f, p, t ) => { f.Title = t; f.Apply( p ); },
-			f => f.Free()
-		),
-		[typeof( Colour4 )] = createField<ColourEditField, Colour4>(
-			( f, p, t ) => f.Apply( p ),
-			f => f.Free()
-		),
-	};
-	Drawable createEditField ( Type type, IEnumerable<IProp> props ) {
-		if ( !editFieldPool.TryGetValue( type, out var stack ) ) editFieldPool.Add( type, stack = new() );
+		if ( !pool.TryPop( out var field ) )
+			field = description.CreateEditField( description );
 
-		if ( !editFieldFactory.TryGetValue( type, out var factory ) ) throw new InvalidOperationException( $"No edit field for type {type.ReadableName()} exists." );
-
-		if ( !stack.TryPop( out var field ) ) field = factory.create();
-
-		factory.apply( field, props, props.First().Name );
-		rentedFields.Add( (field, factory.free, stack) );
+		description.ApplyEditField( field, props );
+		rentedFields.Add( (field, description, pool) );
 		return field;
 	}
 }

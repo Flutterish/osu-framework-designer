@@ -9,7 +9,10 @@ public interface IComponent {
 	Blueprint<IComponent> CreateBlueprint ();
 
 	public Prop<T>? GetProperty<T> ( string name, string category )
-		=> Properties.FirstOrDefault( x => x.Name == name && x.Category == category && x.Type == typeof( T ) ) as Prop<T>;
+		=> Properties.FirstOrDefault( x => x.Prototype.Name == name && x.Prototype.Category == category ) as Prop<T>;
+
+	public Prop<T>? GetProperty<T> ( PropDescription description )
+		=> Properties.FirstOrDefault( x => x.Prototype == description ) as Prop<T>;
 
 	public IEnumerable<IProp> GetNestedProperties ()
 		=> this is IEnumerable<IComponent> container

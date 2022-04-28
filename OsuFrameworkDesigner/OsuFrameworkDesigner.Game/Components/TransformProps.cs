@@ -88,17 +88,17 @@ public class TransformProps : IEnumerable<IProp> {
 		}
 	}
 
-	public readonly Prop<float> X = new() { Category = "Basic" };
-	public readonly Prop<float> Y = new() { Category = "Basic" };
-	public readonly Prop<float> Width = new() { Category = "Basic" };
-	public readonly Prop<float> Height = new() { Category = "Basic" };
-	public readonly Prop<float> Rotation = new() { Category = "Basic" };
-	public readonly Prop<float> ScaleX = new( "X" ) { Category = "Scale" };
-	public readonly Prop<float> ScaleY = new( "Y" ) { Category = "Scale" };
-	public readonly Prop<float> ShearX = new( "X" ) { Category = "Shear" };
-	public readonly Prop<float> ShearY = new( "Y" ) { Category = "Shear" };
-	public readonly Prop<float> OriginX = new( "X" ) { Category = "Origin" };
-	public readonly Prop<float> OriginY = new( "Y" ) { Category = "Origin" };
+	public readonly Prop<float> X = new( PropDescriptions.X );
+	public readonly Prop<float> Y = new( PropDescriptions.Y );
+	public readonly Prop<float> Width = new( PropDescriptions.Width );
+	public readonly Prop<float> Height = new( PropDescriptions.Height );
+	public readonly Prop<float> Rotation = new( PropDescriptions.Rotation );
+	public readonly Prop<float> ScaleX = new( PropDescriptions.ScaleX );
+	public readonly Prop<float> ScaleY = new( PropDescriptions.ScaleY );
+	public readonly Prop<float> ShearX = new( PropDescriptions.ShearX );
+	public readonly Prop<float> ShearY = new( PropDescriptions.ShearY );
+	public readonly Prop<float> OriginX = new( PropDescriptions.OriginX );
+	public readonly Prop<float> OriginY = new( PropDescriptions.OriginY );
 
 	public Vector2 RelativeOrigin => new( OriginX.Value, OriginY.Value );
 

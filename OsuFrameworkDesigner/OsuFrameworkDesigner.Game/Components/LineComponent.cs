@@ -5,14 +5,19 @@ using OsuFrameworkDesigner.Game.Components.Interfaces;
 namespace OsuFrameworkDesigner.Game.Components;
 
 public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
+	public static readonly PropDescription RadiusProto = PropDescriptions.FloatProp with { Name = "Radius", Category = "Shape" };
+	public static readonly PropDescription StartXProto = PropDescriptions.FloatProp with { Name = "X", Category = "Start" };
+	public static readonly PropDescription StartYProto = PropDescriptions.FloatProp with { Name = "Y", Category = "Start" };
+	public static readonly PropDescription EndXProto = PropDescriptions.FloatProp with { Name = "X", Category = "End" };
+	public static readonly PropDescription EndYProto = PropDescriptions.FloatProp with { Name = "Y", Category = "End" };
 	Box box;
 
-	public readonly Prop<float> Radius = new( 1 ) { Category = "Shape" };
-	public readonly Prop<float> StartX = new( "X" ) { Category = "Start" };
-	public readonly Prop<float> StartY = new( "Y" ) { Category = "Start" };
-	public readonly Prop<float> EndX = new( "X" ) { Category = "End" };
-	public readonly Prop<float> EndY = new( "Y" ) { Category = "End" };
-	public readonly Prop<Colour4> FillColour = new( Colour4.Green, "Colour" ) { Category = "Fill", Groupable = true };
+	public readonly Prop<float> Radius = new( 1, RadiusProto );
+	public readonly Prop<float> StartX = new( StartXProto );
+	public readonly Prop<float> StartY = new( StartYProto );
+	public readonly Prop<float> EndX = new( EndXProto );
+	public readonly Prop<float> EndY = new( EndYProto );
+	public readonly Prop<Colour4> FillColour = new( Colour4.Green, PropDescriptions.FillColour );
 
 	public LineComponent () {
 		Origin = Anchor.CentreLeft;

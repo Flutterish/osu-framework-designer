@@ -23,7 +23,7 @@ public class AssetsPanel : CompositeDrawable {
 			}
 		}.Fill() );
 
-		Selection.BindCollectionChanged( (_, e) => {
+		Selection.BindCollectionChanged( ( _, e ) => {
 			if ( e.OldItems != null ) {
 				foreach ( IComponent i in e.OldItems ) {
 					if ( itemsByComponent.TryGetValue( i, out var item ) )
@@ -51,7 +51,7 @@ public class AssetsPanel : CompositeDrawable {
 			listItem = new();
 			listItem.Clicked += onListItemClicked;
 		}
-		
+
 		listItem.Apply( component );
 		items.Add( listItem );
 		itemsByComponent.Add( component, listItem );

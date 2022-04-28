@@ -5,11 +5,12 @@ using OsuFrameworkDesigner.Game.Graphics;
 namespace OsuFrameworkDesigner.Game.Components;
 
 public class PolygonComponent : CompositeDrawable, IComponent {
+	public static readonly PropDescription CornerCountProto = PropDescriptions.IntProp with { Name = "Count", Category = "Corners" };
 	public readonly PolygonDrawable Polygon;
 
 	public readonly DrawableProps TransformProps;
-	new public readonly Prop<float> CornerRadius = new( "Radius" ) { Category = "Corners" };
-	public readonly Prop<int> CornerCount = new( 3, "Count" ) { Category = "Corners" };
+	new public readonly Prop<float> CornerRadius = new( PropDescriptions.CornerRadius );
+	public readonly Prop<int> CornerCount = new( 3, CornerCountProto );
 
 	public PolygonComponent () {
 		TransformProps = new( this );

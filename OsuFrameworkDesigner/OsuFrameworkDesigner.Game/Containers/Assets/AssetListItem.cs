@@ -15,7 +15,7 @@ public class AssetListItem : CompositeDrawable {
 
 		AddInternal( new Box { Alpha = 0, AlwaysPresent = true }.Fill() );
 		AddInternal( new FillFlowContainer { Spacing = new( 4 ), AutoSizeAxes = Axes.Y, Direction = FillDirection.Horizontal }.WithChildren(
-			icon = new Box { 
+			icon = new Box {
 				Size = new( 12 ),
 				Anchor = Anchor.CentreLeft,
 				Origin = Anchor.CentreLeft

@@ -10,7 +10,7 @@ public class DrawableProps : TransformProps {
 		FillColour.Value = drawable.Colour;
 	}
 
-	public readonly Prop<Colour4> FillColour = new( Colour4.Green, "Colour" ) { Category = "Fill", Groupable = true };
+	public readonly Prop<Colour4> FillColour = new( Colour4.Green, PropDescriptions.FillColour );
 
 	public override IEnumerator<IProp> GetEnumerator () {
 		var b = base.GetEnumerator();
