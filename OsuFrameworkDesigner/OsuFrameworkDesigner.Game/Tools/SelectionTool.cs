@@ -12,7 +12,7 @@ namespace OsuFrameworkDesigner.Game.Tools;
 public class SelectionTool : Tool {
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
-		selectionComponent = ( new SelectionComponent().CreateBlueprint() as BasicTransformBlueprint<SelectionComponent> )!;
+		selectionComponent = ( new SelectionComponent().CreateBlueprint() as SelectionBlueprint )!;
 		AddInternal( selectionComponent );
 		selectionComponent.Alpha = 0;
 		selectionComponent.ResizingScales = true;
@@ -33,6 +33,8 @@ public class SelectionTool : Tool {
 			selectionBox.FarBottomLeft.Alpha =
 			selectionBox.FarBottomRight.Alpha =
 				selectionHasMatrices ? 1 : 0;
+
+			selectionComponent.SelectedComponents = Selection;
 		} );
 
 		selectionComponent.OriginHandle.Dragged += _ => lastPosition = selectionComponent.TransformProps.Position;
@@ -133,7 +135,7 @@ public class SelectionTool : Tool {
 	}
 
 	public readonly BindableList<IComponent> Selection = new();
-	BasicTransformBlueprint<SelectionComponent> selectionComponent;
+	SelectionBlueprint selectionComponent;
 	SelectionBox selectionBox => selectionComponent.SelectionBox;
 
 	Container<DrawableSelection> selections;
@@ -224,10 +226,20 @@ public class SelectionTool : Tool {
 		}
 
 		public Blueprint<IComponent> CreateBlueprint ()
-			=> new BasicTransformBlueprint<SelectionComponent>( this, TransformProps );
+			=> new SelectionBlueprint( this );
 		string IComponent.Name => Name;
 		public IEnumerable<IProp> Properties => TransformProps;
 	}
+
+	private class SelectionBlueprint : BasicTransformBlueprint<SelectionComponent>, ISelection {
+		public SelectionBlueprint ( SelectionComponent value ) : base( value, value.TransformProps ) { }
+
+		public IEnumerable<IComponent> SelectedComponents { get; set; } = Array.Empty<IComponent>();
+	}
+}
+
+public interface ISelection {
+	IEnumerable<IComponent> SelectedComponents { get; }
 }
 
 public class HoverSelectionBox : CompositeDrawable { // TODO the borders should be around, not inside

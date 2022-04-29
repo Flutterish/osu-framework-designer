@@ -47,7 +47,15 @@ public class RectangleComponent : CompositeDrawable, IComponent, IHasSnapGuides 
 	public IEnumerable<PointGuide> PointGuides {
 		get {
 			yield return TransformProps.TopLeft;
+			yield return TransformProps.TopRight;
+			yield return TransformProps.BottomLeft;
+			yield return TransformProps.BottomRight;
 			yield return TransformProps.Centre;
+
+			yield return TransformProps.LeftCentre;
+			yield return TransformProps.RightCentre;
+			yield return TransformProps.TopCentre;
+			yield return TransformProps.BottomCentre;
 		}
 	}
 	public IEnumerable<LineGuide> LineGuides { get; } = Array.Empty<LineGuide>();

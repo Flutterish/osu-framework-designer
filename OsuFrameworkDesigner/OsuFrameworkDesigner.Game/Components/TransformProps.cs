@@ -152,57 +152,16 @@ public class TransformProps : IEnumerable<IProp> {
 		return new( x, y );
 	}
 
-	public Vector2 TopLeft {
-		get {
-			var x = X.Value;
-			var y = Y.Value;
+	public Vector2 TopLeft => PositionAtRelative( Vector2.Zero );
+	public Vector2 TopRight => PositionAtRelative( new( 1, 0 ) );
+	public Vector2 BottomLeft => PositionAtRelative( new( 0, 1 ) );
+	public Vector2 BottomRight => PositionAtRelative( new( 1, 1 ) );
+	public Vector2 Centre => PositionAtRelative( new( 0.5f ) );
 
-			var deltaY = -OriginY.Value;
-			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
-			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
-			x += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
-			y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
-
-			var deltaX = -OriginX.Value;
-			cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
-			sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
-			x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
-			y += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
-			// shear is non-commutative
-			var total = Shear.X * Shear.Y;
-			x += cos * total * deltaX * EffectiveWidth;
-			y += sin * total * deltaX * EffectiveWidth;
-
-			return new( x, y );
-		}
-	}
-
-	public Vector2 Centre {
-		get {
-			var x = X.Value;
-			var y = Y.Value;
-
-			var deltaY = 0.5f - OriginY.Value;
-
-			var cos = MathF.Cos( ( Rotation.Value + 90 ) / 180 * MathF.PI );
-			var sin = MathF.Sin( ( Rotation.Value + 90 ) / 180 * MathF.PI );
-			x += ( cos - sin * ShearX.Value ) * deltaY * EffectiveHeight;
-			y += ( sin + cos * ShearX.Value ) * deltaY * EffectiveHeight;
-
-			var deltaX = 0.5f - OriginX.Value;
-
-			cos = MathF.Cos( Rotation.Value / 180 * MathF.PI );
-			sin = MathF.Sin( Rotation.Value / 180 * MathF.PI );
-			x += ( cos + sin * ShearY.Value ) * deltaX * EffectiveWidth;
-			y += ( sin - cos * ShearY.Value ) * deltaX * EffectiveWidth;
-			// shear is non-commutative
-			var total = Shear.X * Shear.Y;
-			x += cos * total * deltaX * EffectiveWidth;
-			y += sin * total * deltaX * EffectiveWidth;
-
-			return new( x, y );
-		}
-	}
+	public Vector2 BottomCentre => PositionAtRelative( new( 0.5f, 1 ) );
+	public Vector2 TopCentre => PositionAtRelative( new( 0.5f, 0 ) );
+	public Vector2 RightCentre => PositionAtRelative( new( 1, 0.5f ) );
+	public Vector2 LeftCentre => PositionAtRelative( new( 0, 0.5f ) );
 
 	public void Normalize () {
 		if ( ScaleX.Value < 0 ) {

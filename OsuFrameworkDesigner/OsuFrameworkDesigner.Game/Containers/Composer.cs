@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
+using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
 
@@ -16,7 +17,9 @@ public class Composer : CompositeDrawable {
 
 	TransformContainer content;
 	UnmaskableContainer components;
-	UnmaskableContainer layerAbove;
+	UnmaskableContainer snapMarkers;
+
+	SnapMarker marker1 = new();
 
 	public readonly SelectionTool SelectionTool = new();
 
@@ -28,10 +31,11 @@ public class Composer : CompositeDrawable {
 			TargetDrawSize = new Vector2( 500 ),
 			Child = content = new TransformContainer().Fit().Center().WithChildren(
 				components = new UnmaskableContainer().Center(),
-				layerAbove = new UnmaskableContainer().Center()
+				snapMarkers = new UnmaskableContainer { Alpha = 0 }.Center()
 			)
 		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
+		AddInternal( snapMarkers.CreateProxy() );
 	}
 
 	public IEnumerable<IComponent> Components => components.OfType<IComponent>();
@@ -61,16 +65,29 @@ public class Composer : CompositeDrawable {
 	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null )
 		=> Snap( point, source.Yield(), context );
 	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, UIEvent? context = null ) {
+		snapMarkers.Clear( disposeChildren: false );
+
+		if ( context?.ControlPressed == true )
+			return point;
+
 		foreach ( var i in SnapGuidesNear( point ).Except( source.OfType<IHasSnapGuides>() ).SelectMany( x => x.PointGuides ) ) {
 			if ( i.IsInRange( point ) ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = i.Point;
 				return i.Point;
 			}
 		}
 
-		if ( context?.ControlPressed != true )
-			return point.Round();
-		else
-			return point;
+		return point.Round();
+	}
+
+	bool showSnaps;
+	public bool ShowSnaps {
+		get => showSnaps;
+		set {
+			showSnaps = value;
+			snapMarkers.Alpha = value ? 1 : 0;
+		}
 	}
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )

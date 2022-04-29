@@ -17,6 +17,9 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.ToLocalSpace( Composer.ToContentSpace( screenSpacePosition ) );
 
+	public Vector2 ContentToTargetSpace ( Vector2 contentSpacePosition )
+		=> TransformProps.ToLocalSpace( contentSpacePosition );
+
 	/// <summary>
 	/// Transforms screen space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
 	/// </summary>
@@ -28,6 +31,18 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	/// </summary>
 	public Vector2 ToTargetTopLeftSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.Position + ToTargetSpace( screenSpacePosition );
+
+	/// <summary>
+	/// Transforms content space coordinates to target local space where (TransformProps.X, Y) is the origin of the drawable
+	/// </summary>
+	public Vector2 ContentToTargetOriginSpace ( Vector2 contentSpacePosition )
+		=> TransformProps.Position - TransformProps.Size * TransformProps.RelativeOrigin + ContentToTargetSpace( contentSpacePosition );
+
+	/// <summary>
+	/// Transforms content space coordinates to target local space where (TransformProps.X, Y) is the top left of the drawable
+	/// </summary>
+	public Vector2 ContentToTargetTopLeftSpace ( Vector2 contentSpacePosition )
+		=> TransformProps.Position + ContentToTargetSpace( contentSpacePosition );
 
 	public Vector2 ContentToLocalSpace ( Vector2 contentSpace )
 		=> ToLocalSpace( Composer.ContentToScreenSpace( contentSpace ) );
@@ -119,71 +134,71 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			TransformProps.ShearBottom( dx );
 		}
 
-		SelectionBox.TopLeft.Dragged += e => {
-			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-			setLeft( e.AltPressed ? x : x.Round() );
-			setTop( e.AltPressed ? y : y.Round() );
+		SelectionBox.TopLeft.SnapDragged += e => {
+			var (x, y) = ContentToTargetOriginSpace( e.Position );
+			setLeft( x );
+			setTop( y );
 		};
-		SelectionBox.TopRight.Dragged += e => {
-			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-			setRight( e.AltPressed ? x : x.Round() );
-			setTop( e.AltPressed ? y : y.Round() );
+		SelectionBox.TopRight.SnapDragged += e => {
+			var (x, y) = ContentToTargetOriginSpace( e.Position );
+			setRight( x );
+			setTop( y );
 		};
-		SelectionBox.BottomLeft.Dragged += e => {
-			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-			setLeft( e.AltPressed ? x : x.Round() );
-			setBottom( e.AltPressed ? y : y.Round() );
+		SelectionBox.BottomLeft.SnapDragged += e => {
+			var (x, y) = ContentToTargetOriginSpace( e.Position );
+			setLeft( x );
+			setBottom( y );
 		};
-		SelectionBox.BottomRight.Dragged += e => {
-			var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-			setRight( e.AltPressed ? x : x.Round() );
-			setBottom( e.AltPressed ? y : y.Round() );
+		SelectionBox.BottomRight.SnapDragged += e => {
+			var (x, y) = ContentToTargetOriginSpace( e.Position );
+			setRight( x );
+			setBottom( y );
 		};
-		SelectionBox.Bottom.Dragged += e => {
+		SelectionBox.Bottom.SnapDragged += e => {
 			if ( isShearing ) {
-				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
-				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
+				var (x, y) = Unshear( ContentToTargetSpace( e.Position ) );
+				var (lx, ly) = Unshear( ContentToTargetSpace( e.LastPosition ) );
 				shearBottom( x - lx );
 			}
 			else {
-				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-				setBottom( e.AltPressed ? y : y.Round() );
+				var (x, y) = ContentToTargetOriginSpace( e.Position );
+				setBottom( y );
 			}
 		};
-		SelectionBox.Top.Dragged += e => {
+		SelectionBox.Top.SnapDragged += e => {
 			if ( isShearing ) {
-				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
-				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
+				var (x, y) = Unshear( ContentToTargetSpace( e.Position ) );
+				var (lx, ly) = Unshear( ContentToTargetSpace( e.LastPosition ) );
 				shearTop( x - lx );
 			}
 			else {
-				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-				setTop( e.AltPressed ? y : y.Round() );
+				var (x, y) = ContentToTargetOriginSpace( e.Position );
+				setTop( y );
 			}
 		};
-		SelectionBox.Left.Dragged += e => {
+		SelectionBox.Left.SnapDragged += e => {
 			if ( isShearing ) {
-				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
-				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
+				var (x, y) = Unshear( ContentToTargetSpace( e.Position ) );
+				var (lx, ly) = Unshear( ContentToTargetSpace( e.LastPosition ) );
 				shearLeft( y - ly );
 			}
 			else {
-				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-				setLeft( e.AltPressed ? x : x.Round() );
+				var (x, y) = ContentToTargetOriginSpace( e.Position );
+				setLeft( x );
 			}
 		};
-		SelectionBox.Right.Dragged += e => {
+		SelectionBox.Right.SnapDragged += e => {
 			if ( isShearing ) {
-				var (x, y) = Unshear( ToTargetSpace( e.ScreenSpaceMousePosition ) );
-				var (lx, ly) = Unshear( ToTargetSpace( e.ScreenSpaceLastMousePosition ) );
+				var (x, y) = Unshear( ContentToTargetSpace( e.Position ) );
+				var (lx, ly) = Unshear( ContentToTargetSpace( e.LastPosition ) );
 				shearRight( y - ly );
 			}
 			else {
-				var (x, y) = ToTargetOriginSpace( e.ScreenSpaceMousePosition );
-				setRight( e.AltPressed ? x : x.Round() );
+				var (x, y) = ContentToTargetOriginSpace( e.Position );
+				setRight( x );
 			}
 		};
-		Vector2 boxDragHandle = Vector2.Zero;
+		Vector2 boxDragHandle = Vector2.Zero; // TODO snap these
 		SelectionBox.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
 		SelectionBox.Dragged += e => {
 			var delta = boxDragHandle + Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );

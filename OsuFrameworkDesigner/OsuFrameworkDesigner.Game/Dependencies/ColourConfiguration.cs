@@ -21,4 +21,7 @@ public class ColourConfiguration {
 	public readonly Bindable<Colour4> Selection = new( SelectionDefault );
 	public static Colour4 SelectionHandleDefault { get; } = Colour4.FromHex( "#FCFCFC" );
 	public readonly Bindable<Colour4> SelectionHandle = new( SelectionHandleDefault );
+
+	public static Colour4 SnapMarkerDefault { get; } = Colour4.FromHex( "#F34922" );
+	public readonly Bindable<Colour4> SnapMarker = new( SnapMarkerDefault );
 }
