@@ -64,10 +64,15 @@ public class Composer : CompositeDrawable {
 		return Components.SelectMany( x => x.GetNestedComponents() );
 	}
 
-	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null )
-		=> Snap( point, source.Yield(), context );
-	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, UIEvent? context = null ) {
+	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null, bool snapLines = true )
+		=> Snap( point, source.Yield(), out _, context, snapLines );
+	public Vector2 Snap ( Vector2 point, IComponent source, out bool snapped, UIEvent? context = null, bool snapLines = true )
+		=> Snap( point, source.Yield(), out snapped, context, snapLines );
+	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, UIEvent? context = null, bool snapLines = true )
+		=> Snap( point, source, out _, context, snapLines );
+	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, out bool snapped, UIEvent? context = null, bool snapLines = true ) {
 		snapMarkers.Clear( disposeChildren: false );
+		snapped = false;
 
 		if ( context?.ControlPressed == true )
 			return point;
@@ -76,47 +81,60 @@ public class Composer : CompositeDrawable {
 			if ( i.IsInRange( point ) ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = i.Point;
+				snapped = true;
 				return i.Point;
 			}
 		}
 
-		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
-			if ( i.TrySnap( point, out var snapped ) ) {
-				snapMarkers.Add( marker1 );
-				marker1.Position = i.StartPoint;
-				snapMarkers.Add( marker2 );
-				marker2.Position = i.EndPoint;
-				return snapped;
+		if ( snapLines ) {
+			foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
+				if ( i.TrySnap( point, out var snappedPoint ) ) {
+					snapMarkers.Add( marker1 );
+					marker1.Position = i.StartPoint;
+					snapMarkers.Add( marker2 );
+					marker2.Position = i.EndPoint;
+					snapped = true;
+					return snappedPoint;
+				}
 			}
 		}
 
 		return point.Round();
 	}
 
-	public Vector2 Snap ( Vector2 point, Vector2 direction, IComponent source, UIEvent? context = null )
-		=> Snap( point, direction, source.Yield(), context );
-	public Vector2 Snap ( Vector2 point, Vector2 direction, IEnumerable<IComponent> source, UIEvent? context = null ) {
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IComponent source, out bool snapped, UIEvent? context = null, bool snapPoints = true )
+		=> Snap( point, direction, source.Yield(), out snapped, context, snapPoints );
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IComponent source, UIEvent? context = null, bool snapPoints = true )
+		=> Snap( point, direction, source.Yield(), out _, context, snapPoints );
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IEnumerable<IComponent> source, UIEvent? context = null, bool snapPoints = true )
+		=> Snap( point, direction, source, out _, context, snapPoints );
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IEnumerable<IComponent> source, out bool snapped, UIEvent? context = null, bool snapPoints = true ) {
 		direction = direction.Normalized();
 		snapMarkers.Clear( disposeChildren: false );
+		snapped = false;
 
 		if ( context?.ControlPressed == true )
 			return point;
 
-		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
-			if ( i.IsInRange( point ) ) {
-				snapMarkers.Add( marker1 );
-				marker1.Position = i.Point;
-				return i.Point;
+		if ( snapPoints ) {
+			foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
+				if ( i.IsInRange( point ) ) {
+					snapMarkers.Add( marker1 );
+					marker1.Position = i.Point;
+					snapped = true;
+					return i.Point;
+				}
 			}
 		}
 
 		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
-			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snapped ) ) {
+			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snappedPoint ) ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = i.StartPoint;
 				snapMarkers.Add( marker2 );
 				marker2.Position = i.EndPoint;
-				return snapped;
+				snapped = true;
+				return snappedPoint;
 			}
 		}
 

@@ -28,19 +28,20 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 		if ( Type is HandleType.Point ) {
 			return Composer.Snap( point, Source, context );
 		}
-		else {
+		else /* if ( Type is HandleType.Line ) */ {
 			if ( DrawWidth > DrawHeight ) {
-				return Composer.Snap( point, Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.TopRight ), Source, context );
+				var direction = Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.TopRight );
+				return Composer.Snap( point, direction, Source, context );
 			}
 			else {
-				return Composer.Snap( point, Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.BottomLeft ), Source, context );
+				var direction = Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.BottomLeft );
+				return Composer.Snap( point, direction, Source, context );
 			}
 		}
 	}
 
 	SnapResult currentSnappedDragState;
 	protected override bool OnDragStart ( DragStartEvent e ) {
-		DragStarted?.Invoke( e );
 		if ( HandlesSnapEvents ) {
 			Composer.ShowSnaps = true;
 			var downPosition = snap( e.ScreenSpaceMouseDownPosition, e );
@@ -53,11 +54,11 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 
 			SnapDragStarted?.Invoke( currentSnappedDragState );
 		}
+		DragStarted?.Invoke( e );
 		return true;
 	}
 
 	protected override void OnDrag ( DragEvent e ) {
-		Dragged?.Invoke( e );
 		if ( HandlesSnapEvents ) {
 			var position = snap( e.ScreenSpaceMousePosition, e );
 			currentSnappedDragState = currentSnappedDragState with {
@@ -67,10 +68,10 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 
 			SnapDragged?.Invoke( currentSnappedDragState );
 		}
+		Dragged?.Invoke( e );
 	}
 
 	protected override void OnDragEnd ( DragEndEvent e ) {
-		DragEnded?.Invoke( e );
 		if ( HandlesSnapEvents ) {
 			Composer.ShowSnaps = false;
 			var position = snap( e.ScreenSpaceMousePosition, e );
@@ -81,6 +82,46 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 
 			SnapDragEnded?.Invoke( currentSnappedDragState );
 		}
+		DragEnded?.Invoke( e );
+	}
+
+	public void HandleSnappedTranslate (
+		Func<List<LineGuide>, List<PointGuide>, Vector2> populateGuides,
+		Action<Vector2> drag
+	) {
+		List<LineGuide> lineGuides = new();
+		List<PointGuide> pointGuides = new();
+		Vector2 offset = Vector2.Zero;
+
+		SnapDragStarted += e => {
+			lineGuides.Clear();
+			pointGuides.Clear();
+			offset = populateGuides( lineGuides, pointGuides );
+		};
+		Dragged += e => {
+			var delta = Composer!.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
+			var target = offset + delta;
+
+			foreach ( var p in pointGuides ) {
+				var point = p.Point + delta;
+				var snapped = Composer.Snap( point, Source, out var success, e, snapLines: false );
+				if ( success ) {
+					drag( target + snapped - point );
+					return;
+				}
+			}
+
+			foreach ( var line in lineGuides ) {
+				var point = line.StartPoint + delta;
+				var snapped = Composer.Snap( point, line.Direction, Source, out var success, e, snapPoints: false );
+				if ( success ) {
+					drag( target + snapped - point );
+					return;
+				}
+			}
+
+			drag( Composer.Snap( target, Source, e ) );
+		};
 	}
 
 	public virtual void ClearEvents () {

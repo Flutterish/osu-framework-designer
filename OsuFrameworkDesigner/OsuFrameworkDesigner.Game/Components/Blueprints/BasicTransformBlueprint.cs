@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
@@ -13,6 +14,9 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 	public TransformProps TransformProps;
 	public bool ResizingScales = false;
 	public bool CanShear = true;
+
+	IEnumerable<IComponent> source
+		=> this is ISelection s ? s.SelectedComponents : Value.Yield<IComponent>();
 
 	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.ToLocalSpace( Composer.ToContentSpace( screenSpacePosition ) );
@@ -198,13 +202,21 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 				setRight( x );
 			}
 		};
-		Vector2 boxDragHandle = Vector2.Zero; // TODO snap these
-		SelectionBox.DragStarted += e => boxDragHandle = new( TransformProps.X.Value, TransformProps.Y.Value );
-		SelectionBox.Dragged += e => {
-			var delta = boxDragHandle + Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
-			TransformProps.X.Value = e.AltPressed ? delta.X : delta.X.Round();
-			TransformProps.Y.Value = e.AltPressed ? delta.Y : delta.Y.Round();
-		};
+		SelectionBox.HandleSnappedTranslate( ( lines, points ) => {
+			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.TopRight } );
+			lines.Add( new() { StartPoint = TransformProps.BottomLeft, EndPoint = TransformProps.BottomRight } );
+			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.BottomLeft } );
+			lines.Add( new() { StartPoint = TransformProps.TopRight, EndPoint = TransformProps.BottomRight } );
+
+			points.Add( TransformProps.TopLeft );
+			points.Add( TransformProps.TopRight );
+			points.Add( TransformProps.BottomLeft );
+			points.Add( TransformProps.BottomRight );
+
+			return TransformProps.Position;
+		}, position => {
+			TransformProps.Position = position;
+		} );
 		OriginHandle.Dragged += e => {
 			var pos = Vector2.Divide( ToTargetSpace( e.ScreenSpaceMousePosition ), TransformProps.Size );
 			TransformProps.SetOrigin( e.AltPressed ? pos : pos.Round( 0.5f ).Clamp( Vector2.Zero, Vector2.One ) );

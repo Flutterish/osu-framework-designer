@@ -22,22 +22,18 @@ public class LineBlueprint : Blueprint<IComponent> {
 			(Value.EndX.Value, Value.EndY.Value) = e.Position;
 		};
 
-		Vector2 dragHandle = Vector2.Zero;
 		Vector2 dragDeltaHandle = Vector2.Zero;
-		move.DragStarted += e => {
-			dragHandle = new( Value.StartX.Value, Value.StartY.Value );
-			dragDeltaHandle = new Vector2( Value.EndX.Value, Value.EndY.Value ) - dragHandle;
-		};
-		move.Dragged += e => {
-			var pos = dragHandle + Composer.ToContentSpace( e.ScreenSpaceMousePosition ) - Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
-			if ( !e.AltPressed )
-				pos = pos.Round();
+		move.HandleSnappedTranslate( ( lines, points ) => {
+			points.Add( new Vector2( Value.EndX, Value.EndY ) );
 
-			Value.StartX.Value = pos.X;
-			Value.StartY.Value = pos.Y;
-			Value.EndX.Value = pos.X + dragDeltaHandle.X;
-			Value.EndY.Value = pos.Y + dragDeltaHandle.Y;
-		};
+			dragDeltaHandle = new Vector2( Value.EndX, Value.EndY ) - new Vector2( value.StartX, value.StartY );
+			return new( value.StartX, value.StartY );
+		}, position => {
+			Value.StartX.Value = position.X;
+			Value.StartY.Value = position.Y;
+			Value.EndX.Value = position.X + dragDeltaHandle.X;
+			Value.EndY.Value = position.Y + dragDeltaHandle.Y;
+		} );
 	}
 
 	protected override void Update () {
