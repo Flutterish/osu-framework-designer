@@ -20,6 +20,7 @@ public class Composer : CompositeDrawable {
 	UnmaskableContainer snapMarkers;
 
 	SnapMarker marker1 = new();
+	SnapMarker marker2 = new();
 
 	public readonly SelectionTool SelectionTool = new();
 
@@ -80,6 +81,28 @@ public class Composer : CompositeDrawable {
 		}
 
 		return point.Round();
+	}
+
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IComponent source, UIEvent? context = null )
+		=> Snap( point, direction, source.Yield(), context );
+	public Vector2 Snap ( Vector2 point, Vector2 direction, IEnumerable<IComponent> source, UIEvent? context = null ) {
+		direction = direction.Normalized();
+		snapMarkers.Clear( disposeChildren: false );
+
+		if ( context?.ControlPressed == true )
+			return point;
+
+		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
+			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snapped ) ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = i.StartPoint;
+				snapMarkers.Add( marker2 );
+				marker2.Position = i.EndPoint;
+				return snapped;
+			}
+		}
+
+		return Snap( point, source, context );
 	}
 
 	bool showSnaps;

@@ -26,12 +26,44 @@ public interface IHasSnapGuides {
 			yield return composer.ToContentSpace( ( quad.BottomRight + quad.BottomLeft ) / 2 );
 		}
 	}
+
+	public static IEnumerable<LineGuide> LineGuidesFrom ( IComponent component, Composer composer ) {
+		if ( component is IHasSnapGuides s ) {
+			foreach ( var i in s.LineGuides )
+				yield return i;
+		}
+
+		if ( component is Drawable d ) {
+			var quad = d.ScreenSpaceDrawQuad;
+			yield return new() {
+				StartPoint = composer.ToContentSpace( quad.TopLeft ),
+				EndPoint = composer.ToContentSpace( quad.TopRight )
+			};
+			yield return new() {
+				StartPoint = composer.ToContentSpace( quad.BottomLeft ),
+				EndPoint = composer.ToContentSpace( quad.BottomRight )
+			};
+			yield return new() {
+				StartPoint = composer.ToContentSpace( quad.TopLeft ),
+				EndPoint = composer.ToContentSpace( quad.BottomLeft )
+			};
+			yield return new() {
+				StartPoint = composer.ToContentSpace( quad.TopRight ),
+				EndPoint = composer.ToContentSpace( quad.BottomRight )
+			};
+		}
+	}
 }
 
 public struct LineGuide {
 	public Vector2 StartPoint;
 	public Vector2 EndPoint;
-	public Vector2 Direction => ( EndPoint - StartPoint ).Normalized();
+	public Vector2 Direction => EndPoint - StartPoint;
+
+	public bool TrySnap ( Vector2 point, out Vector2 snapped ) {
+		snapped = MathExtensions.ClosestPointToLine( StartPoint, EndPoint - StartPoint, point );
+		return ( snapped - point ).LengthSquared <= 100;
+	}
 }
 
 public struct PointGuide {

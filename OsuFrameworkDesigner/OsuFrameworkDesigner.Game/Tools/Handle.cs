@@ -22,13 +22,29 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 	protected bool HandlesSnapEvents => CanHandleSnapEvents && ( SnapDragged != null || SnapDragStarted != null || SnapDragEnded != null );
 	protected bool CanHandleSnapEvents => Composer != null;
 
+	Vector2 snap ( Vector2 screenSpacePoint, UIEvent? context ) {
+		var point = Composer!.ToContentSpace( screenSpacePoint );
+
+		if ( Type is HandleType.Point ) {
+			return Composer.Snap( point, Source, context );
+		}
+		else {
+			if ( DrawWidth > DrawHeight ) {
+				return Composer.Snap( point, Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.TopRight ), Source, context );
+			}
+			else {
+				return Composer.Snap( point, Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.BottomLeft ), Source, context );
+			}
+		}
+	}
+
 	SnapResult currentSnappedDragState;
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		DragStarted?.Invoke( e );
 		if ( HandlesSnapEvents ) {
 			Composer.ShowSnaps = true;
-			var downPosition = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition ), Source, e );
-			var position = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMousePosition ), Source, e );
+			var downPosition = snap( e.ScreenSpaceMouseDownPosition, e );
+			var position = snap( e.ScreenSpaceMousePosition, e );
 			currentSnappedDragState = new() {
 				DownPosition = downPosition,
 				LastPosition = downPosition,
@@ -43,7 +59,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 	protected override void OnDrag ( DragEvent e ) {
 		Dragged?.Invoke( e );
 		if ( HandlesSnapEvents ) {
-			var position = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMousePosition ), Source, e );
+			var position = snap( e.ScreenSpaceMousePosition, e );
 			currentSnappedDragState = currentSnappedDragState with {
 				LastPosition = currentSnappedDragState.Position,
 				Position = position
@@ -57,7 +73,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 		DragEnded?.Invoke( e );
 		if ( HandlesSnapEvents ) {
 			Composer.ShowSnaps = false;
-			var position = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMousePosition ), Source, e );
+			var position = snap( e.ScreenSpaceMousePosition, e );
 			currentSnappedDragState = currentSnappedDragState with {
 				LastPosition = currentSnappedDragState.Position,
 				Position = position
@@ -83,9 +99,15 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 	public event Action<SnapResult>? SnapDragged;
 	public event Action<SnapResult>? SnapDragEnded;
 
+	public HandleType Type = HandleType.Point;
 	public CursorStyle CursorStyle { get; set; }
 	public float CursorRotation { get; set; }
 	public LocalisableString TooltipText { get; set; }
+}
+
+public enum HandleType {
+	Point,
+	Line
 }
 
 /// <summary>
