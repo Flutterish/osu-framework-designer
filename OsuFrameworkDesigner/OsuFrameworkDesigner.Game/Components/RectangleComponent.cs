@@ -3,7 +3,7 @@ using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public class RectangleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
+public class RectangleComponent : CompositeDrawable, IComponent {
 	Box box;
 	Container? roundedContainer;
 
@@ -43,20 +43,4 @@ public class RectangleComponent : CompositeDrawable, IComponent, IHasSnapGuides 
 		=> new RectangleBlueprint( this );
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius );
-
-	public IEnumerable<PointGuide> PointGuides {
-		get {
-			yield return TransformProps.TopLeft;
-			yield return TransformProps.TopRight;
-			yield return TransformProps.BottomLeft;
-			yield return TransformProps.BottomRight;
-			yield return TransformProps.Centre;
-
-			yield return TransformProps.LeftCentre;
-			yield return TransformProps.RightCentre;
-			yield return TransformProps.TopCentre;
-			yield return TransformProps.BottomCentre;
-		}
-	}
-	public IEnumerable<LineGuide> LineGuides { get; } = Array.Empty<LineGuide>();
 }

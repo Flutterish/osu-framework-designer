@@ -59,9 +59,10 @@ public class Composer : CompositeDrawable {
 	public event HierarchyChangedHandler? ComponentRemoved;
 	public event HierarchyChangedHandler? ComponentAdded;
 
-	public IEnumerable<IHasSnapGuides> SnapGuidesNear ( Vector2 point ) { // TODO use this point to optimize in the future
-		return Components.SelectMany( x => x.GetNestedComponents() ).OfType<IHasSnapGuides>();
+	public IEnumerable<IComponent> ComponentsNear ( Vector2 point ) { // TODO use this point to optimize in the future
+		return Components.SelectMany( x => x.GetNestedComponents() );
 	}
+
 	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null )
 		=> Snap( point, source.Yield(), context );
 	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, UIEvent? context = null ) {
@@ -70,7 +71,7 @@ public class Composer : CompositeDrawable {
 		if ( context?.ControlPressed == true )
 			return point;
 
-		foreach ( var i in SnapGuidesNear( point ).Except( source.OfType<IHasSnapGuides>() ).SelectMany( x => x.PointGuides ) ) {
+		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
 			if ( i.IsInRange( point ) ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = i.Point;
