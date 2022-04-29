@@ -80,6 +80,16 @@ public class Composer : CompositeDrawable {
 			}
 		}
 
+		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
+			if ( i.TrySnap( point, out var snapped ) ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = i.StartPoint;
+				snapMarkers.Add( marker2 );
+				marker2.Position = i.EndPoint;
+				return snapped;
+			}
+		}
+
 		return point.Round();
 	}
 
@@ -92,6 +102,14 @@ public class Composer : CompositeDrawable {
 		if ( context?.ControlPressed == true )
 			return point;
 
+		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
+			if ( i.IsInRange( point ) ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = i.Point;
+				return i.Point;
+			}
+		}
+
 		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
 			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snapped ) ) {
 				snapMarkers.Add( marker1 );
@@ -102,7 +120,7 @@ public class Composer : CompositeDrawable {
 			}
 		}
 
-		return Snap( point, source, context );
+		return point.Round();
 	}
 
 	bool showSnaps;
