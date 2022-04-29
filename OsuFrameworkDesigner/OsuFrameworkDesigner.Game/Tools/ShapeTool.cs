@@ -13,7 +13,8 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		dragFinished = false;
 
-		dragStartPosition = Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition );
+		Composer.ShowSnaps = true;
+		dragStartPosition = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition ), Array.Empty<IComponent>(), e );
 		Composer.Add( shape = CreateShape().With( s => {
 			s.Colour = Colour4.Green;
 		} ) );
@@ -24,7 +25,7 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	}
 
 	protected override void OnDrag ( DragEvent e ) {
-		var end = Composer.ToContentSpace( e.ScreenSpaceMousePosition );
+		var end = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMousePosition ), shape!, e );
 		if ( e.AltPressed ) {
 			UpdateShape( shape!, dragStartPosition, end );
 		}
@@ -42,6 +43,7 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 		}
 	}
 	protected override void OnDragEnd ( DragEndEvent e ) {
+		Composer.ShowSnaps = false;
 		Composer.SelectionTool.Selection.Add( shape! );
 		if ( !e.ShiftPressed ) {
 			Composer.Tool.Value = Composer.SelectionTool;
