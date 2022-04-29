@@ -203,6 +203,8 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 			}
 		};
 		SelectionBox.HandleSnappedTranslate( ( lines, points ) => {
+			lines.Add( new() { StartPoint = TransformProps.TopCentre, EndPoint = TransformProps.BottomCentre } );
+			lines.Add( new() { StartPoint = TransformProps.LeftCentre, EndPoint = TransformProps.RightCentre } );
 			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.TopRight } );
 			lines.Add( new() { StartPoint = TransformProps.BottomLeft, EndPoint = TransformProps.BottomRight } );
 			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.BottomLeft } );

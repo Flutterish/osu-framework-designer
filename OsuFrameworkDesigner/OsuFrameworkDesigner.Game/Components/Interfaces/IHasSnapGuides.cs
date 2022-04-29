@@ -36,6 +36,15 @@ public interface IHasSnapGuides {
 		if ( component is Drawable d ) {
 			var quad = d.ScreenSpaceDrawQuad;
 			yield return new() {
+				StartPoint = composer.ToContentSpace( ( quad.TopLeft + quad.BottomLeft ) / 2 ),
+				EndPoint = composer.ToContentSpace( ( quad.TopRight + quad.BottomRight ) / 2 )
+			};
+			yield return new() {
+				StartPoint = composer.ToContentSpace( ( quad.TopLeft + quad.TopRight ) / 2 ),
+				EndPoint = composer.ToContentSpace( ( quad.BottomLeft + quad.BottomRight ) / 2 )
+			};
+
+			yield return new() {
 				StartPoint = composer.ToContentSpace( quad.TopLeft ),
 				EndPoint = composer.ToContentSpace( quad.TopRight )
 			};

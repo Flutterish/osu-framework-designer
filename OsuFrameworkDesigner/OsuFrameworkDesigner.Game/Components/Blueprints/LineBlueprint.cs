@@ -24,10 +24,13 @@ public class LineBlueprint : Blueprint<IComponent> {
 
 		Vector2 dragDeltaHandle = Vector2.Zero;
 		move.HandleSnappedTranslate( ( lines, points ) => {
-			points.Add( new Vector2( Value.EndX, Value.EndY ) );
+			var from = new Vector2( value.StartX, value.StartY );
+			var to = new Vector2( Value.EndX, Value.EndY );
+			points.Add( to );
+			lines.Add( new() { StartPoint = from, EndPoint = to } );
 
-			dragDeltaHandle = new Vector2( Value.EndX, Value.EndY ) - new Vector2( value.StartX, value.StartY );
-			return new( value.StartX, value.StartY );
+			dragDeltaHandle = to - from;
+			return from;
 		}, position => {
 			Value.StartX.Value = position.X;
 			Value.StartY.Value = position.Y;
