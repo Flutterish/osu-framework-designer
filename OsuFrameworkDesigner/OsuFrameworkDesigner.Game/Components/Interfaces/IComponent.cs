@@ -1,4 +1,5 @@
-﻿using OsuFrameworkDesigner.Game.Components.Blueprints;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using OsuFrameworkDesigner.Game.Components.Blueprints;
 
 namespace OsuFrameworkDesigner.Game.Components.Interfaces;
 
@@ -18,4 +19,9 @@ public interface IComponent {
 		=> this is IEnumerable<IComponent> container
 			? Properties.Concat( container.SelectMany( c => c.GetNestedProperties() ) )
 			: Properties;
+
+	public IEnumerable<IComponent> GetNestedComponents ()
+		=> this is IEnumerable<IComponent> container
+			? this.Yield().Concat( container.SelectMany( c => c.GetNestedComponents() ) )
+			: this.Yield();
 }

@@ -1,4 +1,5 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
@@ -53,6 +54,24 @@ public class Composer : CompositeDrawable {
 	public delegate void HierarchyChangedHandler ( IComponent component, IComponent? parent );
 	public event HierarchyChangedHandler? ComponentRemoved;
 	public event HierarchyChangedHandler? ComponentAdded;
+
+	public IEnumerable<IHasSnapGuides> SnapGuidesNear ( Vector2 point ) { // TODO use this point to optimize in the future
+		return Components.SelectMany( x => x.GetNestedComponents() ).OfType<IHasSnapGuides>();
+	}
+	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null )
+		=> Snap( point, source.Yield(), context );
+	public Vector2 Snap ( Vector2 point, IEnumerable<IComponent> source, UIEvent? context = null ) {
+		foreach ( var i in SnapGuidesNear( point ).Except( source.OfType<IHasSnapGuides>() ).SelectMany( x => x.PointGuides ) ) {
+			if ( i.IsInRange( point ) ) {
+				return i.Point;
+			}
+		}
+
+		if ( context?.ControlPressed != true )
+			return point.Round();
+		else
+			return point;
+	}
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;

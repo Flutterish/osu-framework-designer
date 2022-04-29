@@ -107,7 +107,13 @@ public class TransformProps : IEnumerable<IProp> {
 
 	public Vector2 Size => new( Width.Value, Height.Value );
 	public Vector2 Scale => new( ScaleX.Value, ScaleY.Value );
-	public Vector2 Position => new( X.Value, Y.Value );
+	public Vector2 Position {
+		get => new( X.Value, Y.Value );
+		set {
+			X.Value = value.X;
+			Y.Value = value.Y;
+		}
+	}
 	// Notes about shear:
 	//	given the origin is at (x,y), the point at (x + dx, y) is translated so that:
 	//		X += dx * shearX * shearY
