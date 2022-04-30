@@ -6,6 +6,7 @@ using OsuFrameworkDesigner.Game.Tools;
 
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
+// TODO translating snaps the origin, but not any other point
 public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
 	public readonly SelectionBox SelectionBox;
 	public readonly OriginHandle OriginHandle;

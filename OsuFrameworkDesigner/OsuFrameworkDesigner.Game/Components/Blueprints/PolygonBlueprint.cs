@@ -2,6 +2,7 @@
 
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
+// TODO translating this doesnt snap to corners
 public class PolygonBlueprint : BasicTransformBlueprint<PolygonComponent> {
 	PointHandle radiusHandle;
 	PointHandle countHandle;
