@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
@@ -60,6 +61,10 @@ public class Composer : CompositeDrawable {
 	public event HierarchyChangedHandler? ComponentRemoved;
 	public event HierarchyChangedHandler? ComponentAdded;
 
+	public IEnumerable<IComponent> VisibleComponentsNear ( Vector2 point ) { // TODO use this point to optimize in the future
+		return components.Where( x => x.ScreenSpaceDrawQuad.Intersects( ScreenSpaceDrawQuad ) ).OfType<IComponent>().SelectMany( x => x.GetNestedComponents() );
+	}
+
 	public IEnumerable<IComponent> ComponentsNear ( Vector2 point ) { // TODO use this point to optimize in the future
 		return Components.SelectMany( x => x.GetNestedComponents() );
 	}
@@ -77,7 +82,7 @@ public class Composer : CompositeDrawable {
 		if ( context?.ControlPressed == true )
 			return point;
 
-		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
+		foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
 			if ( i.IsInRange( point ) ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = i.Point;
@@ -87,7 +92,7 @@ public class Composer : CompositeDrawable {
 		}
 
 		if ( snapLines ) {
-			foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
+			foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
 				if ( i.TrySnap( point, out var snappedPoint ) ) {
 					snapMarkers.Add( marker1 );
 					marker1.Position = i.StartPoint;
@@ -117,7 +122,7 @@ public class Composer : CompositeDrawable {
 			return point;
 
 		if ( snapPoints ) {
-			foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
+			foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
 				if ( i.IsInRange( point ) ) {
 					snapMarkers.Add( marker1 );
 					marker1.Position = i.Point;
@@ -127,7 +132,7 @@ public class Composer : CompositeDrawable {
 			}
 		}
 
-		foreach ( var i in ComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
+		foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
 			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snappedPoint ) ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = i.StartPoint;
