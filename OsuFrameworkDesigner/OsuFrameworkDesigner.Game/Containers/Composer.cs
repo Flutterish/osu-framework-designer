@@ -22,6 +22,7 @@ public class Composer : CompositeDrawable {
 
 	SnapMarker marker1 = new();
 	SnapMarker marker2 = new();
+	SnapLine lineMarker = new();
 
 	public readonly SelectionTool SelectionTool = new();
 
@@ -98,6 +99,8 @@ public class Composer : CompositeDrawable {
 					marker1.Position = i.StartPoint;
 					snapMarkers.Add( marker2 );
 					marker2.Position = i.EndPoint;
+					snapMarkers.Add( lineMarker );
+					lineMarker.Connect( i.StartPoint, i.EndPoint, snappedPoint );
 					snapped = true;
 					return snappedPoint;
 				}
@@ -138,6 +141,8 @@ public class Composer : CompositeDrawable {
 				marker1.Position = i.StartPoint;
 				snapMarkers.Add( marker2 );
 				marker2.Position = i.EndPoint;
+				snapMarkers.Add( lineMarker );
+				lineMarker.Connect( i.StartPoint, i.EndPoint, snappedPoint );
 				snapped = true;
 				return snappedPoint;
 			}
