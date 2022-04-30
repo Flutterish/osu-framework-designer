@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Extensions.PolygonExtensions;
+using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
@@ -134,6 +135,45 @@ public class SelectionTool : Tool {
 		}
 
 		return true;
+	}
+
+	InputManager? inputManager;
+	InputManager InputManager => inputManager ??= GetContainingInputManager();
+
+	protected override bool OnMouseMove ( MouseMoveEvent e ) {
+		if ( !Selection.Any() ) {
+			var item = ( blueprint != null && InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed )
+				? blueprint.Value
+				: Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().Contains( e.ScreenSpaceMousePosition ) );
+
+			if ( item != null ) {
+				if ( blueprint != null && blueprint.Value != item ) {
+					RemoveInternal( blueprint );
+					blueprintPool[blueprint.Value.GetType()].Push( blueprint );
+					blueprint.Free();
+					blueprint = null;
+				}
+
+				if ( blueprint is null ) {
+					if ( !blueprintPool.TryGetValue( item.GetType(), out var pool ) )
+						blueprintPool.Add( item.GetType(), pool = new() );
+
+					if ( !pool.TryPop( out blueprint ) )
+						blueprint = item.CreateBlueprint();
+
+					blueprint.Apply( item );
+					AddInternal( blueprint );
+				}
+			}
+			else if ( blueprint != null ) {
+				RemoveInternal( blueprint );
+				blueprintPool[blueprint.Value.GetType()].Push( blueprint );
+				blueprint.Free();
+				blueprint = null;
+			}
+		}
+
+		return base.OnMouseMove( e );
 	}
 
 	public readonly BindableList<IComponent> Selection = new();
