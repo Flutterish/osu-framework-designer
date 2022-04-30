@@ -86,11 +86,11 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 	}
 
 	public void HandleSnappedTranslate (
-		Func<List<LineGuide>, List<PointGuide>, Vector2> populateGuides,
+		Func<List<LineGuide>, List<HandlePointGuide>, Vector2> populateGuides,
 		Action<Vector2> drag
 	) {
 		List<LineGuide> lineGuides = new();
-		List<PointGuide> pointGuides = new();
+		List<HandlePointGuide> pointGuides = new();
 		Vector2 offset = Vector2.Zero;
 
 		SnapDragStarted += e => {
@@ -104,7 +104,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 
 			foreach ( var p in pointGuides ) {
 				var point = p.Point + delta;
-				var snapped = Composer.Snap( point, Source, out var success, e, snapLines: false );
+				var snapped = Composer.Snap( point, Source, out var success, e, snapLines: p.SnapToLines );
 				if ( success ) {
 					drag( target + snapped - point );
 					return;
@@ -149,6 +149,14 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 public enum HandleType {
 	Point,
 	Line
+}
+
+public struct HandlePointGuide {
+	public Vector2 Point;
+	public bool SnapToLines;
+
+	public static implicit operator HandlePointGuide ( Vector2 p )
+		=> new() { Point = p };
 }
 
 /// <summary>

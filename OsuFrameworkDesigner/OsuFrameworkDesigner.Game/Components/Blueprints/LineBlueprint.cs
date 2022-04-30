@@ -26,7 +26,8 @@ public class LineBlueprint : Blueprint<IComponent> {
 		move.HandleSnappedTranslate( ( lines, points ) => {
 			var from = new Vector2( value.StartX, value.StartY );
 			var to = new Vector2( Value.EndX, Value.EndY );
-			points.Add( to );
+			points.Add( new() { Point = from, SnapToLines = true } );
+			points.Add( new() { Point = to, SnapToLines = true } );
 			lines.Add( new() { StartPoint = from, EndPoint = to } );
 
 			dragDeltaHandle = to - from;
