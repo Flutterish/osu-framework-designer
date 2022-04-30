@@ -393,6 +393,13 @@ public class TransformProps : IEnumerable<IProp> {
 		}
 	}
 
+	public Quad ContentSpaceQuad => new Quad(
+		TopLeft,
+		TopRight,
+		BottomLeft,
+		BottomRight
+	);
+
 	public DrawInfo LocalDrawInfo {
 		get {
 			var info = new DrawInfo( null );

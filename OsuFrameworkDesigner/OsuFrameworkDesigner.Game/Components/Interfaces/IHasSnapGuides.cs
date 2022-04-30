@@ -7,60 +7,64 @@ public interface IHasSnapGuides {
 	IEnumerable<LineGuide> LineGuides { get; }
 
 	public static IEnumerable<PointGuide> PointGuidesFrom ( IComponent component, Composer composer ) {
-		if ( component is IHasSnapGuides s ) {
-			foreach ( var i in s.PointGuides )
-				yield return i;
-		}
+		if ( component is IHasSnapGuides s )
+			return s.PointGuides;
 
-		if ( component is Drawable d ) {
-			var quad = d.ScreenSpaceDrawQuad;
-			yield return composer.ToContentSpace( quad.Centre );
-			yield return composer.ToContentSpace( quad.TopLeft );
-			yield return composer.ToContentSpace( quad.BottomLeft );
-			yield return composer.ToContentSpace( quad.TopRight );
-			yield return composer.ToContentSpace( quad.BottomRight );
+		if ( component is Drawable d )
+			return PointGuidesFrom( composer.ToContentSpace( d.ScreenSpaceDrawQuad ) );
 
-			yield return composer.ToContentSpace( ( quad.TopLeft + quad.TopRight ) / 2 );
-			yield return composer.ToContentSpace( ( quad.TopLeft + quad.BottomLeft ) / 2 );
-			yield return composer.ToContentSpace( ( quad.BottomRight + quad.TopRight ) / 2 );
-			yield return composer.ToContentSpace( ( quad.BottomRight + quad.BottomLeft ) / 2 );
-		}
+		return Array.Empty<PointGuide>();
+	}
+
+	public static IEnumerable<PointGuide> PointGuidesFrom ( Quad quad ) {
+		yield return quad.Centre;
+		yield return quad.TopLeft;
+		yield return quad.BottomLeft;
+		yield return quad.TopRight;
+		yield return quad.BottomRight;
+
+		yield return ( quad.TopLeft + quad.TopRight ) / 2;
+		yield return ( quad.TopLeft + quad.BottomLeft ) / 2;
+		yield return ( quad.BottomRight + quad.TopRight ) / 2;
+		yield return ( quad.BottomRight + quad.BottomLeft ) / 2;
 	}
 
 	public static IEnumerable<LineGuide> LineGuidesFrom ( IComponent component, Composer composer ) {
-		if ( component is IHasSnapGuides s ) {
-			foreach ( var i in s.LineGuides )
-				yield return i;
-		}
+		if ( component is IHasSnapGuides s )
+			return s.LineGuides;
 
-		if ( component is Drawable d ) {
-			var quad = d.ScreenSpaceDrawQuad;
-			yield return new() {
-				StartPoint = composer.ToContentSpace( ( quad.TopLeft + quad.BottomLeft ) / 2 ),
-				EndPoint = composer.ToContentSpace( ( quad.TopRight + quad.BottomRight ) / 2 )
-			};
-			yield return new() {
-				StartPoint = composer.ToContentSpace( ( quad.TopLeft + quad.TopRight ) / 2 ),
-				EndPoint = composer.ToContentSpace( ( quad.BottomLeft + quad.BottomRight ) / 2 )
-			};
+		if ( component is Drawable d )
+			return LineGuidesFrom( composer.ToContentSpace( d.ScreenSpaceDrawQuad ) );
 
-			yield return new() {
-				StartPoint = composer.ToContentSpace( quad.TopLeft ),
-				EndPoint = composer.ToContentSpace( quad.TopRight )
-			};
-			yield return new() {
-				StartPoint = composer.ToContentSpace( quad.BottomLeft ),
-				EndPoint = composer.ToContentSpace( quad.BottomRight )
-			};
-			yield return new() {
-				StartPoint = composer.ToContentSpace( quad.TopLeft ),
-				EndPoint = composer.ToContentSpace( quad.BottomLeft )
-			};
-			yield return new() {
-				StartPoint = composer.ToContentSpace( quad.TopRight ),
-				EndPoint = composer.ToContentSpace( quad.BottomRight )
-			};
-		}
+		return Array.Empty<LineGuide>();
+	}
+
+	public static IEnumerable<LineGuide> LineGuidesFrom ( Quad quad ) {
+		yield return new() {
+			StartPoint = ( quad.TopLeft + quad.BottomLeft ) / 2,
+			EndPoint = ( quad.TopRight + quad.BottomRight ) / 2
+		};
+		yield return new() {
+			StartPoint = ( quad.TopLeft + quad.TopRight ) / 2,
+			EndPoint = ( quad.BottomLeft + quad.BottomRight ) / 2
+		};
+
+		yield return new() {
+			StartPoint = quad.TopLeft,
+			EndPoint = quad.TopRight
+		};
+		yield return new() {
+			StartPoint = quad.BottomLeft,
+			EndPoint = quad.BottomRight
+		};
+		yield return new() {
+			StartPoint = quad.TopLeft,
+			EndPoint = quad.BottomLeft
+		};
+		yield return new() {
+			StartPoint = quad.TopRight,
+			EndPoint = quad.BottomRight
+		};
 	}
 }
 

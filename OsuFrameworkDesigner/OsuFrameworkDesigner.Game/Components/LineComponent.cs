@@ -4,7 +4,7 @@ using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
+public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnapGuides {
 	public static readonly PropDescription RadiusProto = PropDescriptions.FloatProp with { Name = "Radius", Category = "Shape" };
 	public static readonly PropDescription StartXProto = PropDescriptions.FloatProp with { Name = "X", Category = "Start" };
 	public static readonly PropDescription StartYProto = PropDescriptions.FloatProp with { Name = "Y", Category = "Start" };
@@ -76,5 +76,20 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
 		StartY.Value += offset.Y;
 		EndX.Value += offset.X;
 		EndY.Value += offset.Y;
+	}
+
+	public IEnumerable<PointGuide> PointGuides {
+		get {
+			yield return new Vector2( StartX, StartY );
+			yield return new Vector2( EndX, EndY );
+		}
+	}
+	public IEnumerable<LineGuide> LineGuides {
+		get {
+			yield return new() {
+				StartPoint = new Vector2( StartX, StartY ),
+				EndPoint = new Vector2( EndX, EndY )
+			};
+		}
 	}
 }

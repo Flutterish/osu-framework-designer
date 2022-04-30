@@ -4,7 +4,7 @@ using OsuFrameworkDesigner.Game.Graphics;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public class PolygonComponent : CompositeDrawable, IComponent {
+public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 	public static readonly PropDescription CornerCountProto = PropDescriptions.IntProp with { Name = "Count", Category = "Corners" };
 	public readonly PolygonDrawable Polygon;
 
@@ -27,4 +27,38 @@ public class PolygonComponent : CompositeDrawable, IComponent {
 		=> new PolygonBlueprint();
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius ).Append( CornerCount );
+
+	public IEnumerable<PointGuide> PointGuides {
+		get {
+			var quad = TransformProps.ContentSpaceQuad;
+			var matrix = quad.AsMatrix();
+
+			yield return quad.Centre;
+
+			var centre = new Vector2( 0.5f );
+			var vertex = new Vector2( 0, -0.5f );
+			var theta = MathF.Tau / CornerCount;
+			for ( int i = 0; i < CornerCount; i++ ) {
+				yield return Vector2Extensions.Transform( centre + vertex, matrix );
+				vertex = vertex.Rotate( theta );
+			}
+		}
+	}
+	public IEnumerable<LineGuide> LineGuides {
+		get {
+			var quad = TransformProps.ContentSpaceQuad;
+			var matrix = quad.AsMatrix();
+
+			var centre = new Vector2( 0.5f );
+			var vertex = new Vector2( 0, -0.5f );
+			var theta = MathF.Tau / CornerCount;
+			var last = Vector2Extensions.Transform( centre + vertex, matrix );
+			for ( int i = 0; i < CornerCount; i++ ) {
+				vertex = vertex.Rotate( theta );
+				var next = Vector2Extensions.Transform( centre + vertex, matrix );
+				yield return new() { StartPoint = last, EndPoint = next };
+				last = next;
+			}
+		}
+	}
 }

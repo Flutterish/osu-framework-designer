@@ -4,7 +4,7 @@ using OsuFrameworkDesigner.Game.Graphics;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public class CircleComponent : CompositeDrawable, IComponent {
+public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 	public static readonly PropDescription FillProto = PropDescriptions.FloatProp with { Name = "Fill", Category = "Shape" };
 	public static readonly PropDescription SweepEndProto = PropDescriptions.FloatProp with { Name = "End", Category = "Shape" };
 	public static readonly PropDescription SweepStartProto = PropDescriptions.FloatProp with { Name = "Start", Category = "Shape" };
@@ -68,4 +68,47 @@ public class CircleComponent : CompositeDrawable, IComponent {
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new CircleBlueprint();
+
+	public IEnumerable<PointGuide> PointGuides {
+		get {
+			var quad = TransformProps.ContentSpaceQuad;
+			var matrix = quad.AsMatrix();
+
+			yield return quad.Centre;
+			if ( circle.ContainsAngle( -MathF.PI / 2 ) )
+				yield return ( quad.TopLeft + quad.TopRight ) / 2;
+			if ( circle.ContainsAngle( -MathF.PI ) )
+				yield return ( quad.TopLeft + quad.BottomLeft ) / 2;
+			if ( circle.ContainsAngle( MathF.PI / 2 ) )
+				yield return ( quad.BottomRight + quad.BottomLeft ) / 2;
+			if ( circle.ContainsAngle( 0 ) )
+				yield return ( quad.BottomRight + quad.TopRight ) / 2;
+
+			yield return Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -( 1 - Fill ) / 2 ).Rotate( SweepStart * MathF.Tau ), matrix );
+			yield return Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -0.5f ).Rotate( SweepStart * MathF.Tau ), matrix );
+
+			yield return Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -( 1 - Fill ) / 2 ).Rotate( SweepEnd * MathF.Tau ), matrix );
+			yield return Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -0.5f ).Rotate( SweepEnd * MathF.Tau ), matrix );
+		}
+	}
+	public IEnumerable<LineGuide> LineGuides {
+		get {
+			var quad = TransformProps.ContentSpaceQuad;
+
+			if ( ( (float)circle.Current.Value ).Mod( 1 ) != 0 ) {
+				var matrix = quad.AsMatrix();
+
+				var a = Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -( 1 - Fill ) / 2 ).Rotate( SweepStart * MathF.Tau ), matrix );
+				var b = Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -0.5f ).Rotate( SweepStart * MathF.Tau ), matrix );
+				yield return new() { StartPoint = a, EndPoint = b };
+
+				a = Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -( 1 - Fill ) / 2 ).Rotate( SweepEnd * MathF.Tau ), matrix );
+				b = Vector2Extensions.Transform( new Vector2( 0.5f ) + new Vector2( 0, -0.5f ).Rotate( SweepEnd * MathF.Tau ), matrix );
+				yield return new() { StartPoint = a, EndPoint = b };
+			}
+
+			yield return new() { StartPoint = ( quad.TopLeft + quad.TopRight ) / 2, EndPoint = ( quad.BottomLeft + quad.BottomRight ) / 2 };
+			yield return new() { StartPoint = ( quad.TopLeft + quad.BottomLeft ) / 2, EndPoint = ( quad.TopRight + quad.BottomRight ) / 2 };
+		}
+	}
 }
