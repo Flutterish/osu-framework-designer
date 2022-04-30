@@ -1,13 +1,15 @@
 ﻿using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Graphics.Batches;
 using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Textures;
+using OsuFrameworkDesigner.Game.Memory;
 using osuTK.Graphics.ES30;
 
 namespace OsuFrameworkDesigner.Game.Graphics;
 
-public class PolygonDrawable : Drawable {
+public class PolygonDrawable : Drawable, IConvexPolygon {
 	int sideCount = 3;
 	public int SideCount {
 		get => sideCount;
@@ -60,6 +62,38 @@ public class PolygonDrawable : Drawable {
 	[BackgroundDependencyLoader]
 	private void load ( ShaderManager shaders ) {
 		shader = shaders.Load( VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE );
+	}
+
+	public ReadOnlySpan<Vector2> GetAxisVertices ()
+		=> GetVertices();
+
+	RentedArray<Vector2> verticesArray;
+	public ReadOnlySpan<Vector2> GetVertices () {
+		if ( verticesArray.Length != sideCount ) {
+			verticesArray.TryDispose();
+			verticesArray = MemoryPool<Vector2>.Shared.Rent( sideCount );
+		}
+
+		var matrix = ScreenSpaceDrawQuad.AsMatrix();
+		var centre = new Vector2( 0.5f );
+		var vertex = new Vector2( 0, -0.5f );
+		var theta = MathF.Tau / sideCount;
+		for ( int i = 0; i < sideCount; i++ ) {
+			var p = centre + vertex;
+			Vector2Extensions.Transform( ref p, ref matrix, out verticesArray[i] );
+			vertex = vertex.Rotate( theta );
+		}
+
+		return verticesArray;
+	}
+
+	public override bool Contains ( Vector2 screenSpacePos )
+		=> this.Intersects( new Quad( screenSpacePos, screenSpacePos, screenSpacePos, screenSpacePos ) );
+
+	protected override void Dispose ( bool isDisposing ) {
+		base.Dispose( isDisposing );
+		verticesArray.TryDispose();
+		verticesArray = default;
 	}
 
 	protected override DrawNode CreateDrawNode ()

@@ -30,6 +30,9 @@ public class ArrowComponent : LineComponent {
 		}, true );
 	}
 
+	public override bool Contains ( Vector2 screenSpacePos )
+		=> base.Contains( screenSpacePos ) || arrowHeadRight.Contains( screenSpacePos ) || arrowHeadLeft.Contains( screenSpacePos );
+
 	protected override Quad ComputeScreenSpaceDrawQuad () {
 		var box = DrawRectangle.Yield()
 			.Append( arrowHeadLeft.ToParentSpace( arrowHeadLeft.DrawRectangle ).AABBFloat )

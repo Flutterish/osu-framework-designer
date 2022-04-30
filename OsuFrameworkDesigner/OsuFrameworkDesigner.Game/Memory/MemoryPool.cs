@@ -57,6 +57,11 @@ public struct RentedArray<T> : IDisposable, IEnumerable<T> {
 		backing.Return( Array );
 	}
 
+	public void TryDispose () {
+		if ( backing != null )
+			Dispose();
+	}
+
 	IEnumerator<T> IEnumerable<T>.GetEnumerator () {
 		for ( int i = 0; i < Length; i++ ) {
 			yield return this[i];
@@ -68,4 +73,10 @@ public struct RentedArray<T> : IDisposable, IEnumerable<T> {
 			yield return this[i];
 		}
 	}
+
+	public static implicit operator Span<T> ( RentedArray<T> arr )
+		=> arr.AsSpan();
+
+	public static implicit operator ReadOnlySpan<T> ( RentedArray<T> arr )
+		=> arr.AsSpan();
 }

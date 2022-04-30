@@ -119,7 +119,7 @@ public class SelectionTool : Tool {
 	}
 
 	protected override bool OnClick ( ClickEvent e ) {
-		var item = Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().ScreenSpaceDrawQuad.Contains( e.ScreenSpaceMouseDownPosition ) );
+		var item = Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().Contains( e.ScreenSpaceMouseDownPosition ) );
 
 		if ( item != null ) {
 			if ( Selection.Count != 1 || item != Selection.Single() ) {

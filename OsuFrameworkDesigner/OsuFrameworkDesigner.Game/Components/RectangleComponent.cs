@@ -39,6 +39,9 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 		}
 	}
 
+	public override bool Contains ( Vector2 screenSpacePos )
+		=> InternalChild.Contains( screenSpacePos );
+
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new RectangleBlueprint( this );
 	string IComponent.Name => Name;

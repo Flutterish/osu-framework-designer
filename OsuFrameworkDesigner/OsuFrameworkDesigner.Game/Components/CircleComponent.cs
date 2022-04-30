@@ -61,6 +61,9 @@ public class CircleComponent : CompositeDrawable, IComponent {
 		CornerRadius = Math.Min( DrawSize.X.Abs(), DrawSize.Y.Abs() ) / 2f;
 	}
 
+	public override bool Contains ( Vector2 screenSpacePos )
+		=> InternalChild.Contains( screenSpacePos );
+
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
 	public Blueprint<IComponent> CreateBlueprint ()

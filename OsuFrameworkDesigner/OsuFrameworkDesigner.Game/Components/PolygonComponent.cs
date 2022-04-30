@@ -20,6 +20,9 @@ public class PolygonComponent : CompositeDrawable, IComponent {
 		CornerCount.BindValueChanged( v => Polygon.SideCount = v.NewValue );
 	}
 
+	public override bool Contains ( Vector2 screenSpacePos )
+		=> InternalChild.Contains( screenSpacePos );
+
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new PolygonBlueprint( this );
 	string IComponent.Name => Name;

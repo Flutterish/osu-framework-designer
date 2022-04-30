@@ -20,6 +20,20 @@ public class TwoSidedCircularProgress : CircularProgress {
 		}
 	}
 
+	public override bool Contains ( Vector2 screenSpacePos ) {
+		var unit = Vector2.Divide( ToLocalSpace( screenSpacePos ), DrawSize );
+		var delta = unit - new Vector2( 0.5f );
+		if ( delta.Length > 0.5f || delta.Length < ( 1 - InnerRadius ) / 2 )
+			return false;
+
+		var angle = MathF.Atan2( delta.Y, delta.X ) - offset * MathF.Tau + MathF.PI / 2;
+		var range = ( Current.Value == 0 ? 0 : ( (float)Current.Value ).Mod( 1 ) == 0 ? 1 : ( (float)Current.Value ).Mod( 1 ) ) * MathF.Tau;
+		if ( angle.AngleTo( range / 2 ).Abs() > range / 2 )
+			return false;
+
+		return true;
+	}
+
 	protected override DrawNode CreateDrawNode ()
 		=> new TwoSidedCircularProgressDrawNode( this );
 }
