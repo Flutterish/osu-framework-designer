@@ -49,7 +49,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnap
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new LineBlueprint();
-	string IComponent.Name => Name;
+	string IComponent.Name { get => Name; set => Name = value; }
 	public IEnumerable<IProp> Properties =>
 		StartX.Yield<IProp>().Append( StartY )
 		.Append( EndX ).Append( EndY )

@@ -63,6 +63,10 @@ public class AssetsPanel : CompositeDrawable {
 				Selection.Add( comp );
 				SelectionChanged?.Invoke( Selection );
 			}
+			else {
+				Selection.Remove( comp );
+				SelectionChanged?.Invoke( Selection );
+			}
 		}
 		else if ( e.ShiftPressed ) {
 			if ( Selection.Count == 0 ) {

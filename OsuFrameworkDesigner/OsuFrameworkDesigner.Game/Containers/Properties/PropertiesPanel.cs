@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Caching;
+using osu.Framework.Extensions.TypeExtensions;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
@@ -51,6 +52,22 @@ public class PropertiesPanel : CompositeDrawable {
 			rentedFields.Clear();
 
 			items.Clear();
+			if ( Components.Count == 1 ) {
+				var comp = Components.Single();
+				var name = new DesignerSpriteText { Font = DesignerFont.Bold( 24 ), Colour = Colour4.Black, RelativeSizeAxes = Axes.X };
+				items.Add( name );
+				items.OnUpdate += _ => {
+					if ( string.IsNullOrWhiteSpace( comp.Name ) )
+						name.Text = comp.GetType().ReadableName();
+					else
+						name.Text = comp.Name;
+				};
+			}
+			else if ( Components.Any() ) {
+				var name = new DesignerSpriteText { Text = $"{Components.Count} Selected", Font = DesignerFont.Bold( 24 ), Colour = Colour4.Black, RelativeSizeAxes = Axes.X };
+				items.Add( name );
+			}
+
 			foreach ( var category in Components.SelectMany( c => c.GetNestedProperties() ).GroupBy( x => x.Prototype.Category ) ) {
 				items.Add( new DesignerSpriteText { Text = category.Key, Font = DesignerFont.Bold( 18 ), Colour = Colour4.Black, Alpha = 0.5f, RelativeSizeAxes = Axes.X } );
 

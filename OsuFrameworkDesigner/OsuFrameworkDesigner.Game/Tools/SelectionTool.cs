@@ -277,7 +277,7 @@ public class SelectionTool : Tool {
 
 		public Blueprint<IComponent> CreateBlueprint ()
 			=> new SelectionBlueprint();
-		string IComponent.Name => Name;
+		string IComponent.Name { get => Name; set => Name = value; }
 		public IEnumerable<IProp> Properties => TransformProps;
 	}
 

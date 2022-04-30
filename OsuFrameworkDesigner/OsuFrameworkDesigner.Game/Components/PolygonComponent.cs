@@ -25,7 +25,7 @@ public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new PolygonBlueprint();
-	string IComponent.Name => Name;
+	string IComponent.Name { get => Name; set => Name = value; }
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius ).Append( CornerCount );
 
 	public IEnumerable<PointGuide> PointGuides {

@@ -64,7 +64,7 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 	public override bool Contains ( Vector2 screenSpacePos )
 		=> InternalChild.Contains( screenSpacePos );
 
-	string IComponent.Name => Name;
+	string IComponent.Name { get => Name; set => Name = value; }
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new CircleBlueprint();
