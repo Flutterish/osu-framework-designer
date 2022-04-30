@@ -48,7 +48,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix {
 	}
 
 	public Blueprint<IComponent> CreateBlueprint ()
-		=> new LineBlueprint( this );
+		=> new LineBlueprint();
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties =>
 		StartX.Yield<IProp>().Append( StartY )

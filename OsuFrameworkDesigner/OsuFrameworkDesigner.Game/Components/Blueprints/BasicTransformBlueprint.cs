@@ -1,5 +1,4 @@
-﻿using osu.Framework.Extensions.IEnumerableExtensions;
-using osu.Framework.Graphics.Sprites;
+﻿using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
@@ -7,16 +6,13 @@ using OsuFrameworkDesigner.Game.Tools;
 
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
-public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
+public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : IComponent {
 	public readonly SelectionBox SelectionBox;
 	public readonly OriginHandle OriginHandle;
 	new public T Value => (T)base.Value;
-	public TransformProps TransformProps;
+	public abstract TransformProps TransformProps { get; }
 	public bool ResizingScales = false;
 	public bool CanShear = true;
-
-	IEnumerable<IComponent> source
-		=> this is ISelection s ? s.SelectedComponents : Value.Yield<IComponent>();
 
 	public Vector2 ToTargetSpace ( Vector2 screenSpacePosition )
 		=> TransformProps.ToLocalSpace( Composer.ToContentSpace( screenSpacePosition ) );
@@ -66,10 +62,9 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		return new( x, y );
 	}
 
-	public BasicTransformBlueprint ( T value, TransformProps props ) : base( value ) {
+	public BasicTransformBlueprint () {
 		AddInternal( SelectionBox = new SelectionBox().Fill() );
 		AddInternal( OriginHandle = new OriginHandle { CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
-		TransformProps = props;
 
 		void setTop ( float y ) {
 			if ( ResizingScales ) {
@@ -258,7 +253,9 @@ public class BasicTransformBlueprint<T> : Blueprint<IComponent> where T : ICompo
 		SelectionBox.FarBottomRight.DragEnded += dragEnded;
 		SelectionBox.FarTopLeft.DragEnded += dragEnded;
 		SelectionBox.FarTopRight.DragEnded += dragEnded;
+	}
 
+	protected override void OnApply () {
 		TransformProps.Normalize();
 	}
 

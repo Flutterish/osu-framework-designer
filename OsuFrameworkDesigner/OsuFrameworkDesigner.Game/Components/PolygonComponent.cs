@@ -24,7 +24,7 @@ public class PolygonComponent : CompositeDrawable, IComponent {
 		=> InternalChild.Contains( screenSpacePos );
 
 	public Blueprint<IComponent> CreateBlueprint ()
-		=> new PolygonBlueprint( this );
+		=> new PolygonBlueprint();
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius ).Append( CornerCount );
 }

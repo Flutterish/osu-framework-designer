@@ -7,10 +7,18 @@ public abstract class Blueprint<T> : CompositeDrawable {
 	[Resolved]
 	protected Composer Composer { get; private set; } = null!;
 
-	public T Value { get; private set; }
+	public T Value { get; private set; } = default!;
 
-	protected Blueprint ( T value ) {
+	protected virtual void OnApply () { }
+	public void Apply ( T value ) {
 		Value = value;
+		OnApply();
+	}
+
+	protected virtual void OnFree () { }
+	public void Free () {
+		OnFree();
+		Value = default!;
 	}
 
 	protected override void Update () {

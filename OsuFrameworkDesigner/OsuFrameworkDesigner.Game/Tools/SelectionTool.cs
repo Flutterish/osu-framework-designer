@@ -12,7 +12,9 @@ namespace OsuFrameworkDesigner.Game.Tools;
 public class SelectionTool : Tool {
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
-		selectionComponent = ( new SelectionComponent().CreateBlueprint() as SelectionBlueprint )!;
+		var comp = new SelectionComponent();
+		selectionComponent = ( comp.CreateBlueprint() as SelectionBlueprint )!;
+		selectionComponent.Apply( comp );
 		AddInternal( selectionComponent );
 		selectionComponent.Alpha = 0;
 		selectionComponent.ResizingScales = true;
@@ -139,6 +141,7 @@ public class SelectionTool : Tool {
 	SelectionBox selectionBox => selectionComponent.SelectionBox;
 
 	Container<DrawableSelection> selections;
+	Dictionary<Type, Stack<Blueprint<IComponent>>> blueprintPool = new();
 	Blueprint<IComponent>? blueprint;
 	Stack<DrawableSelection> selectionPool = new();
 	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
@@ -150,11 +153,20 @@ public class SelectionTool : Tool {
 
 			if ( blueprint != null ) {
 				RemoveInternal( blueprint );
+				blueprintPool[blueprint.Value.GetType()].Push( blueprint );
+				blueprint.Free();
 				blueprint = null;
 			}
 			selectionComponent.Alpha = Selection.Count > 1 ? 1 : 0;
 			if ( Selection.Count < 2 && Selection.SingleOrDefault() is IComponent comp ) {
-				AddInternal( blueprint = comp.CreateBlueprint() );
+				if ( !blueprintPool.TryGetValue( comp.GetType(), out var pool ) )
+					blueprintPool.Add( comp.GetType(), pool = new() );
+
+				if ( !pool.TryPop( out blueprint ) )
+					blueprint = comp.CreateBlueprint();
+
+				blueprint.Apply( comp );
+				AddInternal( blueprint );
 			}
 
 			if ( Selection.Count < 2 )
@@ -226,14 +238,13 @@ public class SelectionTool : Tool {
 		}
 
 		public Blueprint<IComponent> CreateBlueprint ()
-			=> new SelectionBlueprint( this );
+			=> new SelectionBlueprint();
 		string IComponent.Name => Name;
 		public IEnumerable<IProp> Properties => TransformProps;
 	}
 
 	private class SelectionBlueprint : BasicTransformBlueprint<SelectionComponent>, ISelection {
-		public SelectionBlueprint ( SelectionComponent value ) : base( value, value.TransformProps ) { }
-
+		public override TransformProps TransformProps => Value.TransformProps;
 		public IEnumerable<IComponent> SelectedComponents { get; set; } = Array.Empty<IComponent>();
 	}
 }

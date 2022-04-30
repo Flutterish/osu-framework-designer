@@ -9,7 +9,7 @@ public class LineBlueprint : Blueprint<IComponent> {
 	PointHandle start;
 	PointHandle end;
 	Handle move;
-	public LineBlueprint ( LineComponent value ) : base( value ) {
+	public LineBlueprint () {
 		AddInternal( move = new Handle().Fill() );
 		AddInternal( start = new PointHandle { Anchor = Anchor.CentreLeft, CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
 		AddInternal( end = new PointHandle { Anchor = Anchor.CentreRight, CursorStyle = Cursor.CursorStyle.ResizeOrthogonal } );
@@ -24,7 +24,7 @@ public class LineBlueprint : Blueprint<IComponent> {
 
 		Vector2 dragDeltaHandle = Vector2.Zero;
 		move.HandleSnappedTranslate( ( lines, points ) => {
-			var from = new Vector2( value.StartX, value.StartY );
+			var from = new Vector2( Value.StartX, Value.StartY );
 			var to = new Vector2( Value.EndX, Value.EndY );
 			points.Add( new() { Point = from, SnapToLines = true } );
 			points.Add( new() { Point = to, SnapToLines = true } );

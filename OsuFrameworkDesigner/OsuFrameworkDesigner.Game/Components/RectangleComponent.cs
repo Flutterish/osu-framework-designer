@@ -43,7 +43,7 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 		=> InternalChild.Contains( screenSpacePos );
 
 	public Blueprint<IComponent> CreateBlueprint ()
-		=> new RectangleBlueprint( this );
+		=> new RectangleBlueprint();
 	string IComponent.Name => Name;
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius );
 }

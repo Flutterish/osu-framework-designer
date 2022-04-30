@@ -16,7 +16,8 @@ public class PolygonBlueprint : BasicTransformBlueprint<PolygonComponent> {
 		}
 	}
 
-	public PolygonBlueprint ( PolygonComponent value ) : base( value, value.TransformProps ) {
+	public override TransformProps TransformProps => Value.TransformProps;
+	public PolygonBlueprint () {
 		AddInternal( radiusHandle = new PointHandle().Center() );
 		AddInternal( countHandle = new PointHandle().Center() );
 

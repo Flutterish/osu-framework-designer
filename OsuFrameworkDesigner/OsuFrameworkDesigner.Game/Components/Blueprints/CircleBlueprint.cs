@@ -25,7 +25,8 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 		return ( a * b ) / ( MathF.Sqrt( a * a * sin * sin + b * b * cos * cos ) ) / 2;
 	}
 
-	public CircleBlueprint ( CircleComponent value ) : base( value, value.TransformProps ) {
+	public override TransformProps TransformProps => Value.TransformProps;
+	public CircleBlueprint () {
 		AddInternal( sweepStartHandle = new PointHandle() );
 		AddInternal( sweepEndHandle = new PointHandle() );
 		AddInternal( fillHandle = new PointHandle() );

@@ -9,7 +9,8 @@ public class RectangleBlueprint : BasicTransformBlueprint<RectangleComponent> {
 	PointHandle cornerRadiusBottomRight;
 	int isDragging;
 
-	public RectangleBlueprint ( RectangleComponent value ) : base( value, value.TransformProps ) {
+	public override TransformProps TransformProps => Value.TransformProps;
+	public RectangleBlueprint () {
 		void setupEvents ( Handle handle, Vector2 direction, Func<Vector2> getOrigin ) {
 			handle.DragStarted += e => isDragging++;
 			handle.DragEnded += e => { isDragging--; updateCorners(); };
