@@ -58,9 +58,46 @@ public class AssetsPanel : CompositeDrawable {
 	}
 
 	void onListItemClicked ( IComponent comp, ClickEvent e ) {
-		Selection.Clear();
-		Selection.Add( comp );
-		SelectionChanged?.Invoke( Selection );
+		if ( e.ControlPressed ) {
+			if ( !Selection.Contains( comp ) ) {
+				Selection.Add( comp );
+				SelectionChanged?.Invoke( Selection );
+			}
+		}
+		else if ( e.ShiftPressed ) {
+			if ( Selection.Count == 0 ) {
+				Selection.Add( comp );
+				SelectionChanged?.Invoke( Selection );
+				return;
+			}
+
+			if ( !itemsByComponent.TryGetValue( comp, out var clickedItem ) )
+				return;
+
+			if ( !itemsByComponent.TryGetValue( Selection.Last(), out var lastItem ) )
+				return;
+
+			var start = items.IndexOf( lastItem );
+			var end = items.IndexOf( clickedItem );
+			if ( start > end )
+				(start, end) = (end, start);
+
+			for ( int i = start; i <= end; i++ ) {
+				comp = ( (AssetListItem)items[i] ).Component;
+				if ( !Selection.Contains( comp ) ) {
+					Selection.Add( comp );
+				}
+			}
+
+			SelectionChanged?.Invoke( Selection );
+		}
+		else {
+			if ( Selection.Count != 1 || Selection.Single() != comp ) {
+				Selection.Clear();
+				Selection.Add( comp );
+				SelectionChanged?.Invoke( Selection );
+			}
+		}
 	}
 
 	public void RemoveComponent ( IComponent component, IComponent? parent ) {
