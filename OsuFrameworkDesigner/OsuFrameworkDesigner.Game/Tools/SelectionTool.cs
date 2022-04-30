@@ -148,27 +148,16 @@ public class SelectionTool : Tool {
 
 			if ( item != null ) {
 				if ( blueprint != null && blueprint.Value != item ) {
-					RemoveInternal( blueprint );
-					blueprintPool[blueprint.Value.GetType()].Push( blueprint );
-					blueprint.Free();
+					ReturnBlueprint( blueprint );
 					blueprint = null;
 				}
 
 				if ( blueprint is null ) {
-					if ( !blueprintPool.TryGetValue( item.GetType(), out var pool ) )
-						blueprintPool.Add( item.GetType(), pool = new() );
-
-					if ( !pool.TryPop( out blueprint ) )
-						blueprint = item.CreateBlueprint();
-
-					blueprint.Apply( item );
-					AddInternal( blueprint );
+					blueprint = GetBlueprint( item );
 				}
 			}
 			else if ( blueprint != null ) {
-				RemoveInternal( blueprint );
-				blueprintPool[blueprint.Value.GetType()].Push( blueprint );
-				blueprint.Free();
+				ReturnBlueprint( blueprint );
 				blueprint = null;
 			}
 		}
@@ -185,6 +174,24 @@ public class SelectionTool : Tool {
 	Blueprint<IComponent>? blueprint;
 	Stack<DrawableSelection> selectionPool = new();
 	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
+	Blueprint<IComponent> GetBlueprint ( IComponent component ) {
+		if ( !blueprintPool.TryGetValue( component.GetType(), out var pool ) )
+			blueprintPool.Add( component.GetType(), pool = new() );
+
+		if ( !pool.TryPop( out var blueprint ) )
+			blueprint = component.CreateBlueprint();
+
+		blueprint.Apply( component );
+		AddInternal( blueprint );
+
+		return blueprint;
+	}
+	void ReturnBlueprint ( Blueprint<IComponent> blueprint ) {
+		RemoveInternal( blueprint );
+		blueprintPool[blueprint.Value.GetType()].Push( blueprint );
+		blueprint.Free();
+	}
+
 	protected override void LoadComplete () {
 		base.LoadComplete();
 
@@ -192,21 +199,12 @@ public class SelectionTool : Tool {
 			selectionComponent.TransformProps.MatrixChanged -= onMatrixChanged;
 
 			if ( blueprint != null ) {
-				RemoveInternal( blueprint );
-				blueprintPool[blueprint.Value.GetType()].Push( blueprint );
-				blueprint.Free();
+				ReturnBlueprint( blueprint );
 				blueprint = null;
 			}
 			selectionComponent.Alpha = Selection.Count > 1 ? 1 : 0;
 			if ( Selection.Count < 2 && Selection.SingleOrDefault() is IComponent comp ) {
-				if ( !blueprintPool.TryGetValue( comp.GetType(), out var pool ) )
-					blueprintPool.Add( comp.GetType(), pool = new() );
-
-				if ( !pool.TryPop( out blueprint ) )
-					blueprint = comp.CreateBlueprint();
-
-				blueprint.Apply( comp );
-				AddInternal( blueprint );
+				blueprint = GetBlueprint( comp );
 			}
 
 			if ( Selection.Count < 2 )
