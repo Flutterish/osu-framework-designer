@@ -13,7 +13,6 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	protected override bool OnDragStart ( DragStartEvent e ) {
 		dragFinished = false;
 
-		Composer.ShowSnaps = true;
 		dragStartPosition = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition ), Array.Empty<IComponent>(), e );
 		Composer.Add( shape = CreateShape().With( s => {
 			s.Colour = Colour4.Green;
@@ -22,6 +21,11 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 		var pos = e.AltPressed ? dragStartPosition : dragStartPosition.Round();
 		UpdateShape( shape, pos, pos );
 		return true;
+	}
+
+	protected override bool OnMouseMove ( MouseMoveEvent e ) {
+		Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMousePosition ), Array.Empty<IComponent>(), e );
+		return base.OnMouseMove( e );
 	}
 
 	protected override void OnDrag ( DragEvent e ) {
@@ -43,7 +47,6 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 		}
 	}
 	protected override void OnDragEnd ( DragEndEvent e ) {
-		Composer.ShowSnaps = false;
 		Composer.SelectionTool.Selection.Add( shape! );
 		if ( !e.ShiftPressed ) {
 			Composer.Tool.Value = Composer.SelectionTool;
@@ -51,7 +54,12 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	}
 
 	public override void BeginUsing () {
+		Composer.ShowSnaps = true;
 		Composer.SelectionTool.Selection.Clear();
+	}
+
+	public override void StopUsing () {
+		Composer.ShowSnaps = false;
 	}
 
 	protected override bool OnMouseDown ( MouseDownEvent e ) {
