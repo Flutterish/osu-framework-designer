@@ -3,7 +3,7 @@
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
 [Cached]
-public abstract class Blueprint<T> : CompositeDrawable {
+public abstract class Blueprint<T> : ErrorBoundry {
 	[Resolved]
 	protected Composer Composer { get; private set; } = null!;
 
