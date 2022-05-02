@@ -45,11 +45,21 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 	public Vector2 ContentToTargetTopLeftSpace ( Vector2 contentSpacePosition )
 		=> TransformProps.Position + ContentToTargetSpace( contentSpacePosition );
 
+	Vector2 normalizeLocalCoords ( Vector2 v ) {
+		if ( float.IsNaN( v.X ) || float.IsInfinity( v.X ) )
+			v.X = 0;
+
+		if ( float.IsNaN( v.Y ) || float.IsInfinity( v.Y ) )
+			v.Y = 0;
+
+		return v;
+	}
+
 	public Vector2 ContentToLocalSpace ( Vector2 contentSpace )
-		=> ToLocalSpace( Composer.ContentToScreenSpace( contentSpace ) );
+		=> normalizeLocalCoords( ToLocalSpace( Composer.ContentToScreenSpace( contentSpace ) ) );
 
 	public Vector2 TargetToLocalSpace ( Vector2 local )
-		=> ContentToLocalSpace( TransformProps.ToContentSpace( local ) );
+		=> normalizeLocalCoords( ContentToLocalSpace( TransformProps.ToContentSpace( local ) ) );
 
 	public Vector2 Unshear ( Vector2 localPosition ) {
 		var lx = localPosition.X;
