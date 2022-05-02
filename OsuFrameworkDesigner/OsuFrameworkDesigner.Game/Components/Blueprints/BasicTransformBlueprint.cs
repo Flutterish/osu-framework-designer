@@ -323,9 +323,8 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 		var topLeft = Parent.ToLocalSpace( Composer.ContentToScreenSpace( TransformProps.TopLeft ) );
 		Position = topLeft;
 		var a = Parent.ToLocalSpace( Composer.ContentToScreenSpace( Vector2.Zero ) );
-		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( 1, 0 ) ) );
-		var scale = ( a - b ).Length;
-		Size = TransformProps.Size * TransformProps.Scale * scale;
+		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( TransformProps.Size ) );
+		Size = (b - a) * TransformProps.Scale;
 		Shear = TransformProps.Shear;
 		Rotation = TransformProps.Rotation.Value;
 

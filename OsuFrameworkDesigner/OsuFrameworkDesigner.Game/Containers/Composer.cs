@@ -231,7 +231,7 @@ public class Composer : CompositeDrawable {
 
 	float zoom = 0;
 	protected override bool OnScroll ( ScrollEvent e ) {
-		zoom += e.ScrollDelta.Y / 4;
+		zoom = Math.Clamp( zoom + e.ScrollDelta.Y / 4, -8, 8 );
 		content.Scale = new( MathF.Pow( 2, zoom ) );
 
 		return true;
