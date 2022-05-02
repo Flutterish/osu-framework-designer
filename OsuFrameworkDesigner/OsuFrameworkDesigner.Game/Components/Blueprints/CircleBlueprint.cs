@@ -10,17 +10,17 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 	float fillHandleAngle;
 
 	protected float ToScaledAngle ( float radians ) {
-		var cos = MathF.Cos( radians ) / TransformProps.Width.Value;
-		var sin = MathF.Sin( radians ) / TransformProps.Height.Value;
-		return MathF.Atan2( sin, cos );
+		var cos = MathF.Cos( radians ) / TransformProps.Width;
+		var sin = MathF.Sin( radians ) / TransformProps.Height;
+		return MathF.Atan2( sin, cos ) + ( TransformProps.SizeFlipAxes.X != TransformProps.SizeFlipAxes.Y ? MathF.PI : 0 );
 	}
 
 	protected float RadiusAtAngle ( float radians ) {
 		var cos = MathF.Cos( radians );
 		var sin = MathF.Sin( radians );
 
-		var b = TransformProps.Width.Value;
-		var a = TransformProps.Height.Value;
+		var b = TransformProps.Width.Value.Abs();
+		var a = TransformProps.Height.Value.Abs();
 
 		return ( a * b ) / ( MathF.Sqrt( a * a * sin * sin + b * b * cos * cos ) ) / 2;
 	}

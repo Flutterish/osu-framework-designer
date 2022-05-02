@@ -420,6 +420,11 @@ public class TransformProps : IEnumerable<IProp> {
 	public Vector2 ToContentSpace ( Vector2 localSpace )
 		=> Vector2Extensions.Transform( localSpace, DrawInfo.Matrix );
 
+	public Vector2 SizeFlipAxes => new Vector2(
+		Width < 0 ? -1 : 1,
+		Height < 0 ? -1 : 1
+	);
+
 	public virtual IEnumerator<IProp> GetEnumerator () {
 		yield return X;
 		yield return Y;

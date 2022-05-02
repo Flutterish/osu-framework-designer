@@ -14,7 +14,7 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 	public int SideCount {
 		get => sideCount;
 		set {
-			if ( sideCount == value )
+			if ( sideCount == value || value < 3 )
 				return;
 
 			sideCount = value;
@@ -34,13 +34,14 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 		}
 	}
 
+	public float MaxSize => MathF.Max( DrawWidth.Abs(), DrawHeight.Abs() );
 	public float CornerRadiusAtDistance ( float distance ) {
 		var vertex = new Vector2( 0, -0.5f );
 		var theta = MathF.Tau / sideCount;
 
 		var vertexDelta = vertex.Rotate( theta ) - vertex;
 
-		return MathExtensions.RoundedTriangleRadius( -vertex.Y, -vertexDelta.Y / vertexDelta.X, distance / MathF.Max( DrawWidth, DrawHeight ) ) * MathF.Max( DrawWidth, DrawHeight );
+		return MathExtensions.RoundedTriangleRadius( -vertex.Y, -vertexDelta.Y / vertexDelta.X, distance / MaxSize ) * MaxSize;
 	}
 
 	public float CornerCentreDistance {
@@ -50,8 +51,8 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 
 			var vertexDelta = vertex.Rotate( theta ) - vertex;
 
-			var (h, r, a) = MathExtensions.RoundTriangle( -vertex.Y, -vertexDelta.Y / vertexDelta.X, cornerRadius / MathF.Max( DrawWidth, DrawHeight ) );
-			return h * MathF.Max( DrawWidth, DrawHeight ) * 2;
+			var (h, r, a) = MathExtensions.RoundTriangle( -vertex.Y, -vertexDelta.Y / vertexDelta.X, cornerRadius / MaxSize );
+			return h * MaxSize * 2;
 		}
 	}
 
@@ -116,7 +117,7 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 
 			shader = Source.shader;
 			sideCount = Math.Clamp( Source.sideCount, 3, MAX_SIDES );
-			cornerRadius = Source.cornerRadius / MathF.Max( Source.DrawWidth, Source.DrawHeight );
+			cornerRadius = Source.cornerRadius / Source.MaxSize;
 			matrix = Source.ScreenSpaceDrawQuad.AsMatrix();
 		}
 

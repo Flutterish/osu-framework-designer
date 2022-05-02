@@ -38,8 +38,22 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 			AddInternal( box );
 		}
 	}
-	public override bool Contains ( Vector2 screenSpacePos )
-		=> DrawRectangle.NormalizedContains( ToLocalSpace( screenSpacePos ) );
+	public override bool Contains ( Vector2 screenSpacePos ) {
+		float cRadius = CornerRadius * 0.8f * CornerExponent / 2 + 0.2f * CornerRadius;
+		float cExponent = CornerExponent;
+
+		var normalized = DrawRectangle.Normalize();
+		// Select a cheaper contains method when we don't need rounded edges.
+		if ( cRadius == 0.0f )
+			return normalized.Contains( ToLocalSpace( screenSpacePos ) );
+
+		var localSpacePos = ToLocalSpace( screenSpacePos );
+		normalized = normalized.Shrink( cRadius );
+		float distX = Math.Max( 0.0f, Math.Max( localSpacePos.X - normalized.Right, normalized.Left - localSpacePos.X ) );
+		float distY = Math.Max( 0.0f, Math.Max( localSpacePos.Y - normalized.Bottom, normalized.Top - localSpacePos.Y ) );
+
+		return MathF.Pow( distX, cExponent ) + MathF.Pow( distY, cExponent ) <= Math.Pow( cRadius, cExponent );
+	}
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new RectangleBlueprint();

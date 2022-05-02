@@ -9,11 +9,11 @@ public class PolygonBlueprint : BasicTransformBlueprint<PolygonComponent> {
 
 	Vector2 scale {
 		get {
-			var ratio = TransformProps.Width / TransformProps.Height;
+			var ratio = TransformProps.Width.Value.Abs() / TransformProps.Height.Value.Abs();
 			if ( ratio > 1 )
-				return new Vector2( 1, 1 / ratio );
+				return new Vector2( 1, 1 / ratio ) * TransformProps.SizeFlipAxes;
 			else
-				return new Vector2( ratio, 1 );
+				return new Vector2( ratio, 1 ) * TransformProps.SizeFlipAxes;
 		}
 	}
 
@@ -24,8 +24,8 @@ public class PolygonBlueprint : BasicTransformBlueprint<PolygonComponent> {
 
 		radiusHandle.Dragged += e => {
 			var pos = ToTargetSpace( e.ScreenSpaceMousePosition ) - TransformProps.Size / 2;
-			pos = pos * Math.Max( TransformProps.Width / TransformProps.Height, 1 );
-			var r = -pos.Y;
+			pos = pos * Math.Max( TransformProps.Width.Value.Abs() / TransformProps.Height.Value.Abs(), 1 );
+			var r = ( TransformProps.Height < 0 ) ? pos.Y : -pos.Y;
 			var v = Value.Polygon.CornerRadiusAtDistance( r );
 			Value.CornerRadius.Value = Math.Clamp( e.AltPressed ? v : v.Round(), 0, Value.Polygon.MaxCornerRadius );
 		};

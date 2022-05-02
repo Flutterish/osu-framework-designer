@@ -89,7 +89,7 @@ public class TwoSidedCircularProgressDrawNode : TexturedShaderDrawNode {
 		float start_angle = offset;
 
 		float dir = Math.Sign( angle );
-		float radius = Math.Max( drawSize.X, drawSize.Y );
+		float radius = Math.Max( drawSize.X.Abs(), drawSize.Y.Abs() );
 
 		// The amount of points are selected such that discrete curvature is smaller than the provided tolerance.
 		// The exact angle required to meet the tolerance is: 2 * Math.Acos(1 - TOLERANCE / r)

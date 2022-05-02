@@ -355,7 +355,7 @@ public class SelectionBox : Handle {
 		FinishTransforms( true );
 	}
 
-	public void UpdateCursorStyles ( float rotation, bool isShearing, Vector2 shear = default ) {
+	public void UpdateCursorStyles ( float rotation, bool isShearing, bool flip = false, Vector2 shear = default ) {
 		var rightX = 1f + shear.X * shear.Y;
 		var rightY = -shear.Y;
 		var rightAngle = MathF.Atan2( rightY, rightX ).ToDegrees();
@@ -391,14 +391,16 @@ public class SelectionBox : Handle {
 			Bottom.CursorStyle = CursorStyle.ResizeVertical;
 		}
 
+		if ( flip ) rotation -= 90;
 		TopRight.CursorRotation = rotation + diagAngle;
 		TopLeft.CursorRotation = rotation + diagAngle;
 		BottomRight.CursorRotation = rotation + diagAngle;
 		BottomLeft.CursorRotation = rotation + diagAngle;
 
+		if ( flip ) rotation += 180;
 		FarTopLeft.CursorRotation = rotation;
-		FarTopRight.CursorRotation = rotation + 90;
-		FarBottomRight.CursorRotation = rotation + 180;
-		FarBottomLeft.CursorRotation = rotation + 270;
+		FarTopRight.CursorRotation = rotation + ( flip ? -90 : 90 );
+		FarBottomRight.CursorRotation = rotation + ( flip ? -180 : 180 );
+		FarBottomLeft.CursorRotation = rotation + ( flip ? -270 : 270 );
 	}
 }

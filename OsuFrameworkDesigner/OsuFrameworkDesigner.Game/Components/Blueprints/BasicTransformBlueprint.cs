@@ -323,7 +323,7 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 			isShearing = InputManager.CurrentState.Keyboard.ControlPressed;
 		}
 
-		SelectionBox.UpdateCursorStyles( Rotation, isShearing, Shear );
+		SelectionBox.UpdateCursorStyles( Rotation, isShearing, ( TransformProps.EffectiveHeight < 0 ) != ( TransformProps.EffectiveWidth < 0 ), Shear );
 
 		Scale = Vector2.One;
 		if ( Height < 0 ) {
