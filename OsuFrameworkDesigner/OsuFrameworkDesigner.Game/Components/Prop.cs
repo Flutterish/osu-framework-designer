@@ -18,6 +18,11 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 	public Prop ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
 	public PropDescription Prototype { get; }
 
+	public override T Value {
+		get => base.Value;
+		set => base.Value = Prototype.Normalize( value, base.Value );
+	}
+
 	object? IProp.Value => Value;
 
 	public static implicit operator T ( Prop<T> prop )
@@ -28,6 +33,11 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 	public ClampedProp ( PropDescription proto ) { Prototype = proto; }
 	public ClampedProp ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
 	public PropDescription Prototype { get; }
+
+	public override T Value {
+		get => base.Value;
+		set => base.Value = Prototype.Normalize( value, base.Value );
+	}
 
 	object? IProp.Value => Value;
 
@@ -57,15 +67,31 @@ public sealed record PropDescription {
 	public Action<Drawable, IEnumerable<IProp>> ApplyEditField { get; init; } = null!;
 	public Action<Drawable> FreeEditField { get; init; } = null!;
 
+	Func<object?, object?> normalizeValue = x => x;
+	Func<object?, object?, object?> normalizeValueWihDefault = ( x, d ) => x;
+	public PropDescription WithNormalizeFunction<T> ( Func<T, T> func, Func<T, T, T> funcWithDefault ) => this with {
+		normalizeValue = obj => func( (T)obj! ),
+		normalizeValueWihDefault = ( obj, def ) => funcWithDefault( (T)obj!, (T)def! )
+	};
+	public T Normalize<T> ( T value )
+		=> (T)normalizeValue( value )!;
+
+	public T Normalize<T> ( T value, T @default )
+		=> (T)normalizeValueWihDefault( value, Normalize( @default ) )!;
+
 	public string UnqualifiedName => Name.StartsWith( Category ) ? Name[Category.Length..] : Name;
 }
 
 public static class PropDescriptions {
-	public static readonly PropDescription FloatProp = new() {
+	public static readonly PropDescription UnboundFloatProp = new() {
 		CreateEditField = self => new FloatEditField { Title = self.UnqualifiedName },
 		ApplyEditField = ( f, props ) => ( (FloatEditField)f ).Apply( props.OfType<IProp<float>>() ),
 		FreeEditField = f => ( (FloatEditField)f ).Free()
 	};
+	public static readonly PropDescription FloatProp = UnboundFloatProp.WithNormalizeFunction<float>(
+		f => float.IsNaN( f ) || float.IsInfinity( f ) ? 0 : f,
+		( f, def ) => float.IsNaN( f ) || float.IsInfinity( f ) ? def : f
+	);
 	public static readonly PropDescription IntProp = new() {
 		CreateEditField = self => new IntEditField { Title = self.UnqualifiedName },
 		ApplyEditField = ( f, props ) => ( (IntEditField)f ).Apply( props.OfType<IProp<int>>() ),
