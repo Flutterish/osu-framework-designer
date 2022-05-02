@@ -7,7 +7,7 @@ public interface IHasFillColour {
 		if ( component is IHasFillColour iface )
 			return iface;
 
-		if ( component.GetProperty<Colour4>( "Colour", "Fill" ) is Prop<Colour4> c ) {
+		if ( component.GetProperty<Colour4>( PropDescriptions.FillColour ) is Prop<Colour4> c ) {
 			return new Impl {
 				FillColour = c
 			};

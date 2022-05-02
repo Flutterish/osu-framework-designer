@@ -8,7 +8,7 @@ public interface IHasSize {
 		if ( component is IHasSize iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "Width", "Basic" ) is Prop<float> w && component.GetProperty<float>( "Height", "Basic" ) is Prop<float> h ) {
+		if ( component.GetProperty<float>( PropDescriptions.Width ) is Prop<float> w && component.GetProperty<float>( PropDescriptions.Height ) is Prop<float> h ) {
 			return new Impl {
 				Width = w,
 				Height = h

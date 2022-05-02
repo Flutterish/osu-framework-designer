@@ -8,7 +8,7 @@ public interface IHasScale {
 		if ( component is IHasScale iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "X", "Scale" ) is Prop<float> x && component.GetProperty<float>( "Y", "Scale" ) is Prop<float> y ) {
+		if ( component.GetProperty<float>( PropDescriptions.ScaleX ) is Prop<float> x && component.GetProperty<float>( PropDescriptions.ScaleY ) is Prop<float> y ) {
 			return new Impl {
 				ScaleX = x,
 				ScaleY = y

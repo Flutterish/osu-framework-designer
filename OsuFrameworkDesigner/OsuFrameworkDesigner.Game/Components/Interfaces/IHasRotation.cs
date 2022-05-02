@@ -7,7 +7,7 @@ public interface IHasRotation {
 		if ( component is IHasRotation iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "Rotation", "Basic" ) is Prop<float> rot ) {
+		if ( component.GetProperty<float>( PropDescriptions.Rotation ) is Prop<float> rot ) {
 			return new Impl {
 				Rotation = rot
 			};

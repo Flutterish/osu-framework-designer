@@ -8,7 +8,7 @@ public interface IHasOrigin {
 		if ( component is IHasOrigin iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "X", "Origin" ) is Prop<float> x && component.GetProperty<float>( "Y", "Origin" ) is Prop<float> y ) {
+		if ( component.GetProperty<float>( PropDescriptions.OriginX ) is Prop<float> x && component.GetProperty<float>( PropDescriptions.OriginY ) is Prop<float> y ) {
 			return new Impl {
 				OriginX = x,
 				OriginY = y

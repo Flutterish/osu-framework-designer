@@ -8,7 +8,7 @@ public interface IHasPosition {
 		if ( component is IHasPosition iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "X", "Basic" ) is Prop<float> x && component.GetProperty<float>( "Y", "Basic" ) is Prop<float> y ) {
+		if ( component.GetProperty<float>( PropDescriptions.X ) is Prop<float> x && component.GetProperty<float>( PropDescriptions.Y ) is Prop<float> y ) {
 			return new Impl {
 				X = x,
 				Y = y

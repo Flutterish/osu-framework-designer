@@ -8,7 +8,7 @@ public interface IHasShear {
 		if ( component is IHasShear iface )
 			return iface;
 
-		if ( component.GetProperty<float>( "X", "Shear" ) is Prop<float> x && component.GetProperty<float>( "Y", "Shear" ) is Prop<float> y ) {
+		if ( component.GetProperty<float>( PropDescriptions.ShearX ) is Prop<float> x && component.GetProperty<float>( PropDescriptions.ShearY ) is Prop<float> y ) {
 			return new Impl {
 				ShearX = x,
 				ShearY = y
