@@ -256,10 +256,6 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 		SelectionBox.FarTopRight.DragEnded += dragEnded;
 	}
 
-	protected override void OnApply () {
-		TransformProps.Normalize();
-	}
-
 	protected void DisableAllHandles () {
 		SelectionBox.Top.Alpha =
 		SelectionBox.Bottom.Alpha =
@@ -291,9 +287,6 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 	}
 	private void dragEnded ( DragEndEvent e ) {
 		isDragging = false;
-		BeforeNormalization?.Invoke();
-		TransformProps.Normalize();
-		AfterNormalization?.Invoke();
 	}
 
 	float startAngle;
@@ -332,35 +325,20 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 
 		SelectionBox.UpdateCursorStyles( Rotation, isShearing, Shear );
 
+		Scale = Vector2.One;
 		if ( Height < 0 ) {
-			var cos = MathF.Cos( ( Rotation + 90 ) / 180 * MathF.PI );
-			var sin = MathF.Sin( ( Rotation + 90 ) / 180 * MathF.PI );
-			X += ( cos - sin * Shear.X ) * Height;
-			Y += ( sin + cos * Shear.X ) * Height;
-
 			Height = -Height;
+			Scale *= new Vector2( 1, -1 );
 		}
-
 		if ( Width < 0 ) {
-			var cos = MathF.Cos( Rotation / 180 * MathF.PI );
-			var sin = MathF.Sin( Rotation / 180 * MathF.PI );
-			X += ( cos + sin * Shear.Y ) * Width;
-			Y += ( sin - cos * Shear.Y ) * Width;
-			// shear is non-commutative
-			var total = Shear.X * Shear.Y;
-			X += cos * total * Width;
-			Y += sin * total * Width;
-
 			Width = -Width;
+			Scale *= new Vector2( -1, 1 );
 		}
 	}
 
 	protected override bool ComputeIsMaskedAway ( RectangleF maskingBounds ) {
 		return !InternalChildren.Any( x => x.ScreenSpaceDrawQuad.AABBFloat.IntersectsWith( maskingBounds ) ) && base.ComputeIsMaskedAway( maskingBounds );
 	}
-
-	public event Action? BeforeNormalization;
-	public event Action? AfterNormalization;
 }
 
 public class OriginHandle : Handle {

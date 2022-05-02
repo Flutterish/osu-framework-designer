@@ -38,9 +38,8 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 			AddInternal( box );
 		}
 	}
-
 	public override bool Contains ( Vector2 screenSpacePos )
-		=> InternalChild.Contains( screenSpacePos );
+		=> DrawRectangle.NormalizedContains( ToLocalSpace( screenSpacePos ) );
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new RectangleBlueprint();

@@ -217,4 +217,22 @@ public static class MathExtensions {
 		var y = m2 * x;
 		return MathF.Sqrt( x * x + y * y );
 	}
+
+	/// <summary>
+	/// Whether the rectangle contains a point which also works with negatively sized rectangles
+	/// </summary>
+	/// <param name="rectangle"></param>
+	/// <returns></returns>
+	public static bool NormalizedContains ( this RectangleF rectangle, Vector2 point ) {
+		if ( rectangle.Width < 0 ) {
+			rectangle.X += rectangle.Width;
+			rectangle.Width = -rectangle.Width;
+		}
+		if ( rectangle.Height < 0 ) {
+			rectangle.Y += rectangle.Height;
+			rectangle.Height = -rectangle.Height;
+		}
+
+		return rectangle.Contains( point );
+	}
 }

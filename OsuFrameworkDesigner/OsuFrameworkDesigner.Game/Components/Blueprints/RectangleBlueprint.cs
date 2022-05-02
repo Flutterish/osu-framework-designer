@@ -67,9 +67,9 @@ public class RectangleBlueprint : BasicTransformBlueprint<RectangleComponent> {
 		var b = Parent.ToLocalSpace( Composer.ContentToScreenSpace( new( r, 0 ) ) );
 		r = ( a - b ).Length;
 
-		cornerRadiusTopLeft.Position = new Vector2( 1, 1 ) * Value.Scale * r;
-		cornerRadiusTopRight.Position = new Vector2( -1, 1 ) * Value.Scale * r;
-		cornerRadiusBottomLeft.Position = new Vector2( 1, -1 ) * Value.Scale * r;
-		cornerRadiusBottomRight.Position = new Vector2( -1, -1 ) * Value.Scale * r;
+		cornerRadiusTopLeft.Position = new Vector2( 1, 1 ) * Value.Scale.Abs() * r;
+		cornerRadiusTopRight.Position = new Vector2( -1, 1 ) * Value.Scale.Abs() * r;
+		cornerRadiusBottomLeft.Position = new Vector2( 1, -1 ) * Value.Scale.Abs() * r;
+		cornerRadiusBottomRight.Position = new Vector2( -1, -1 ) * Value.Scale.Abs() * r;
 	}
 }
