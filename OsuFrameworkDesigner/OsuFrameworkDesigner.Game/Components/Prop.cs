@@ -24,6 +24,17 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 		=> prop.Value;
 }
 
+public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, IComparable<T>, IConvertible, IEquatable<T> {
+	public ClampedProp ( PropDescription proto ) { Prototype = proto; }
+	public ClampedProp ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
+	public PropDescription Prototype { get; }
+
+	object? IProp.Value => Value;
+
+	public static implicit operator T ( ClampedProp<T> prop )
+		=> prop.Value;
+}
+
 public sealed record PropDescription {
 	public PropDescription ( [CallerMemberName] string name = "" ) {
 		Name = name;

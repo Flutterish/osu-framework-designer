@@ -34,10 +34,9 @@ public abstract class TextEditField<T> : EditField<T> {
 
 		textBox.CommitOnFocusLost = true;
 		textBox.OnCommit += ( _, _ ) => {
-			if ( !TryParse( textBox.Current.Value, out var value ) ) {
-				InvalidateDisplay();
+			InvalidateDisplay();
+			if ( !TryParse( textBox.Current.Value, out var value ) )
 				return;
-			}
 
 			SetValue( value );
 		};

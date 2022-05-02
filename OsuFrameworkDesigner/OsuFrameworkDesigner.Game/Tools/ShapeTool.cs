@@ -6,7 +6,7 @@ namespace OsuFrameworkDesigner.Game.Tools;
 
 public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	protected abstract T CreateShape ();
-	protected virtual void UpdateShape ( T shape, Vector2 start, Vector2 end ) { }
+	protected abstract void UpdateShape ( T shape, Vector2 start, Vector2 end );
 
 	T? shape;
 	Vector2 dragStartPosition;

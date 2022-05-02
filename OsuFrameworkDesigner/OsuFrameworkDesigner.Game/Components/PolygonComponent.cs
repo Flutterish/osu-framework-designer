@@ -10,7 +10,7 @@ public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 
 	public readonly DrawableProps TransformProps;
 	new public readonly Prop<float> CornerRadius = new( PropDescriptions.CornerRadius );
-	public readonly Prop<int> CornerCount = new( 3, CornerCountProto );
+	public readonly ClampedProp<int> CornerCount = new( 3, CornerCountProto ) { MinValue = 3, MaxValue = 60 };
 
 	public PolygonComponent () {
 		TransformProps = new( this );
