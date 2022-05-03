@@ -228,10 +228,8 @@ public class Composer : CompositeDrawable {
 			foreach ( var i in snapMarkers ) {
 				if ( i is SnapMarker )
 					i.Scale = new( 1 / content.Scale.X );
-				else if ( i is SnapLine s ) {
-					i.Scale = new( 1, 1 / content.Scale.X );
-					s.EdgeSmoothness = new( 0, MathF.Min( content.Scale.X, 1 ) );
-				}
+				else if ( i is SnapLine )
+					i.Height = 1 / content.Scale.X;
 			}
 		}
 	}
