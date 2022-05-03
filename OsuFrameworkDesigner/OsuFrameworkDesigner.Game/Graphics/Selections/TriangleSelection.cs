@@ -9,7 +9,7 @@ public class TriangleSelection : DrawableSelection {
 	Bindable<Colour4> backgroundColor = new( Theme.SelectionDefault );
 
 	public TriangleSelection () {
-		AddInternal( background = new DrawableTriangle { BorderThickness = 6, Colour = Color4.Transparent }.Fill() );
+		AddInternal( background = new DrawableTriangle { BorderThickness = 3, Colour = Color4.Transparent }.Fill() );
 	}
 
 	protected override void Update () {
