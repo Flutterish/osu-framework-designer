@@ -1,4 +1,5 @@
-﻿using osu.Framework.Input.Events;
+﻿using osu.Framework.Extensions.TypeExtensions;
+using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using osuTK.Input;
 
@@ -14,9 +15,12 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 		dragFinished = false;
 
 		dragStartPosition = Composer.Snap( Composer.ToContentSpace( e.ScreenSpaceMouseDownPosition ), Array.Empty<IComponent>(), e );
-		Composer.Add( shape = CreateShape().With( s => {
+		shape = CreateShape().With( s => {
 			s.Colour = Colour4.Green;
-		} ) );
+		} );
+
+		shape.Name = shape.NameOrDefault( Composer );
+		Composer.Add( shape );
 
 		var pos = e.AltPressed ? dragStartPosition : dragStartPosition.Round();
 		UpdateShape( shape, pos, pos );

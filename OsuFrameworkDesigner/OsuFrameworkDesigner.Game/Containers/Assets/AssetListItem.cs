@@ -30,6 +30,7 @@ public class AssetListItem : CompositeDrawable {
 		name.CommitOnFocusLost = true;
 		name.OnCommit += ( t, v ) => {
 			Component.Name = t.Text;
+			onNameUpdated();
 		};
 	}
 
@@ -78,10 +79,7 @@ public class AssetListItem : CompositeDrawable {
 	}
 
 	void onNameUpdated () {
-		if ( string.IsNullOrWhiteSpace( Component.Name ) )
-			name.Text = Component.GetType().ReadableName();
-		else
-			name.Text = Component.Name;
+		name.Text = Component.NameOrDefault();
 	}
 
 	Bindable<Colour4> selectionColour = new( Theme.SelectionDefault );
