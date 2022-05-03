@@ -10,12 +10,14 @@ public class ArrowComponent : LineComponent {
 		AddInternal( arrowHeadLeft = new() {
 			Origin = Anchor.TopRight,
 			Anchor = Anchor.CentreRight,
-			Rotation = 45
+			Rotation = 45,
+			EdgeSmoothness = new( 1 )
 		} );
 		AddInternal( arrowHeadRight = new() {
 			Origin = Anchor.BottomRight,
 			Anchor = Anchor.CentreRight,
-			Rotation = -45
+			Rotation = -45,
+			EdgeSmoothness = new( 1 )
 		} );
 
 		Radius.BindValueChanged( v => {

@@ -21,7 +21,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnap
 
 	public LineComponent () {
 		Origin = Anchor.CentreLeft;
-		AddInternal( box = new Box().Fill() );
+		AddInternal( box = new Box { EdgeSmoothness = new( 1 ) }.Fill() );
 
 		Radius.BindValueChanged( v => Height = v.NewValue * 2, true );
 		(StartX, StartY).BindValueChanged( ( x, y ) => {
