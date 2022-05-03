@@ -7,7 +7,7 @@ public class DrawableSelection : CompositeDrawable {
 	protected Composer Composer { get; private set; } = null!;
 
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionDefault );
 
 	public DrawableSelection () {
 		AddInternal( background = new Box { Alpha = 0, AlwaysPresent = true }.Fill() );
@@ -35,7 +35,7 @@ public class DrawableSelection : CompositeDrawable {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.Selection );
 		backgroundColor.BindValueChanged( v => BorderColour = v.NewValue, true );
 		FinishTransforms( true );

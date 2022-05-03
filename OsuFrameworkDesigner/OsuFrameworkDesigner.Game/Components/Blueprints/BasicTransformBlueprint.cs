@@ -354,8 +354,8 @@ public class OriginHandle : Handle {
 	SpriteIcon icon;
 	SpriteIcon iconBorder1;
 	SpriteIcon iconBorder2;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
-	Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionHandleDefault );
+	Bindable<Colour4> selectionColor = new( Theme.SelectionDefault );
 
 	public OriginHandle () {
 		Origin = Anchor.Centre;
@@ -370,7 +370,7 @@ public class OriginHandle : Handle {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.SelectionHandle );
 		selectionColor.BindTo( colours.Selection );
 		icon.FadeColour( backgroundColor );

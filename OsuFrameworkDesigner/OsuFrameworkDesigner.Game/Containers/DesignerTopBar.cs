@@ -6,7 +6,7 @@ namespace OsuFrameworkDesigner.Game.Containers;
 
 public class DesignerTopBar : CompositeDrawable {
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.TopbarDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.TopbarDefault );
 
 	FillFlowContainer toolSelection;
 	public readonly Bindable<Tool> Tool = new();
@@ -57,7 +57,7 @@ public class DesignerTopBar : CompositeDrawable {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.Topbar );
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );

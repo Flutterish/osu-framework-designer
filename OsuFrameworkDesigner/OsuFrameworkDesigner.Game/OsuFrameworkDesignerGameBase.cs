@@ -5,7 +5,7 @@ namespace OsuFrameworkDesigner.Game;
 
 public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 	[Cached]
-	public ColourConfiguration ColourConfiguration { get; } = new();
+	public Theme Theme { get; } = new();
 
 	protected override Container<Drawable> Content { get; }
 	protected OsuFrameworkDesignerGameBase () {

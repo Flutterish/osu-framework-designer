@@ -171,8 +171,8 @@ public readonly struct SnapResult {
 public class CornerHandle : Handle {
 	Container border;
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
-	Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionHandleDefault );
+	Bindable<Colour4> selectionColor = new( Theme.SelectionDefault );
 
 	public CornerHandle () {
 		Origin = Anchor.Centre;
@@ -186,7 +186,7 @@ public class CornerHandle : Handle {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.SelectionHandle );
 		selectionColor.BindTo( colours.Selection );
 		background.FadeColour( backgroundColor );
@@ -197,8 +197,8 @@ public class CornerHandle : Handle {
 
 public class PointHandle : Handle {
 	Circle background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionHandleDefault );
-	Bindable<Colour4> selectionColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionHandleDefault );
+	Bindable<Colour4> selectionColor = new( Theme.SelectionDefault );
 
 	public PointHandle () {
 		Origin = Anchor.Centre;
@@ -210,7 +210,7 @@ public class PointHandle : Handle {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.SelectionHandle );
 		selectionColor.BindTo( colours.Selection );
 		background.FadeColour( backgroundColor );

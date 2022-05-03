@@ -84,10 +84,10 @@ public class AssetListItem : CompositeDrawable {
 			name.Text = Component.Name;
 	}
 
-	Bindable<Colour4> selectionColour = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> selectionColour = new( Theme.SelectionDefault );
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		selectionColour.BindTo( colours.Selection );
 		selectionColour.BindValueChanged( v => BorderColour = v.NewValue, true );
 	}

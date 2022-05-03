@@ -14,7 +14,7 @@ public class Composer : CompositeDrawable {
 	Container<Tool> tools;
 
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.ComposerBackgroundDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.ComposerBackgroundDefault );
 
 	TransformContainer content;
 	UnmaskableContainer components;
@@ -312,7 +312,7 @@ public class Composer : CompositeDrawable {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.ComposerBackground );
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );

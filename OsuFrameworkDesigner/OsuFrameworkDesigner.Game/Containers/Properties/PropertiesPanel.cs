@@ -8,7 +8,7 @@ namespace OsuFrameworkDesigner.Game.Containers.Properties;
 
 public class PropertiesPanel : CompositeDrawable {
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SidePanelDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SidePanelDefault );
 	FillFlowContainer items;
 
 	public PropertiesPanel () {
@@ -30,7 +30,7 @@ public class PropertiesPanel : CompositeDrawable {
 	public readonly BindableList<IComponent> Components = new();
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.SidePanel );
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );

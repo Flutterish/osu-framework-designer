@@ -6,7 +6,7 @@ namespace OsuFrameworkDesigner.Game.Containers.Assets;
 public class AssetsPanel : CompositeDrawable {
 	Box background;
 	FillFlowContainer items;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SidePanelDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SidePanelDefault );
 	Stack<AssetListItem> listItemPool = new();
 	Dictionary<IComponent, AssetListItem> itemsByComponent = new();
 
@@ -40,7 +40,7 @@ public class AssetsPanel : CompositeDrawable {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.SidePanel );
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );

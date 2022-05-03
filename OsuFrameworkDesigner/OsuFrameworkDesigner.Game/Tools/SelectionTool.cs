@@ -289,7 +289,7 @@ public interface ISelection {
 
 public class HoverSelectionBox : CompositeDrawable { // TODO the borders should be around, not inside
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionDefault );
 
 	public HoverSelectionBox () {
 		AddInternal( background = new Box { Alpha = 0.2f }.Fill() );
@@ -298,7 +298,7 @@ public class HoverSelectionBox : CompositeDrawable { // TODO the borders should 
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.Selection );
 		background.FadeColour( backgroundColor );
 		backgroundColor.BindValueChanged( v => BorderColour = v.NewValue, true );
@@ -308,7 +308,7 @@ public class HoverSelectionBox : CompositeDrawable { // TODO the borders should 
 
 public class SelectionBox : Handle {
 	Container border;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.SelectionDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.SelectionDefault );
 
 	public readonly CornerHandle TopLeft;
 	public readonly CornerHandle TopRight;
@@ -349,7 +349,7 @@ public class SelectionBox : Handle {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		backgroundColor.BindTo( colours.Selection );
 		backgroundColor.BindValueChanged( v => border.BorderColour = v.NewValue, true );
 		FinishTransforms( true );

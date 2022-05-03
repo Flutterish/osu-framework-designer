@@ -1,6 +1,6 @@
 ﻿namespace OsuFrameworkDesigner.Game.Dependencies;
 
-public class ColourConfiguration {
+public class Theme {
 	public static Colour4 TopbarDefault { get; } = Colour4.FromHex( "#2C2C2C" );
 	public readonly Bindable<Colour4> Topbar = new( TopbarDefault );
 	public static Colour4 TopbarButtonDefault { get; } = TopbarDefault;

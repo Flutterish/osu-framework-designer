@@ -5,12 +5,12 @@ using osu.Framework.Input.Events;
 namespace OsuFrameworkDesigner.Game.Tools;
 public class ToolButton : Button {
 	Box background;
-	Bindable<Colour4> backgroundColor = new( ColourConfiguration.TopbarButtonDefault );
-	Bindable<Colour4> hoverColor = new( ColourConfiguration.TopbarButtonHoverDefault );
-	Bindable<Colour4> activeColor = new( ColourConfiguration.TopbarButtonActiveDefault );
+	Bindable<Colour4> backgroundColor = new( Theme.TopbarButtonDefault );
+	Bindable<Colour4> hoverColor = new( Theme.TopbarButtonHoverDefault );
+	Bindable<Colour4> activeColor = new( Theme.TopbarButtonActiveDefault );
 
 	SpriteIcon icon;
-	Bindable<Colour4> iconColor = new( ColourConfiguration.TopbarButtonIconDefault );
+	Bindable<Colour4> iconColor = new( Theme.TopbarButtonIconDefault );
 	public IconUsage Icon {
 		get => icon.Icon;
 		set => icon.Icon = value;
@@ -33,7 +33,7 @@ public class ToolButton : Button {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		iconColor.BindTo( colours.TopbarButtonIcon );
 		backgroundColor.BindTo( colours.TopbarButton );
 		hoverColor.BindTo( colours.TopbarButtonHover );

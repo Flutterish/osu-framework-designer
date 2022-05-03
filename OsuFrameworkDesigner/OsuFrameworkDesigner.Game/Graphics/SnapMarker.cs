@@ -1,7 +1,7 @@
 ﻿namespace OsuFrameworkDesigner.Game.Graphics;
 
 public class SnapMarker : CompositeDrawable {
-	public readonly Bindable<Colour4> FillColour = new( ColourConfiguration.SnapMarkerDefault );
+	public readonly Bindable<Colour4> FillColour = new( Theme.SnapMarkerDefault );
 
 	public SnapMarker () {
 		Origin = Anchor.Centre;
@@ -20,7 +20,7 @@ public class SnapMarker : CompositeDrawable {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		FillColour.BindTo( colours.SnapMarker );
 		this.FadeColour( FillColour );
 
@@ -29,7 +29,7 @@ public class SnapMarker : CompositeDrawable {
 }
 
 public class SnapLine : Box {
-	public readonly Bindable<Colour4> FillColour = new( ColourConfiguration.SnapMarkerDefault );
+	public readonly Bindable<Colour4> FillColour = new( Theme.SnapMarkerDefault );
 
 	public SnapLine () {
 		Origin = Anchor.CentreLeft;
@@ -57,7 +57,7 @@ public class SnapLine : Box {
 	}
 
 	[BackgroundDependencyLoader]
-	private void load ( ColourConfiguration colours ) {
+	private void load ( Theme colours ) {
 		FillColour.BindTo( colours.SnapMarker );
 		this.FadeColour( FillColour );
 
