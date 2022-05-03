@@ -1,10 +1,12 @@
-﻿using OsuFrameworkDesigner.Game.Components.Blueprints;
+﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
+using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
 public class RectangleComponent : CompositeDrawable, IComponent {
-	Box box;
+	Sprite box;
 	Container? roundedContainer;
 
 	public readonly DrawableProps TransformProps;
@@ -12,11 +14,13 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 
 	public RectangleComponent () {
 		TransformProps = new( this );
-		AddInternal( box = new Box().Fill() );
+		AddInternal( box = new Sprite { Texture = Texture.WhitePixel }.Fill() );
 
 		CornerRadius.BindValueChanged( v => updateLayout() );
 		TransformProps.Width.BindValueChanged( v => updateLayout() );
 		TransformProps.Height.BindValueChanged( v => updateLayout() );
+
+		TransformProps.Texture.BindValueChanged( v => box.Texture = v.NewValue );
 	}
 
 	public float MaxCornerRadius => Math.Min( DrawSize.X.Abs(), DrawSize.Y.Abs() ) / 2f;

@@ -1,4 +1,5 @@
-﻿using OsuFrameworkDesigner.Game.Containers.Properties;
+﻿using osu.Framework.Graphics.Textures;
+using OsuFrameworkDesigner.Game.Containers.Properties;
 using System.Runtime.CompilerServices;
 
 namespace OsuFrameworkDesigner.Game.Components;
@@ -102,6 +103,11 @@ public static class PropDescriptions {
 		ApplyEditField = ( f, props ) => ( (ColourEditField)f ).Apply( props.OfType<IProp<Colour4>>() ),
 		FreeEditField = f => ( (ColourEditField)f ).Free()
 	};
+	public static readonly PropDescription TextureProp = new() {
+		CreateEditField = self => new TextureEditField(),
+		ApplyEditField = ( f, props ) => ( (TextureEditField)f ).Apply( props.OfType<IProp<Texture>>() ),
+		FreeEditField = f => ( (TextureEditField)f ).Free()
+	};
 
 	public static readonly PropDescription X = FloatProp with { Name = "X", Category = "Basic" };
 	public static readonly PropDescription Y = FloatProp with { Name = "Y", Category = "Basic" };
@@ -116,4 +122,5 @@ public static class PropDescriptions {
 	public static readonly PropDescription OriginY = FloatProp with { Name = "Y", Category = "Origin" };
 	public static readonly PropDescription FillColour = ColourProp with { Name = "Colour", Category = "Fill", Groupable = true };
 	public static readonly PropDescription CornerRadius = FloatProp with { Name = "Radius", Category = "Corners" };
+	public static readonly PropDescription Texture = TextureProp with { Name = "Texture", Category = "Fill", Groupable = true };
 }

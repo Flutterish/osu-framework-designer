@@ -1,15 +1,18 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Extensions.PolygonExtensions;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
+using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
+using OsuFrameworkDesigner.Game.Memory;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Containers;
 
 [Cached]
-public class Composer : CompositeDrawable {
+public class Composer : CompositeDrawable, IFileDropHandler {
 	public readonly Bindable<Tool> Tool = new();
 	Container<Tool> tools;
 
@@ -321,5 +324,21 @@ public class Composer : CompositeDrawable {
 		backgroundColor.BindTo( colours.ComposerBackground );
 		background.FadeColour( backgroundColor );
 		FinishTransforms( true );
+	}
+
+	[Resolved]
+	FileTextureCache textureCache { get; set; } = null!;
+
+	public override bool HandlePositionalInput => true;
+	public bool OnFileDrop ( FileDropArgs args ) {
+		var comp = ComponentAtScreenSpace( args.ScreenSpaceMousePosition );
+		if ( comp?.GetProperty<Texture>( PropDescriptions.Texture ) is IProp<Texture> tx ) {
+			textureCache.GetTextureAsync( args.File ).ContinueWith( v => {
+				tx.Value = v.Result;
+			} );
+			return true;
+		}
+
+		return false;
 	}
 }

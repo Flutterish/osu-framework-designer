@@ -20,7 +20,8 @@ public class DesignerInputManager : PassThroughInputManager {
 	private void onFileDrop ( string[] e ) {
 		Schedule( () => {
 			foreach ( var file in e ) {
-				var handled = PositionalInputQueue.OfType<IFileDropHandler>().FirstOrDefault( d => tryHandleFileDrop( d, file ) );
+				var args = new FileDropArgs { File = file, ScreenSpaceMousePosition = CurrentState.Mouse.Position };
+				var handled = PositionalInputQueue.OfType<IFileDropHandler>().FirstOrDefault( d => tryHandleFileDrop( d, args ) );
 
 				if ( handled != null )
 					Logger.Log( $"File drop ({file}) handled by {handled}.", LoggingTarget.Runtime, LogLevel.Debug );
@@ -30,7 +31,7 @@ public class DesignerInputManager : PassThroughInputManager {
 		} );
 	}
 
-	private bool tryHandleFileDrop ( IFileDropHandler drawable, string file ) {
+	private bool tryHandleFileDrop ( IFileDropHandler drawable, in FileDropArgs file ) {
 		return drawable.OnFileDrop( file );
 	}
 
@@ -44,5 +45,10 @@ public class DesignerInputManager : PassThroughInputManager {
 /// Allows this drawable to handle file drop events. You need <see cref="Drawable.HandlePositionalInput"/> for this to work.
 /// </summary>
 public interface IFileDropHandler {
-	bool OnFileDrop ( string files );
+	bool OnFileDrop ( FileDropArgs file );
+}
+
+public readonly struct FileDropArgs {
+	public string File { get; init; }
+	public Vector2 ScreenSpaceMousePosition { get; init; }
 }

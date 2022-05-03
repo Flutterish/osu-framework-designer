@@ -1,6 +1,7 @@
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using OsuFrameworkDesigner.Game.Containers;
+using OsuFrameworkDesigner.Game.Memory;
 using OsuFrameworkDesigner.Resources;
 
 namespace OsuFrameworkDesigner.Game;
@@ -9,6 +10,9 @@ namespace OsuFrameworkDesigner.Game;
 public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 	[Cached]
 	public Theme Theme { get; } = new();
+
+	[Cached]
+	public FileTextureCache FileTextures { get; } = new();
 
 	protected override Container<Drawable> Content { get; }
 	protected OsuFrameworkDesignerGameBase () {
@@ -46,7 +50,6 @@ public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 		base.Dispose( isDisposing );
 		unbindFileDropEvents();
 	}
-
 
 	protected override bool OnExiting () {
 		unbindFileDropEvents();
