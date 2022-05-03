@@ -34,7 +34,7 @@ public class SnapLine : Box {
 	public SnapLine () {
 		Origin = Anchor.CentreLeft;
 		Size = new( 0, 1 );
-		EdgeSmoothness = new( 1 );
+		EdgeSmoothness = new( 0, 1 );
 	}
 
 	public void Connect ( Vector2 guideA, Vector2 guideB, Vector2 point ) {

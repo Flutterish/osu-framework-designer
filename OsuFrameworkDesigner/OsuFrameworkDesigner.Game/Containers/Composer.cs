@@ -221,6 +221,21 @@ public class Composer : CompositeDrawable {
 		}
 	}
 
+	protected override void Update () {
+		base.Update();
+
+		if ( snapMarkers.IsPresent ) {
+			foreach ( var i in snapMarkers ) {
+				if ( i is SnapMarker )
+					i.Scale = new( 1 / content.Scale.X );
+				else if ( i is SnapLine s ) {
+					i.Scale = new( 1, 1 / content.Scale.X );
+					s.EdgeSmoothness = new( 0, MathF.Min( content.Scale.X, 1 ) );
+				}
+			}
+		}
+	}
+
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
 		=> content.ToLocalSpace( screenSpace ) - content.DrawSize / 2 + content.Position;
 	public Quad ToContentSpace ( Quad screenSpaceQuad ) {
