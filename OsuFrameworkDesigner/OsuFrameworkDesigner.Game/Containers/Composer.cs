@@ -20,10 +20,6 @@ public class Composer : CompositeDrawable {
 	UnmaskableContainer components;
 	UnmaskableContainer snapMarkers;
 
-	SnapMarker marker1 = new();
-	SnapMarker marker2 = new();
-	SnapLine lineMarker = new();
-
 	public readonly SelectionTool SelectionTool = new();
 
 	public Composer () {
@@ -70,6 +66,14 @@ public class Composer : CompositeDrawable {
 		return Components.SelectMany( x => x.GetNestedComponents() );
 	}
 
+	SnapMarker marker1 = new();
+	SnapMarker marker2 = new();
+	SnapLine lineMarker = new();
+	SnapMarker marker3 = new();
+	SnapMarker marker4 = new();
+	SnapLine lineMarker2 = new();
+	SnapMarker marker5 = new();
+
 	public bool TrySnap ( Vector2 point, IEnumerable<PointGuide> guides, out Vector2 snapped ) {
 		snapMarkers.Clear( disposeChildren: false );
 
@@ -87,10 +91,43 @@ public class Composer : CompositeDrawable {
 		return false;
 	}
 
-	public bool TrySnap ( Vector2 point, IEnumerable<LineGuide> guides, out Vector2 snapped ) {
+	public bool TrySnap ( Vector2 point, IEnumerable<LineGuide> guides, out Vector2 snapped, bool useIntersections = true ) {
 		snapMarkers.Clear( disposeChildren: false );
 
 		if ( guides.Any() ) {
+			if ( useIntersections ) {
+				var pairs = guides.SelectMany( ( x, i ) => guides.Skip( i + 1 ).Select( y => (First: x, Second: y) ) );
+
+				var intersectionGuides = pairs
+					.Where( lines => MathF.Abs( Vector2.Dot( lines.First.Direction.Normalized(), lines.Second.Direction.Normalized() ) ) < 0.9999f )
+					.Select( lines => (
+						guide: new PointGuide { Point = MathExtensions.IntersectLines( lines.First.StartPoint, lines.First.Direction, lines.Second.StartPoint, lines.Second.Direction ) },
+						lines: lines
+					) );
+
+				if ( intersectionGuides.Any() ) {
+					var bestIntersection = intersectionGuides.MinBy( x => x.guide.SnapRatingFor( point ) );
+					if ( bestIntersection.guide.SnapRatingFor( point ) <= 64 ) {
+						snapMarkers.Add( marker1 );
+						snapMarkers.Add( marker2 );
+						snapMarkers.Add( marker3 );
+						snapMarkers.Add( marker4 );
+						snapMarkers.Add( marker5 );
+						snapMarkers.Add( lineMarker );
+						snapMarkers.Add( lineMarker2 );
+						marker1.Position = bestIntersection.lines.First.StartPoint;
+						marker2.Position = bestIntersection.lines.First.EndPoint;
+						marker3.Position = bestIntersection.lines.Second.StartPoint;
+						marker4.Position = bestIntersection.lines.Second.EndPoint;
+						marker5.Position = bestIntersection.guide.Point;
+						lineMarker.Connect( bestIntersection.lines.First.StartPoint, bestIntersection.lines.First.EndPoint, bestIntersection.guide.Point );
+						lineMarker2.Connect( bestIntersection.lines.Second.StartPoint, bestIntersection.lines.Second.EndPoint, bestIntersection.guide.Point );
+						snapped = bestIntersection.guide.Point;
+						return true;
+					}
+				}
+			}
+
 			var best = guides.MinBy( x => x.SnapRatingFor( point, out _ ) );
 			if ( best.SnapRatingFor( point, out var snappedPoint ) <= 64 ) {
 				snapMarkers.Add( marker1 );

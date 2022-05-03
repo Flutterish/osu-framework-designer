@@ -77,6 +77,9 @@ public struct LineGuide {
 		snapped = MathExtensions.ClosestPointToLine( StartPoint, EndPoint - StartPoint, point );
 		return ( snapped - point ).LengthSquared;
 	}
+
+	public override string ToString ()
+		=> $"{StartPoint} -> {EndPoint}";
 }
 
 public struct PointGuide {
@@ -84,6 +87,9 @@ public struct PointGuide {
 
 	public float SnapRatingFor ( Vector2 p )
 		=> ( Point - p ).LengthSquared;
+
+	public override string ToString ()
+		=> Point.ToString();
 
 	public static implicit operator PointGuide ( Vector2 p )
 		=> new() { Point = p };

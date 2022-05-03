@@ -235,4 +235,18 @@ public static class MathExtensions {
 
 		return rectangle.Contains( point );
 	}
+
+	public static Vector2 IntersectLines ( Vector2 pointOnA, Vector2 directionA, Vector2 pointOnB, Vector2 directionB ) {
+		directionA.Normalize();
+		directionB.Normalize();
+
+		var d = pointOnB - pointOnA;
+		var v1d = Vector2.Dot( directionA, d );
+		var v2d = Vector2.Dot( directionB, d );
+		var v1v2 = Vector2.Dot( directionA, directionB );
+
+		var b = ( v2d - v1v2 * v1d ) / ( v1v2 * v1v2 - 1 );
+
+		return pointOnB + b * directionB;
+	}
 }
