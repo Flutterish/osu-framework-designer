@@ -37,10 +37,15 @@ public class SnapLine : Box {
 	}
 
 	public void Connect ( Vector2 guideA, Vector2 guideB, Vector2 point ) {
-		if ( ( guideA - point ).Length > ( guideB - point ).Length )
-			Connect( guideA, point );
+		// squared is faster and it doesnt actually matter
+		var AP = ( guideA - point ).LengthSquared;
+		var BP = ( guideB - point ).LengthSquared;
+		var AB = ( guideA - guideB ).LengthSquared;
+
+		if ( AP > BP )
+			Connect( guideA, AB > AP ? guideB : point );
 		else
-			Connect( guideB, point );
+			Connect( guideB, AB > BP ? guideA : point );
 	}
 
 	public void Connect ( Vector2 pointA, Vector2 pointB ) {

@@ -73,17 +73,17 @@ public struct LineGuide {
 	public Vector2 EndPoint;
 	public Vector2 Direction => EndPoint - StartPoint;
 
-	public bool TrySnap ( Vector2 point, out Vector2 snapped ) {
+	public float SnapRatingFor ( Vector2 point, out Vector2 snapped ) {
 		snapped = MathExtensions.ClosestPointToLine( StartPoint, EndPoint - StartPoint, point );
-		return ( snapped - point ).LengthSquared <= 64;
+		return ( snapped - point ).LengthSquared;
 	}
 }
 
 public struct PointGuide {
 	public Vector2 Point;
 
-	public bool IsInRange ( Vector2 p )
-		=> ( Point - p ).LengthSquared <= 64;
+	public float SnapRatingFor ( Vector2 p )
+		=> ( Point - p ).LengthSquared;
 
 	public static implicit operator PointGuide ( Vector2 p )
 		=> new() { Point = p };

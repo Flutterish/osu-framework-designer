@@ -70,6 +70,44 @@ public class Composer : CompositeDrawable {
 		return Components.SelectMany( x => x.GetNestedComponents() );
 	}
 
+	public bool TrySnap ( Vector2 point, IEnumerable<PointGuide> guides, out Vector2 snapped ) {
+		snapMarkers.Clear( disposeChildren: false );
+
+		if ( guides.Any() ) {
+			var best = guides.MinBy( x => x.SnapRatingFor( point ) );
+			if ( best.SnapRatingFor( point ) <= 64 ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = best.Point;
+				snapped = best.Point;
+				return true;
+			}
+		}
+
+		snapped = point;
+		return false;
+	}
+
+	public bool TrySnap ( Vector2 point, IEnumerable<LineGuide> guides, out Vector2 snapped ) {
+		snapMarkers.Clear( disposeChildren: false );
+
+		if ( guides.Any() ) {
+			var best = guides.MinBy( x => x.SnapRatingFor( point, out _ ) );
+			if ( best.SnapRatingFor( point, out var snappedPoint ) <= 64 ) {
+				snapMarkers.Add( marker1 );
+				marker1.Position = best.StartPoint;
+				snapMarkers.Add( marker2 );
+				marker2.Position = best.EndPoint;
+				snapMarkers.Add( lineMarker );
+				lineMarker.Connect( best.StartPoint, best.EndPoint, snappedPoint );
+				snapped = snappedPoint;
+				return true;
+			}
+		}
+
+		snapped = point;
+		return false;
+	}
+
 	public Vector2 Snap ( Vector2 point, IComponent source, UIEvent? context = null, bool snapLines = true )
 		=> Snap( point, source.Yield(), out _, context, snapLines );
 	public Vector2 Snap ( Vector2 point, IComponent source, out bool snapped, UIEvent? context = null, bool snapLines = true )
@@ -83,27 +121,18 @@ public class Composer : CompositeDrawable {
 		if ( context?.ControlPressed == true )
 			return point;
 
-		foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
-			if ( i.IsInRange( point ) ) {
-				snapMarkers.Add( marker1 );
-				marker1.Position = i.Point;
-				snapped = true;
-				return i.Point;
-			}
+		var snapSources = VisibleComponentsNear( point ).Except( source );
+		var pointGuides = snapSources.SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) );
+		if ( TrySnap( point, pointGuides, out var snappedPoint ) ) {
+			snapped = true;
+			return snappedPoint;
 		}
 
 		if ( snapLines ) {
-			foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
-				if ( i.TrySnap( point, out var snappedPoint ) ) {
-					snapMarkers.Add( marker1 );
-					marker1.Position = i.StartPoint;
-					snapMarkers.Add( marker2 );
-					marker2.Position = i.EndPoint;
-					snapMarkers.Add( lineMarker );
-					lineMarker.Connect( i.StartPoint, i.EndPoint, snappedPoint );
-					snapped = true;
-					return snappedPoint;
-				}
+			var lineGuides = snapSources.SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) );
+			if ( TrySnap( point, lineGuides, out snappedPoint ) ) {
+				snapped = true;
+				return snappedPoint;
 			}
 		}
 
@@ -124,28 +153,20 @@ public class Composer : CompositeDrawable {
 		if ( context?.ControlPressed == true )
 			return point;
 
+		var snapSources = VisibleComponentsNear( point ).Except( source );
 		if ( snapPoints ) {
-			foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) ) ) {
-				if ( i.IsInRange( point ) ) {
-					snapMarkers.Add( marker1 );
-					marker1.Position = i.Point;
-					snapped = true;
-					return i.Point;
-				}
-			}
-		}
-
-		foreach ( var i in VisibleComponentsNear( point ).Except( source ).SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) ) ) {
-			if ( MathF.Abs( Vector2.Dot( direction, i.Direction.Normalized() ) ) > 0.9999f && i.TrySnap( point, out var snappedPoint ) ) {
-				snapMarkers.Add( marker1 );
-				marker1.Position = i.StartPoint;
-				snapMarkers.Add( marker2 );
-				marker2.Position = i.EndPoint;
-				snapMarkers.Add( lineMarker );
-				lineMarker.Connect( i.StartPoint, i.EndPoint, snappedPoint );
+			var pointGuides = snapSources.SelectMany( x => IHasSnapGuides.PointGuidesFrom( x, this ) );
+			if ( TrySnap( point, pointGuides, out var snappedPoint ) ) {
 				snapped = true;
 				return snappedPoint;
 			}
+		}
+
+		var lineGuides = snapSources.SelectMany( x => IHasSnapGuides.LineGuidesFrom( x, this ) )
+			.Where( x => MathF.Abs( Vector2.Dot( direction, x.Direction.Normalized() ) ) > 0.9999f );
+		if ( TrySnap( point, lineGuides, out var snappedPoint2 ) ) {
+			snapped = true;
+			return snappedPoint2;
 		}
 
 		return point.Round();
