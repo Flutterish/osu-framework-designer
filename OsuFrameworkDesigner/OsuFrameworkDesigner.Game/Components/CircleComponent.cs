@@ -29,6 +29,11 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 				delta = 2;
 			}
 
+			if ( e < s ) {
+				(s, e) = (e, s);
+				delta = s.WrappedDistanceTo( e, 1 );
+			}
+
 			if ( delta < 0 ) {
 				if ( e < s ) {
 					delta = -delta;
@@ -38,10 +43,6 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 					delta += 1;
 				}
 			}
-			else if ( e < s ) {
-				s = e;
-				delta -= 1;
-			}
 
 			circle.Offset = s;
 			circle.Current.Value = delta;
@@ -50,6 +51,8 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 		Fill.ValueChanged += v => {
 			circle.InnerRadius = v.NewValue;
 		};
+
+		TransformProps.Texture.ValueChanged += v => circle.Texture = v.NewValue;
 
 		Masking = true;
 	}
