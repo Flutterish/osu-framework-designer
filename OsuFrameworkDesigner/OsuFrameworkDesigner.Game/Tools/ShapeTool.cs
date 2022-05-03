@@ -1,5 +1,4 @@
-﻿using osu.Framework.Extensions.TypeExtensions;
-using osu.Framework.Input.Events;
+﻿using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using osuTK.Input;
 

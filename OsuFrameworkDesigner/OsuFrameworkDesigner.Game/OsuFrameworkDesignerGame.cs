@@ -6,7 +6,7 @@ public class OsuFrameworkDesignerGame : OsuFrameworkDesignerGameBase {
 	private ScreenStack screenStack;
 
 	public OsuFrameworkDesignerGame () {
-		Child = screenStack = new ScreenStack { RelativeSizeAxes = Axes.Both };
+		Child = screenStack = new ScreenStack().Fill();
 		screenStack.Push( new DesignerScreen() );
 	}
 }

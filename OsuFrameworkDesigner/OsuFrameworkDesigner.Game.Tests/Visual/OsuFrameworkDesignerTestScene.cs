@@ -2,7 +2,7 @@ using osu.Framework.Testing;
 
 namespace OsuFrameworkDesigner.Game.Tests.Visual;
 
-public class OsuFrameworkDesignerTestScene : TestScene {
+public abstract class OsuFrameworkDesignerTestScene : TestScene {
 	protected override ITestSceneTestRunner CreateRunner () => new OsuFrameworkDesignerTestSceneTestRunner();
 
 	private class OsuFrameworkDesignerTestSceneTestRunner : OsuFrameworkDesignerGameBase, ITestSceneTestRunner {

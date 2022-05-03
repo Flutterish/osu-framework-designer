@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Caching;
-using osu.Framework.Extensions.TypeExtensions;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;

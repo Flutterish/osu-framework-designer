@@ -251,6 +251,11 @@ public class Composer : CompositeDrawable {
 	public Vector2 ContentToScreenSpace ( Vector2 contentSpace )
 		=> content.ToScreenSpace( contentSpace - content.Position + content.DrawSize / 2 );
 
+	public IComponent? ComponentAtScreenSpace ( Vector2 screenSpace )
+		=> ComponentsReverse.FirstOrDefault( x => x is Drawable d && d.Contains( screenSpace ) );
+	public IComponent? ComponentAt ( Vector2 contentSpace )
+		=> ComponentAtScreenSpace( ContentToScreenSpace( contentSpace ) );
+
 	protected override void LoadComplete () {
 		base.LoadComplete();
 		Tool.BindValueChanged( v => {

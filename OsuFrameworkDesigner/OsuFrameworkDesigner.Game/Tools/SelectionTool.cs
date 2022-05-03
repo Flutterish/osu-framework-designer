@@ -140,7 +140,7 @@ public class SelectionTool : Tool {
 		if ( !Selection.Any() ) {
 			var item = ( blueprint != null && InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed )
 				? blueprint.Value
-				: Composer.ComponentsReverse.FirstOrDefault( x => x.AsDrawable().Contains( e.ScreenSpaceMousePosition ) );
+				: Composer.ComponentAtScreenSpace( e.ScreenSpaceMousePosition );
 
 			if ( item != null ) {
 				if ( blueprint != null && blueprint.Value != item ) {

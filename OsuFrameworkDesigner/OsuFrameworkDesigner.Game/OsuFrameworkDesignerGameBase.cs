@@ -1,18 +1,22 @@
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
+using OsuFrameworkDesigner.Game.Containers;
 using OsuFrameworkDesigner.Resources;
 
 namespace OsuFrameworkDesigner.Game;
 
+[Cached]
 public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 	[Cached]
 	public Theme Theme { get; } = new();
 
 	protected override Container<Drawable> Content { get; }
 	protected OsuFrameworkDesignerGameBase () {
-		base.Content.Add( Content = new DrawSizePreservingFillContainer {
-			TargetDrawSize = new Vector2( 1920, 1080 )
-		} );
+		base.Content.Add( new DesignerInputManager {
+			Child = Content = new DrawSizePreservingFillContainer {
+				TargetDrawSize = new Vector2( 1920, 1080 )
+			}
+		}.Fill() );
 	}
 
 	[BackgroundDependencyLoader]
@@ -21,6 +25,7 @@ public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 	}
 
 	public override void SetHost ( GameHost host ) {
+		unbindFileDropEvents();
 		base.SetHost( host );
 
 		if ( host.Window is OsuTKWindow tkWindow )
@@ -39,6 +44,19 @@ public class OsuFrameworkDesignerGameBase : osu.Framework.Game {
 
 	protected override void Dispose ( bool isDisposing ) {
 		base.Dispose( isDisposing );
+		unbindFileDropEvents();
+	}
+
+
+	protected override bool OnExiting () {
+		unbindFileDropEvents();
+
+		return base.OnExiting();
+	}
+
+	void unbindFileDropEvents () {
+		if ( Host is null )
+			return;
 
 		if ( Host.Window is OsuTKWindow tkWindow )
 			tkWindow.FileDrop -= onTkWindowFileDrop;
