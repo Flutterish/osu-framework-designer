@@ -74,12 +74,15 @@ public class Composer : CompositeDrawable {
 	SnapLine lineMarker2 = new();
 	SnapMarker marker5 = new();
 
+	public float SnapPixelThreshold => 8 / content.Scale.X;
+	public float SnapThreshold => SnapPixelThreshold * SnapPixelThreshold;
+
 	public bool TrySnap ( Vector2 point, IEnumerable<PointGuide> guides, out Vector2 snapped ) {
 		snapMarkers.Clear( disposeChildren: false );
 
 		if ( guides.Any() ) {
 			var best = guides.MinBy( x => x.SnapRatingFor( point ) );
-			if ( best.SnapRatingFor( point ) <= 64 ) {
+			if ( best.SnapRatingFor( point ) <= SnapThreshold ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = best.Point;
 				snapped = best.Point;
@@ -107,7 +110,7 @@ public class Composer : CompositeDrawable {
 
 				if ( intersectionGuides.Any() ) {
 					var bestIntersection = intersectionGuides.MinBy( x => x.guide.SnapRatingFor( point ) );
-					if ( bestIntersection.guide.SnapRatingFor( point ) <= 64 ) {
+					if ( bestIntersection.guide.SnapRatingFor( point ) <= SnapThreshold ) {
 						snapMarkers.Add( marker1 );
 						snapMarkers.Add( marker2 );
 						snapMarkers.Add( marker3 );
@@ -129,7 +132,7 @@ public class Composer : CompositeDrawable {
 			}
 
 			var best = guides.MinBy( x => x.SnapRatingFor( point, out _ ) );
-			if ( best.SnapRatingFor( point, out var snappedPoint ) <= 64 ) {
+			if ( best.SnapRatingFor( point, out var snappedPoint ) <= SnapThreshold ) {
 				snapMarkers.Add( marker1 );
 				marker1.Position = best.StartPoint;
 				snapMarkers.Add( marker2 );
