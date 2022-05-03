@@ -1,10 +1,11 @@
 ﻿using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
+using OsuFrameworkDesigner.Game.Graphics.Selections;
 
 namespace OsuFrameworkDesigner.Game.Components;
 
-public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnapGuides {
+public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnapGuides, IHasCustomSelection {
 	public static readonly PropDescription X1Proto = PropDescriptions.FloatProp with { Name = "X", Category = "Vertice 1" };
 	public static readonly PropDescription Y1Proto = PropDescriptions.FloatProp with { Name = "Y", Category = "Vertice 1" };
 	public static readonly PropDescription X2Proto = PropDescriptions.FloatProp with { Name = "X", Category = "Vertice 2" };
@@ -115,4 +116,7 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 		X3.Value += offset.X;
 		Y3.Value += offset.Y;
 	}
+
+	public DrawableSelection CreateSelection ()
+		=> new TriangleSelection();
 }

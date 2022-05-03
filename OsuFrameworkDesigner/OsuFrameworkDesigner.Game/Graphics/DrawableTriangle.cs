@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Extensions.PolygonExtensions;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Textures;
@@ -37,6 +38,30 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 				return;
 
 			c = value;
+			Invalidate( Invalidation.DrawNode | Invalidation.MiscGeometry );
+		}
+	}
+
+	float borderThickness;
+	public float BorderThickness {
+		get => borderThickness;
+		set {
+			if ( borderThickness == value )
+				return;
+
+			borderThickness = value;
+			Invalidate( Invalidation.DrawNode | Invalidation.MiscGeometry );
+		}
+	}
+
+	ColourInfo borderColour;
+	public ColourInfo BorderColour {
+		get => borderColour;
+		set {
+			if ( borderColour.Equals( value ) )
+				return;
+
+			borderColour = value;
 			Invalidate( Invalidation.DrawNode | Invalidation.MiscGeometry );
 		}
 	}
@@ -88,6 +113,9 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 		protected Vector2 B;
 		protected Vector2 C;
 		protected IShader Shader = null!;
+
+		float borderThickness;
+		ColourInfo borderColour;
 		public override void ApplyState () {
 			base.ApplyState();
 
@@ -95,6 +123,9 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 			B = Source.ToScreenSpace( Source.b );
 			C = Source.ToScreenSpace( Source.c );
 			Shader = Source.shader;
+
+			borderColour = Source.borderColour;
+			borderThickness = Source.borderThickness * ( Source.ToLocalSpace( Vector2.Zero ) - Source.ToLocalSpace( new Vector2( 1, 0 ) ) ).Length;
 		}
 
 		public override void Draw ( Action<TexturedVertex2D> vertexAction ) {
@@ -103,6 +134,16 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 			Shader.Bind();
 
 			DrawQuad( Texture.WhitePixel, new Quad( A, A, B, C ), DrawColourInfo.Colour );
+			if ( borderThickness != 0 ) {
+				var centre = ( A + B + C ) / 3;
+				var a = centre + ( A - centre ).Normalized() * ( ( A - centre ).Length - borderThickness );
+				var b = centre + ( B - centre ).Normalized() * ( ( B - centre ).Length - borderThickness );
+				var c = centre + ( C - centre ).Normalized() * ( ( C - centre ).Length - borderThickness );
+
+				DrawQuad( Texture.WhitePixel, new Quad( A, a, B, b ), borderColour );
+				DrawQuad( Texture.WhitePixel, new Quad( B, b, C, c ), borderColour );
+				DrawQuad( Texture.WhitePixel, new Quad( C, c, A, a ), borderColour );
+			}
 
 			Shader.Unbind();
 		}

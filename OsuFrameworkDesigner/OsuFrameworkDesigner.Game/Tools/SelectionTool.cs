@@ -5,7 +5,7 @@ using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Cursor;
-using OsuFrameworkDesigner.Game.Graphics;
+using OsuFrameworkDesigner.Game.Graphics.Selections;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Tools;
@@ -168,7 +168,7 @@ public class SelectionTool : Tool {
 	Container<DrawableSelection> selections;
 	Dictionary<Type, Stack<Blueprint<IComponent>>> blueprintPool = new();
 	Blueprint<IComponent>? blueprint;
-	Stack<DrawableSelection> selectionPool = new();
+	Dictionary<Type, Stack<DrawableSelection>> selectionPool = new();
 	Dictionary<IComponent, DrawableSelection> visibleSelections = new();
 	Blueprint<IComponent> GetBlueprint ( IComponent component ) {
 		if ( !blueprintPool.TryGetValue( component.GetType(), out var pool ) )
@@ -230,15 +230,18 @@ public class SelectionTool : Tool {
 				foreach ( IComponent i in e.OldItems ) {
 					visibleSelections.Remove( i, out var selection );
 					selection!.Free();
-					selectionPool.Push( selection );
+					selectionPool[i.GetType()].Push( selection );
 					selections.Remove( selection );
 				}
 			}
 			if ( e.NewItems != null ) {
 				foreach ( IComponent i in e.NewItems ) {
-					if ( !selectionPool.TryPop( out var selection ) ) {
-						selection = new();
-					}
+					if ( !selectionPool.TryGetValue( i.GetType(), out var pool ) )
+						selectionPool.Add( i.GetType(), pool = new() );
+
+					if ( !pool.TryPop( out var selection ) )
+						selection = i is IHasCustomSelection custom ? custom.CreateSelection() : new DrawableQuadSelection();
+
 					visibleSelections.Add( i, selection );
 					selections.Add( selection );
 					selection.Apply( i.AsDrawable() );
