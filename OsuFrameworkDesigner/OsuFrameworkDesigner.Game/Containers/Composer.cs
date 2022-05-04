@@ -333,7 +333,7 @@ public class Composer : CompositeDrawable, IFileDropHandler {
 	public bool OnFileDrop ( FileDropArgs args ) {
 		var comp = ComponentAtScreenSpace( args.ScreenSpaceMousePosition );
 		if ( comp?.GetProperty<Texture>( PropDescriptions.Texture ) is IProp<Texture> tx ) {
-			textureCache.GetTextureAsync( args.File ).ContinueWith( v => {
+			textureCache.GetAsync( args.File ).ContinueWith( v => {
 				tx.Value = v.Result;
 			} );
 			return true;

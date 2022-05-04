@@ -52,7 +52,7 @@ public class TextureEditField : EditField<Texture>, IFileDropHandler {
 
 	public override bool HandlePositionalInput => true;
 	public bool OnFileDrop ( FileDropArgs args ) {
-		textureCache.GetTextureAsync( args.File ).ContinueWith( v => {
+		textureCache.GetAsync( args.File ).ContinueWith( v => {
 			SetValue( v.Result );
 		} );
 
