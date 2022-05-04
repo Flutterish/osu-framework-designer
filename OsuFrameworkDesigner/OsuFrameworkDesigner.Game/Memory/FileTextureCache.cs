@@ -6,38 +6,47 @@ using System.Threading.Tasks;
 namespace OsuFrameworkDesigner.Game.Memory;
 
 public class FileTextureCache {
-	Dictionary<string, Task<Texture>> cache = new();
+	Dictionary<string, Task<WeakReference<Texture>>> cache = new();
 
 	public Texture GetTexture ( string file ) {
-		if ( cache.TryGetValue( file, out var tx ) ) {
-			tx.Wait();
-			return tx.Result;
+		Texture? txt;
+		if ( cache.TryGetValue( file, out var task ) ) {
+			if ( task.Result.TryGetTarget( out txt ) )
+				return txt;
+			else
+				cache.Remove( file );
 		}
 
 		var image = Image.Load<Rgba32>( file );
-		var txt = new Texture( image.Width, image.Height, filteringMode: All.Nearest );
+		txt = new Texture( image.Width, image.Height, filteringMode: All.Nearest );
 		var upload = new TextureUpload( image );
 		txt.SetData( upload );
 
-		cache.Add( file, Task.FromResult( txt ) );
+		cache.Add( file, Task.FromResult( new WeakReference<Texture>( txt ) ) );
 		return txt;
 	}
 
-	public Task<Texture> GetTextureAsync ( string file ) {
-		if ( cache.TryGetValue( file, out var tx ) )
-			return tx;
+	public async Task<Texture> GetTextureAsync ( string file ) {
+		Texture? txt;
+		if ( cache.TryGetValue( file, out var task ) ) {
+			if ( ( await task ).TryGetTarget( out txt ) )
+				return txt;
+			else
+				cache.Remove( file );
+		}
 
-		var task = getTextureAsync( file );
+		task = getTextureAsync( file );
 		cache.Add( file, task );
-		return task;
+		( await task ).TryGetTarget( out txt );
+		return txt!;
 	}
 
-	async Task<Texture> getTextureAsync ( string file ) {
+	async Task<WeakReference<Texture>> getTextureAsync ( string file ) {
 		var image = await Image.LoadAsync<Rgba32>( file );
 		var txt = new Texture( image.Width, image.Height, filteringMode: All.Nearest );
 		var upload = new TextureUpload( image );
 		txt.SetData( upload );
 
-		return txt;
+		return new WeakReference<Texture>( txt );
 	}
 }
