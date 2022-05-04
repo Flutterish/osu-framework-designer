@@ -4,7 +4,6 @@ namespace OsuFrameworkDesigner.Game.Components.Interfaces;
 
 public interface IHasMatrix {
 	Matrix3 Matrix { get; set; }
-	void Offset ( Vector2 offset );
 
 	public static IHasMatrix? From ( IComponent component ) {
 		if ( component is IHasMatrix m )
@@ -48,11 +47,6 @@ public interface IHasMatrix {
 	}
 
 	private struct Impl : IHasMatrix {
-		public void Offset ( Vector2 offset ) {
-			X.Value += offset.X;
-			Y.Value += offset.Y;
-		}
-
 		public Prop<float> X { get; set; }
 		public Prop<float> Y { get; set; }
 		public Prop<float> Width { get; set; }

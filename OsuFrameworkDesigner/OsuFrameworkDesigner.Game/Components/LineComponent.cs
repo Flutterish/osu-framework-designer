@@ -71,13 +71,6 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnap
 		}
 	}
 
-	public void Offset ( Vector2 offset ) {
-		StartX.Value += offset.X;
-		StartY.Value += offset.Y;
-		EndX.Value += offset.X;
-		EndY.Value += offset.Y;
-	}
-
 	public IEnumerable<PointGuide> PointGuides {
 		get {
 			yield return new Vector2( StartX, StartY );

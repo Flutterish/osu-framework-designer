@@ -1,4 +1,5 @@
-﻿using osu.Framework.Extensions.PolygonExtensions;
+﻿using osu.Framework.Extensions.MatrixExtensions;
+using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components;
@@ -11,6 +12,8 @@ using osuTK.Input;
 namespace OsuFrameworkDesigner.Game.Tools;
 
 public class SelectionTool : Tool {
+	List<(IHasMatrix comp, Matrix3 initialMatrix)> selectedMatrices = new();
+
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
 		var comp = new SelectionComponent();
@@ -18,7 +21,7 @@ public class SelectionTool : Tool {
 		selectionComponent.Apply( comp );
 		AddInternal( selectionComponent );
 		selectionComponent.Alpha = 0;
-		selectionComponent.ResizingScales = true;
+		selectionComponent.ResizingScales = false;
 
 		Selection.BindCollectionChanged( ( _, _ ) => {
 			var selectionHasMatrices = !Selection.Any( x => IHasMatrix.From( x ) is null );
@@ -39,12 +42,10 @@ public class SelectionTool : Tool {
 
 			selectionComponent.SelectedComponents = Selection;
 		} );
-
-		selectionComponent.OriginHandle.Dragged += _ => lastPosition = selectionComponent.TransformProps.Position;
 	}
 
 	bool matrixChanged;
-	DrawInfo lastMatrices;
+	(Matrix3 Matrix, Matrix3 MatrixInverse) lastMatrices;
 	Vector2 lastPosition;
 	void onMatrixChanged () {
 		matrixChanged = true;
@@ -53,22 +54,22 @@ public class SelectionTool : Tool {
 	protected override void Update () {
 		base.Update();
 
-		// TODO this can result in divergence due to numerical dissipation
-		// to fix, we should save the initial matrices and work with a global delta rather than a per-frame one
 		if ( matrixChanged ) {
-			var drawInfo = selectionComponent.TransformProps.LocalDrawInfo;
-			var matrix = lastMatrices.MatrixInverse * drawInfo.Matrix;
+			var matrix = selectionComponent.TransformProps.ContentSpaceQuad.AsMatrix();
+			MatrixExtensions.TranslateFromRight( ref matrix, -selectionComponent.TransformProps.Position );
+
+			var deltaMatrix = lastMatrices.MatrixInverse * matrix;
 			var delta = selectionComponent.TransformProps.Position - lastPosition;
 
 			var origin = selectionComponent.TransformProps.Position;
-			perform( IHasMatrix.From, ( i, c ) => {
-				i.Offset( delta - origin );
-				i.Matrix *= matrix;
-				i.Offset( origin );
-			} );
+			foreach ( var (comp, initialMatrix) in selectedMatrices ) {
+				var setMatrix = initialMatrix;
+				MatrixExtensions.TranslateFromRight( ref setMatrix, delta - origin );
+				setMatrix *= deltaMatrix;
+				MatrixExtensions.TranslateFromRight( ref setMatrix, origin );
+				comp.Matrix = setMatrix;
+			}
 
-			lastPosition = selectionComponent.TransformProps.Position;
-			lastMatrices = drawInfo;
 			matrixChanged = false;
 		}
 	}
@@ -221,8 +222,15 @@ public class SelectionTool : Tool {
 			props.OriginY.Value = 0;
 
 			lastPosition = selectionComponent.TransformProps.Position;
-			lastMatrices = props.LocalDrawInfo;
+			var matrix = props.ContentSpaceQuad.AsMatrix();
+			MatrixExtensions.TranslateFromRight( ref matrix, -lastPosition );
+			lastMatrices = (matrix, matrix.Inverted());
 			selectionComponent.TransformProps.MatrixChanged += onMatrixChanged;
+
+			selectedMatrices.Clear();
+			perform( IHasMatrix.From, m => {
+				selectedMatrices.Add( (m, m.Matrix) );
+			} );
 		} );
 
 		Selection.BindCollectionChanged( ( _, e ) => {

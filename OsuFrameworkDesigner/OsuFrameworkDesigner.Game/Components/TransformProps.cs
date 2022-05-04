@@ -400,17 +400,8 @@ public class TransformProps : IEnumerable<IProp> {
 		BottomRight
 	);
 
-	public DrawInfo LocalDrawInfo {
-		get {
-			var info = new DrawInfo( null );
-			info.ApplyTransform( Vector2.Zero, Scale, Rotation.Value, Shear, Vector2.Zero );
-			return info;
-		}
-	}
-
 	public void SetMatrix ( Matrix3 matrix ) {
-		float rot;
-		((X.Value, Y.Value), (ScaleX.Value, ScaleY.Value), (ShearX.Value, ShearY.Value), rot) = matrix.Decompose();
+		((X.Value, Y.Value), (ScaleX.Value, ScaleY.Value), (ShearX.Value, ShearY.Value), var rot) = matrix.Decompose();
 		Rotation.Value = rot * 180 / MathF.PI;
 	}
 

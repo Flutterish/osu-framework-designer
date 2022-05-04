@@ -108,15 +108,6 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 		}
 	}
 
-	public void Offset ( Vector2 offset ) {
-		X1.Value += offset.X;
-		Y1.Value += offset.Y;
-		X2.Value += offset.X;
-		Y2.Value += offset.Y;
-		X3.Value += offset.X;
-		Y3.Value += offset.Y;
-	}
-
 	public DrawableSelection CreateSelection ()
 		=> new TriangleSelection();
 }
