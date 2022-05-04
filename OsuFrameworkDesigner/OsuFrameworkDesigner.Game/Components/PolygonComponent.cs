@@ -13,11 +13,13 @@ public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 	public readonly ClampedProp<int> CornerCount = new( 3, CornerCountProto ) { MinValue = 3, MaxValue = 60 };
 
 	public PolygonComponent () {
-		TransformProps = new( this ) { HasTexture = false };
+		TransformProps = new( this );
 		AddInternal( Polygon = new PolygonDrawable().Fill() );
 
 		CornerRadius.BindValueChanged( v => Polygon.CornerRadius = v.NewValue );
 		CornerCount.BindValueChanged( v => Polygon.SideCount = v.NewValue );
+
+		TransformProps.Texture.BindValueChanged( v => Polygon.Texture = v.NewValue );
 	}
 
 	public override bool Contains ( Vector2 screenSpacePos )

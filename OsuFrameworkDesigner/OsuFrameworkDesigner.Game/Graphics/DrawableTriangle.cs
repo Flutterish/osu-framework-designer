@@ -66,6 +66,18 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 		}
 	}
 
+	Texture? texture;
+	public Texture? Texture {
+		get => texture;
+		set {
+			if ( texture == value )
+				return;
+
+			texture = value;
+			Invalidate( Invalidation.DrawNode );
+		}
+	}
+
 	public override Quad ScreenSpaceDrawQuad {
 		get {
 			var minX = MathF.Min( MathF.Min( a.X, b.X ), c.X );
@@ -113,6 +125,7 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 		protected Vector2 B;
 		protected Vector2 C;
 		protected IShader Shader = null!;
+		Texture texture = null!;
 
 		float borderThickness;
 		ColourInfo borderColour;
@@ -123,6 +136,7 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 			B = Source.ToScreenSpace( Source.b );
 			C = Source.ToScreenSpace( Source.c );
 			Shader = Source.shader;
+			texture = Source.texture ?? Texture.WhitePixel;
 
 			borderColour = Source.borderColour;
 			borderThickness = Source.borderThickness * ( Source.ToLocalSpace( Vector2.Zero ) - Source.ToLocalSpace( new Vector2( 1, 0 ) ) ).Length;
@@ -133,7 +147,7 @@ public class DrawableTriangle : Drawable, IConvexPolygon {
 
 			Shader.Bind();
 
-			DrawQuad( Texture.WhitePixel, new Quad( A, A, B, C ), DrawColourInfo.Colour );
+			DrawQuad( texture, new Quad( A, A, B, C ), DrawColourInfo.Colour );
 			if ( borderThickness != 0 ) {
 				var centre = ( A + B + C ) / 3;
 				var a = centre + ( A - centre ).Normalized() * ( ( A - centre ).Length - borderThickness );

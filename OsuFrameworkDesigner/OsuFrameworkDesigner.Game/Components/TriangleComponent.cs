@@ -1,4 +1,5 @@
-﻿using OsuFrameworkDesigner.Game.Components.Blueprints;
+﻿using osu.Framework.Graphics.Textures;
+using OsuFrameworkDesigner.Game.Components.Blueprints;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Graphics.Selections;
@@ -22,6 +23,7 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 	public readonly Prop<float> X3 = new( X3Proto );
 	public readonly Prop<float> Y3 = new( Y3Proto );
 	public readonly Prop<Colour4> FillColour = new( Colour4.Green, PropDescriptions.FillColour );
+	public readonly Prop<Texture> Texture = new( PropDescriptions.Texture );
 
 	public Vector2 PointA => new( X1, Y1 );
 	public Vector2 PointB => new( X2, Y2 );
@@ -43,6 +45,8 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 		(X3, Y3).BindValueChanged( ( x, y ) => {
 			triangle.PointC = new Vector2( x, y ) - Position;
 		} );
+
+		Texture.BindValueChanged( v => triangle.Texture = v.NewValue );
 	}
 
 	public override Quad ScreenSpaceDrawQuad
@@ -67,6 +71,7 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 			yield return X3;
 			yield return Y3;
 			yield return FillColour;
+			yield return Texture;
 		}
 	}
 

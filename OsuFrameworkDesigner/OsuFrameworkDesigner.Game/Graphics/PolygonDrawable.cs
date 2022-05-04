@@ -58,6 +58,18 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 
 	public float MaxCornerRadius => CornerRadiusAtDistance( 0 );
 
+	Texture? texture;
+	public Texture? Texture {
+		get => texture;
+		set {
+			if ( texture == value )
+				return;
+
+			texture = value;
+			Invalidate( Invalidation.DrawNode );
+		}
+	}
+
 	IShader shader = null!;
 
 	[BackgroundDependencyLoader]
@@ -105,20 +117,31 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 
 		public PolygonDrawNode ( PolygonDrawable source ) : base( source ) { }
 
+		Texture texture = null!;
 		IShader shader = null!;
 		int sideCount;
 		float cornerRadius;
 		Matrix3 matrix;
 		const int MAX_SIDES = 100;
 		const int SMOOTHING_PER_VERTEX = 50;
+		RectangleF textureRect;
 
 		public override void ApplyState () {
 			base.ApplyState();
 
 			shader = Source.shader;
+			texture = Source.texture ?? Texture.WhitePixel;
+			textureRect = texture.GetTextureRect();
 			sideCount = Math.Clamp( Source.sideCount, 3, MAX_SIDES );
 			cornerRadius = Source.cornerRadius / Source.MaxSize;
 			matrix = Source.ScreenSpaceDrawQuad.AsMatrix();
+		}
+
+		Vector2 texturePosition ( Vector2 point ) {
+			return new Vector2(
+				textureRect.X + point.X * textureRect.Width,
+				textureRect.Y + point.Y * textureRect.Height
+			);
 		}
 
 		LinearBatch<TexturedVertex2D> vertexBatch = new( MAX_SIDES * SMOOTHING_PER_VERTEX + 1, 1, PrimitiveType.TriangleFan );
@@ -131,7 +154,7 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 			var theta = MathF.Tau / sideCount;
 
 			shader.Bind();
-			Texture.WhitePixel.TextureGL.Bind();
+			texture.TextureGL.Bind();
 
 			TexturedVertex2D? loopEnd = null;
 			vertexAction = ( TexturedVertex2D v ) => {
@@ -142,7 +165,8 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 			};
 			vertexAction( new TexturedVertex2D {
 				Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
-				Position = Vector2Extensions.Transform( centre, matrix )
+				Position = Vector2Extensions.Transform( centre, matrix ),
+				TexturePosition = texturePosition( centre )
 			} );
 
 			var vertexDelta = vertex.Rotate( theta ) - vertex;
@@ -158,14 +182,16 @@ public class PolygonDrawable : Drawable, IConvexPolygon {
 						var angle = ( cornerAngle / ( SMOOTHING_PER_VERTEX - 1 ) * k ) - cornerAngle / 2;
 						vertexAction( new TexturedVertex2D {
 							Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
-							Position = Vector2Extensions.Transform( cornerCentre + up.Rotate( angle ), matrix )
+							Position = Vector2Extensions.Transform( cornerCentre + up.Rotate( angle ), matrix ),
+							TexturePosition = texturePosition( cornerCentre + up.Rotate( angle ) )
 						} );
 					}
 				}
 				else {
 					vertexAction( new TexturedVertex2D {
 						Colour = Color4Extensions.ToLinear( DrawColourInfo.Colour ),
-						Position = Vector2Extensions.Transform( centre + vertex, matrix )
+						Position = Vector2Extensions.Transform( centre + vertex, matrix ),
+						TexturePosition = texturePosition( centre + vertex )
 					} );
 				}
 
