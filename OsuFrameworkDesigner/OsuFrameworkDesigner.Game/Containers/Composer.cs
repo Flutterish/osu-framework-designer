@@ -28,6 +28,9 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 
 	public readonly SelectionTool SelectionTool = new();
 	public readonly History History = new();
+	public readonly PropsDelta TrackedProps = new();
+
+	public bool SaveProps = true;
 
 	public Composer () {
 		this.Fill();
@@ -51,6 +54,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		if ( !History.IsLocked ) {
 			History.Push( new ComponentChange { Target = component, Type = ChangeType.Added, Composer = this } );
 		}
+		TrackedProps.TrackedComponents.Add( component );
 		ComponentAdded?.Invoke( component, null );
 	}
 	public void AddRange ( IEnumerable<IComponent> components ) {
@@ -60,11 +64,13 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 
 		foreach ( var i in components ) {
 			this.components.Add( i.AsDrawable() );
+			TrackedProps.TrackedComponents.Add( i );
 			ComponentAdded?.Invoke( i, null );
 		}
 	}
 	public void Remove ( IComponent component ) {
 		components.Remove( component.AsDrawable() );
+		TrackedProps.TrackedComponents.Remove( component );
 		if ( !History.IsLocked ) {
 			History.Push( new ComponentChange { Target = component, Type = ChangeType.Removed, Composer = this } );
 		}
@@ -77,6 +83,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 
 		foreach ( var i in components ) {
 			this.components.Remove( i.AsDrawable() );
+			TrackedProps.TrackedComponents.Remove( i );
 			ComponentRemoved?.Invoke( i, null );
 		}
 	}
@@ -259,6 +266,11 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 					i.Height = 1 / content.Scale.X;
 			}
 		}
+
+		if ( SaveProps && !History.IsLocked && TrackedProps.AnyChanged ) {
+			History.Push( TrackedProps.CreateChange() );
+			TrackedProps.Flush();
+		}
 	}
 
 	public Vector2 ToContentSpace ( Vector2 screenSpace )
@@ -370,12 +382,14 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		if ( e.Action is PlatformAction.Undo && History.Back( out var change ) ) {
 			History.IsLocked = true;
 			change.Undo();
+			TrackedProps.Flush();
 			History.IsLocked = false;
 			return true;
 		}
 		else if ( e.Action is PlatformAction.Redo && History.Forward( out change ) ) {
 			History.IsLocked = true;
 			change.Redo();
+			TrackedProps.Flush();
 			History.IsLocked = false;
 			return true;
 		}

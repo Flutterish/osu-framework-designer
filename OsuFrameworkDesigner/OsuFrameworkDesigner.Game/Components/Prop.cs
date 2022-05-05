@@ -8,6 +8,7 @@ public interface IProp {
 	PropDescription Prototype { get; }
 
 	object? Value { get; set; }
+	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 }
 
 public interface IProp<T> : IProp, IBindable<T> {
@@ -15,7 +16,10 @@ public interface IProp<T> : IProp, IBindable<T> {
 }
 
 public class Prop<T> : Bindable<T>, IProp<T> {
-	public Prop ( PropDescription proto ) { Prototype = proto; }
+	public Prop ( PropDescription proto ) {
+		Prototype = proto;
+		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
+	}
 	public Prop ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
 	public PropDescription Prototype { get; }
 
@@ -31,10 +35,15 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 
 	public static implicit operator T ( Prop<T> prop )
 		=> prop.Value;
+
+	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 }
 
 public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, IComparable<T>, IConvertible, IEquatable<T> {
-	public ClampedProp ( PropDescription proto ) { Prototype = proto; }
+	public ClampedProp ( PropDescription proto ) {
+		Prototype = proto;
+		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
+	}
 	public ClampedProp ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
 	public PropDescription Prototype { get; }
 
@@ -47,6 +56,8 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 		get => Value;
 		set => Value = (T)value!;
 	}
+
+	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 
 	public static implicit operator T ( ClampedProp<T> prop )
 		=> prop.Value;

@@ -51,6 +51,7 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 	}
 	protected override void OnDragEnd ( DragEndEvent e ) {
 		Composer.SelectionTool.Selection.Add( shape! );
+		Composer.TrackedProps.Flush( shape! );
 		if ( !e.ShiftPressed ) {
 			Composer.Tool.Value = Composer.SelectionTool;
 		}

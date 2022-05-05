@@ -53,4 +53,9 @@ public class DesignerScreen : Screen {
 		assetsPanel.Selection.BindTo( composer.SelectionTool.Selection );
 		assetsPanel.SelectionChanged += s => topBar.Tool.Value = composer.SelectionTool;
 	}
+
+	protected override void Update () {
+		base.Update();
+		composer.SaveProps = !topBar.Tool.Value.IsEditingProps;
+	}
 }

@@ -1,4 +1,5 @@
-﻿using OsuFrameworkDesigner.Game.Containers;
+﻿using osu.Framework.Input;
+using OsuFrameworkDesigner.Game.Containers;
 
 namespace OsuFrameworkDesigner.Game.Components.Blueprints;
 
@@ -36,4 +37,12 @@ public abstract class Blueprint<T> : ErrorBoundry {
 		(Position, Size, Shear, var rot) = Parent.ToLocalSpace( drawable.ScreenSpaceDrawQuad ).Decompose();
 		Rotation = rot / MathF.PI * 180;
 	}
+
+	InputManager? inputManager;
+	protected InputManager InputManager => inputManager ??= GetContainingInputManager();
+
+	/// <summary>
+	/// Whether this blueprint is current editing anything such as props
+	/// </summary>
+	public virtual bool IsActive => InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed || Contains( InputManager.CurrentState.Mouse.Position );
 }

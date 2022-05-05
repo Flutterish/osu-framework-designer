@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Extensions.MatrixExtensions;
 using osu.Framework.Extensions.PolygonExtensions;
-using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Blueprints;
@@ -134,12 +133,9 @@ public class SelectionTool : Tool {
 		return true;
 	}
 
-	InputManager? inputManager;
-	InputManager InputManager => inputManager ??= GetContainingInputManager();
-
 	protected override bool OnMouseMove ( MouseMoveEvent e ) {
 		if ( !Selection.Any() ) {
-			var item = ( blueprint != null && InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed )
+			var item = ( blueprint != null && blueprint.IsActive )
 				? blueprint.Value
 				: Composer.ComponentAtScreenSpace( e.ScreenSpaceMousePosition );
 
@@ -272,6 +268,10 @@ public class SelectionTool : Tool {
 
 		return base.OnKeyDown( e );
 	}
+
+	public override bool IsEditingProps => Selection.Count < 2
+		? ( blueprint != null && blueprint.IsActive )
+		: ( selectionComponent.IsActive );
 
 	private class SelectionComponent : Box, IComponent {
 		public readonly TransformProps TransformProps;
