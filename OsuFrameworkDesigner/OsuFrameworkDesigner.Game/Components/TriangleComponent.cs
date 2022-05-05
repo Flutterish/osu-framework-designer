@@ -47,6 +47,7 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 		} );
 
 		Texture.BindValueChanged( v => triangle.Texture = v.NewValue );
+		Name.BindValueChanged( x => base.Name = x.NewValue, true );
 	}
 
 	public override Quad ScreenSpaceDrawQuad
@@ -61,7 +62,7 @@ public class TriangleComponent : CompositeDrawable, IComponent, IHasMatrix, IHas
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new TriangleBlueprint();
 
-	string IComponent.Name { get => Name; set => Name = value; }
+	new public IProp<string> Name { get; } = new Prop<string>( "Triangle", PropDescriptions.Name );
 	public IEnumerable<IProp> Properties {
 		get {
 			yield return X1;

@@ -6,7 +6,7 @@ using OsuFrameworkDesigner.Game.Containers;
 namespace OsuFrameworkDesigner.Game.Components.Interfaces;
 
 public interface IComponent {
-	string Name { get; set; }
+	IProp<string> Name { get; }
 	IEnumerable<IProp> Properties { get; }
 
 	Blueprint<IComponent> CreateBlueprint ();
@@ -28,7 +28,7 @@ public interface IComponent {
 			: this.Yield();
 
 	public string NameOrDefault () {
-		var name = Name;
+		var name = Name.Value;
 		if ( string.IsNullOrEmpty( name ) )
 			name = GetType().ReadableName();
 		else
@@ -43,7 +43,7 @@ public interface IComponent {
 	}
 
 	public string NameOrDefault ( Composer composer ) {
-		var name = Name;
+		var name = Name.Value;
 		if ( string.IsNullOrEmpty( name ) )
 			name = GetType().ReadableName();
 		else
@@ -56,7 +56,7 @@ public interface IComponent {
 
 		int i = 2;
 		var testName = name;
-		while ( composer.Components.Any( x => x.Name == testName ) )
+		while ( composer.Components.Any( x => x.Name.Value == testName ) )
 			testName = $"{name} {i++}";
 
 		return testName;

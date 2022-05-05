@@ -18,7 +18,7 @@ public abstract class ShapeTool<T> : Tool where T : Drawable, IComponent {
 			s.Colour = Colour4.Green;
 		} );
 
-		shape.Name = shape.NameOrDefault( Composer );
+		( shape as IComponent ).Name.Value = shape.NameOrDefault( Composer );
 		Composer.Add( shape );
 
 		var pos = e.AltPressed ? dragStartPosition : dragStartPosition.Round();

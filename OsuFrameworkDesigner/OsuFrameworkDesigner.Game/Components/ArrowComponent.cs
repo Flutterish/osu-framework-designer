@@ -30,6 +30,8 @@ public class ArrowComponent : LineComponent {
 			arrowHeadRight.Width =
 			arrowHeadLeft.Width = v.NewValue * 10;
 		}, true );
+
+		Name.Value = "Arrow";
 	}
 
 	public override bool Contains ( Vector2 screenSpacePos )

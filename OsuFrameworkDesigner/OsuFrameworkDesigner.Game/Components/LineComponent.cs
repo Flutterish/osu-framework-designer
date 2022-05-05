@@ -40,6 +40,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnap
 		} );
 
 		FillColour.ValueChanged += v => Colour = v.NewValue;
+		Name.BindValueChanged( x => base.Name = x.NewValue, true );
 	}
 
 	void updateRotation () {
@@ -49,7 +50,7 @@ public class LineComponent : CompositeDrawable, IComponent, IHasMatrix, IHasSnap
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new LineBlueprint();
-	string IComponent.Name { get => Name; set => Name = value; }
+	new public IProp<string> Name { get; } = new Prop<string>( "Line", PropDescriptions.Name );
 	public IEnumerable<IProp> Properties =>
 		StartX.Yield<IProp>().Append( StartY )
 		.Append( EndX ).Append( EndY )

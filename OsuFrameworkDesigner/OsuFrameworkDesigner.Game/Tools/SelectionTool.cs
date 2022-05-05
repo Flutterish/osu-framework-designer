@@ -299,7 +299,7 @@ public class SelectionTool : Tool {
 
 		public Blueprint<IComponent> CreateBlueprint ()
 			=> new SelectionBlueprint();
-		string IComponent.Name { get => Name; set => Name = value; }
+		new public IProp<string> Name { get; } = new Prop<string>( "Selection", PropDescriptions.Name );
 		public IEnumerable<IProp> Properties => TransformProps;
 	}
 

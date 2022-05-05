@@ -25,12 +25,14 @@ public class PropsDelta {
 	}
 
 	void startTracking ( IComponent component ) {
+		startTracking( component.Name );
 		foreach ( var i in component.Properties ) {
 			startTracking( i );
 		}
 	}
 
 	void stopTracking ( IComponent component ) {
+		stopTracking( component.Name );
 		foreach ( var i in component.Properties ) {
 			stopTracking( i );
 		}

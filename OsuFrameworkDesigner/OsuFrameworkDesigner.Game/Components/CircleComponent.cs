@@ -46,6 +46,7 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 		};
 
 		TransformProps.Texture.ValueChanged += v => circle.Texture = v.NewValue;
+		Name.BindValueChanged( x => base.Name = x.NewValue, true );
 
 		Masking = true;
 	}
@@ -63,7 +64,7 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 	public bool ContainsAngle ( float radians )
 		=> circle.ContainsAngle( radians );
 
-	string IComponent.Name { get => Name; set => Name = value; }
+	new public IProp<string> Name { get; } = new Prop<string>( "Circle", PropDescriptions.Name );
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new CircleBlueprint();

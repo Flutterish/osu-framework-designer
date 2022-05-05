@@ -35,7 +35,7 @@ public class AssetListItem : CompositeDrawable {
 
 		name.CommitOnFocusLost = true;
 		name.OnCommit += ( t, v ) => {
-			Component.Name = t.Text;
+			Component.Name.Value = t.Text;
 			onNameUpdated();
 		};
 	}
@@ -58,31 +58,42 @@ public class AssetListItem : CompositeDrawable {
 	}
 
 	public IComponent Component { get; private set; } = null!;
-	protected IHasFillColour? ComponentColour { get; private set; }
+	protected IProp<Colour4>? ComponentColour { get; private set; }
 	protected IProp<Texture>? ComponentTexture { get; private set; }
+	protected IProp<string> ComponentName { get; private set; } = null!;
 
 	protected virtual void OnApply ( IComponent component ) { }
 	public void Apply ( IComponent component ) {
 		Component = component;
-		ComponentColour = IHasFillColour.From( component );
+		ComponentName = component.Name;
+		ComponentColour = component.GetProperty<Colour4>( PropDescriptions.FillColour );
 		ComponentTexture = component.GetProperty<Texture>( PropDescriptions.Texture );
 		onNameUpdated();
+
+		ComponentName.ValueChanged += onComponentNameChanged;
 
 		OnApply( component );
 	}
 
+	void onComponentNameChanged ( ValueChangedEvent<string> e ) {
+		onNameUpdated();
+	}
+
 	protected virtual void OnFree () { }
 	public void Free () {
+		ComponentName.ValueChanged -= onComponentNameChanged;
+
 		Component = null!;
 		ComponentColour = null;
 		Selected = false;
+		ComponentName = null!;
 		OnFree();
 	}
 
 	protected override void Update () {
 		base.Update();
 
-		icon.Colour = ComponentColour?.FillColour.Value ?? Colour4.Black;
+		icon.Colour = ComponentColour?.Value ?? Colour4.White;
 		icon.Texture = ComponentTexture?.Value ?? Texture.WhitePixel;
 		name.Width = DrawWidth - 20;
 	}

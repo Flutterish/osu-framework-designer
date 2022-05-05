@@ -21,6 +21,7 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 		TransformProps.Height.BindValueChanged( v => updateLayout() );
 
 		TransformProps.Texture.BindValueChanged( v => box.Texture = v.NewValue );
+		Name.BindValueChanged( x => base.Name = x.NewValue, true );
 	}
 
 	public float MaxCornerRadius => Math.Min( DrawSize.X.Abs(), DrawSize.Y.Abs() ) / 2f;
@@ -61,6 +62,6 @@ public class RectangleComponent : CompositeDrawable, IComponent {
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new RectangleBlueprint();
-	string IComponent.Name { get => Name; set => Name = value; }
+	new public IProp<string> Name { get; } = new Prop<string>( "Rectangle", PropDescriptions.Name );
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius );
 }

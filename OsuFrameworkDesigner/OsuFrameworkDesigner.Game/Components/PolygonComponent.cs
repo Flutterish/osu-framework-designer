@@ -20,6 +20,7 @@ public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 		CornerCount.BindValueChanged( v => Polygon.SideCount = v.NewValue );
 
 		TransformProps.Texture.BindValueChanged( v => Polygon.Texture = v.NewValue );
+		Name.BindValueChanged( x => base.Name = x.NewValue, true );
 	}
 
 	public override bool Contains ( Vector2 screenSpacePos )
@@ -27,7 +28,7 @@ public class PolygonComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 
 	public Blueprint<IComponent> CreateBlueprint ()
 		=> new PolygonBlueprint();
-	string IComponent.Name { get => Name; set => Name = value; }
+	new public IProp<string> Name { get; } = new Prop<string>( "Polygon", PropDescriptions.Name );
 	public IEnumerable<IProp> Properties => TransformProps.Append( CornerRadius ).Append( CornerCount );
 
 	public IEnumerable<PointGuide> PointGuides {

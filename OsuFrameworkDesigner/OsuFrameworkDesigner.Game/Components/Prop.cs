@@ -137,6 +137,9 @@ public static class PropDescriptions {
 		ApplyEditField = ( f, props ) => ( (TextureEditField)f ).Apply( props.OfType<IProp<Texture>>() ),
 		FreeEditField = f => ( (TextureEditField)f ).Free()
 	};
+	public static readonly PropDescription StringProp = new() {
+
+	};
 
 	public static readonly PropDescription X = FloatProp with { Name = "X", Category = "Basic" };
 	public static readonly PropDescription Y = FloatProp with { Name = "Y", Category = "Basic" };
@@ -152,4 +155,5 @@ public static class PropDescriptions {
 	public static readonly PropDescription FillColour = ColourProp with { Name = "Colour", Category = "Fill", Groupable = true };
 	public static readonly PropDescription CornerRadius = FloatProp with { Name = "Radius", Category = "Corners" };
 	public static readonly PropDescription Texture = TextureProp with { Name = "Texture", Category = "Fill", Groupable = true };
+	public static readonly PropDescription Name = StringProp with { Name = "Name", Category = "Basic" };
 }
