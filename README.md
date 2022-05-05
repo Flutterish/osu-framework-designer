@@ -18,7 +18,7 @@ A figma-like visual editor for osu!framework with an ability to export designs a
 * [ ] Addditinal properties
   * [ ] Border colour and thickness
   * [ ] Gradients
-    * [ ] Colour4 Gradient
+    * [ ] ColourInfo Gradient
     * [ ] Proper Gradient
   * [ ] Texture coordinates
   * [ ] Automatic Texture UV modes for applicable shapes ( some shapes have more than one "valid" way to use a texture )
