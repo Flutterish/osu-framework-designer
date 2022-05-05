@@ -29,6 +29,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 	public readonly SelectionTool SelectionTool = new();
 	public readonly History History = new();
 	public readonly PropsDelta TrackedProps = new();
+	public event Action<PropsChange>? PropsChanged;
 
 	public bool SaveProps = true;
 
@@ -71,6 +72,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 	public void Remove ( IComponent component ) {
 		components.Remove( component.AsDrawable() );
 		TrackedProps.TrackedComponents.Remove( component );
+		SelectionTool.Selection.Remove( component );
 		if ( !History.IsLocked ) {
 			History.Push( new ComponentChange { Target = component, Type = ChangeType.Removed, Composer = this } );
 		}
@@ -81,9 +83,10 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 			History.Push( new ComponentsChange { Target = MemoryPool<IComponent>.Shared.Rent( components ), Type = ChangeType.Removed, Composer = this } );
 		}
 
-		foreach ( var i in components ) {
+		foreach ( var i in components.ToArray() ) { // TODO if we remove selection this crashes without the toarray
 			this.components.Remove( i.AsDrawable() );
 			TrackedProps.TrackedComponents.Remove( i );
+			SelectionTool.Selection.Remove( i );
 			ComponentRemoved?.Invoke( i, null );
 		}
 	}
@@ -268,8 +271,10 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		}
 
 		if ( SaveProps && !History.IsLocked && TrackedProps.AnyChanged ) {
-			History.Push( TrackedProps.CreateChange() );
+			var change = TrackedProps.CreateChange();
+			History.Push( change );
 			TrackedProps.Flush();
+			PropsChanged?.Invoke( change );
 		}
 	}
 
