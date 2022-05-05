@@ -5,6 +5,8 @@ namespace OsuFrameworkDesigner.Game.Persistence;
 
 public interface IPropChange : IChange {
 	IProp Target { get; }
+	object? PreviousValue { get; }
+	object? NextValue { get; }
 }
 
 public record PropChange<T> : Change<IProp<T>>, IPropChange {
@@ -17,6 +19,9 @@ public record PropChange<T> : Change<IProp<T>>, IPropChange {
 
 	public override void Redo ()
 		=> Target.Value = NextValue;
+
+	object? IPropChange.PreviousValue => PreviousValue;
+	object? IPropChange.NextValue => NextValue;
 }
 
 public record PropChange : Change<IProp>, IPropChange {

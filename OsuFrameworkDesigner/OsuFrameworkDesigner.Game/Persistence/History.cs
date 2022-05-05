@@ -9,6 +9,7 @@ public class History {
 
 	public bool IsLocked;
 	public IReadOnlyCollection<IChange> Changes => changes;
+	public IChange? LatestChange => currentIndex == -1 ? null : changes[currentIndex];
 	public void Push ( IChange change ) {
 		if ( IsLocked )
 			return;
@@ -62,6 +63,19 @@ public class History {
 
 			changes.RemoveAt( changes.Count - 1 );
 			ChangeRemoved?.Invoke( change );
+		}
+	}
+
+	public void NavigateTo ( IChange change ) {
+		if ( IsLocked )
+			return;
+
+		var index = changes.IndexOf( change );
+		while ( index > currentIndex ) {
+			Forward( out _ );
+		}
+		while ( index < currentIndex ) {
+			Back( out _ );
 		}
 	}
 

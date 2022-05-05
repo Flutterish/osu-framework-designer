@@ -32,6 +32,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 	public event Action<PropsChange>? PropsChanged;
 
 	public bool SaveProps = true;
+	bool commiting = false;
 
 	public Composer () {
 		this.Fill();
@@ -46,6 +47,30 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		}.Fill() );
 		AddInternal( tools = new Container<Tool>().Fill() );
 		AddInternal( snapMarkers.CreateProxy() );
+
+		History.NavigatedBack += change => {
+			if ( commiting )
+				return;
+
+			History.IsLocked = true;
+			change.Undo();
+			if ( change is PropsChange p )
+				PropsChanged?.Invoke( p );
+			TrackedProps.Flush();
+			History.IsLocked = false;
+		};
+
+		History.NavigatedForward += change => {
+			if ( commiting )
+				return;
+
+			History.IsLocked = true;
+			change.Redo();
+			if ( change is PropsChange p )
+				PropsChanged?.Invoke( p );
+			TrackedProps.Flush();
+			History.IsLocked = false;
+		};
 	}
 
 	public IEnumerable<IComponent> Components => components.OfType<IComponent>();
@@ -53,14 +78,18 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 	public void Add ( IComponent component ) {
 		components.Add( component.AsDrawable() );
 		if ( !History.IsLocked ) {
+			commiting = true;
 			History.Push( new ComponentChange { Target = component, Type = ChangeType.Added, Composer = this } );
+			commiting = false;
 		}
 		TrackedProps.TrackedComponents.Add( component );
 		ComponentAdded?.Invoke( component, null );
 	}
 	public void AddRange ( IEnumerable<IComponent> components ) {
 		if ( !History.IsLocked ) {
+			commiting = true;
 			History.Push( new ComponentsChange { Target = MemoryPool<IComponent>.Shared.Rent( components ), Type = ChangeType.Added, Composer = this } );
+			commiting = false;
 		}
 
 		foreach ( var i in components ) {
@@ -74,13 +103,17 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		TrackedProps.TrackedComponents.Remove( component );
 		SelectionTool.Selection.Remove( component );
 		if ( !History.IsLocked ) {
+			commiting = true;
 			History.Push( new ComponentChange { Target = component, Type = ChangeType.Removed, Composer = this } );
+			commiting = false;
 		}
 		ComponentRemoved?.Invoke( component, null );
 	}
 	public void RemoveRange ( IEnumerable<IComponent> components ) {
 		if ( !History.IsLocked ) {
+			commiting = true;
 			History.Push( new ComponentsChange { Target = MemoryPool<IComponent>.Shared.Rent( components ), Type = ChangeType.Removed, Composer = this } );
+			commiting = false;
 		}
 
 		foreach ( var i in components.ToArray() ) { // TODO if we remove selection this crashes without the toarray
@@ -272,10 +305,12 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		}
 
 		if ( SaveProps && !History.IsLocked && TrackedProps.AnyChanged ) {
+			commiting = true;
 			var change = TrackedProps.CreateChange();
 			History.Push( change );
 			TrackedProps.Flush();
 			PropsChanged?.Invoke( change );
+			commiting = false;
 		}
 	}
 
@@ -388,21 +423,9 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		// not saving props currenty is equivalent with "Im in the middle of editing something"
 		// so we dont want to interrupt that even if the user requests an undo/redo
 		if ( e.Action is PlatformAction.Undo && SaveProps && History.Back( out var change ) ) {
-			History.IsLocked = true;
-			change.Undo();
-			if ( change is PropsChange p )
-				PropsChanged?.Invoke( p );
-			TrackedProps.Flush();
-			History.IsLocked = false;
 			return true;
 		}
 		else if ( e.Action is PlatformAction.Redo && SaveProps && History.Forward( out change ) ) {
-			History.IsLocked = true;
-			change.Redo();
-			if ( change is PropsChange p )
-				PropsChanged?.Invoke( p );
-			TrackedProps.Flush();
-			History.IsLocked = false;
 			return true;
 		}
 

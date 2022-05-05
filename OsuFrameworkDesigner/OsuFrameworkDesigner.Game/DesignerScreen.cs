@@ -3,6 +3,7 @@ using osu.Framework.Screens;
 using OsuFrameworkDesigner.Game.Containers;
 using OsuFrameworkDesigner.Game.Containers.Assets;
 using OsuFrameworkDesigner.Game.Containers.Properties;
+using OsuFrameworkDesigner.Game.Containers.Timeline;
 using OsuFrameworkDesigner.Game.Cursor;
 
 namespace OsuFrameworkDesigner.Game;
@@ -10,14 +11,16 @@ namespace OsuFrameworkDesigner.Game;
 public class DesignerScreen : Screen {
 	DesignerTopBar topBar;
 	Composer composer;
-	AssetsPanel assetsPanel;
-	PropertiesPanel propertiesPanel;
+	AssetsPanel assetsTab;
+	PropertiesTab propertiesTab;
+	HistoryTab historyTab;
 	DesignerCursorContainer cursorContainer;
 
 	public DesignerScreen () {
 		composer = new Composer();
 		cursorContainer = new DesignerCursorContainer().Fill();
 
+		Panel rightPanel;
 		AddInternal( cursorContainer.WithChild( new TooltipContainer( cursorContainer.CursorContainer ) {
 			new DesignerPopoverContainer {
 				new GridContainer {
@@ -35,9 +38,9 @@ public class DesignerScreen : Screen {
 							},
 							Content = new Drawable[][] {
 								new Drawable[] {
-									assetsPanel = new AssetsPanel(),
+									assetsTab = new AssetsPanel(),
 									composer,
-									propertiesPanel = new PropertiesPanel()
+									rightPanel = new Panel()
 								}
 							}
 						}.Fill() }
@@ -46,12 +49,15 @@ public class DesignerScreen : Screen {
 			}.Fill()
 		}.Fill() ) );
 
+		rightPanel.Add( "Properties", propertiesTab = new PropertiesTab() );
+		rightPanel.Add( "Timeline", historyTab = new HistoryTab( composer.History ) );
+
 		composer.Tool.BindTo( topBar.Tool );
-		propertiesPanel.Components.BindTo( composer.SelectionTool.Selection );
-		composer.ComponentAdded += assetsPanel.AddComponent;
-		composer.ComponentRemoved += assetsPanel.RemoveComponent;
-		assetsPanel.Selection.BindTo( composer.SelectionTool.Selection );
-		assetsPanel.SelectionChanged += s => topBar.Tool.Value = composer.SelectionTool;
+		propertiesTab.Components.BindTo( composer.SelectionTool.Selection );
+		composer.ComponentAdded += assetsTab.AddComponent;
+		composer.ComponentRemoved += assetsTab.RemoveComponent;
+		assetsTab.Selection.BindTo( composer.SelectionTool.Selection );
+		assetsTab.SelectionChanged += s => topBar.Tool.Value = composer.SelectionTool;
 	}
 
 	protected override void Update () {
