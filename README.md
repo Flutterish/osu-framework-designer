@@ -40,6 +40,7 @@ A figma-like visual editor for osu!framework with an ability to export designs a
   * [ ] FillFlowContainer
   * [ ] GridContainer
   * [ ] FlexBox
+* [ ] Components
 * [ ] Ability to export designs as code
 * [ ] Feature parity with Figma
 * [ ] Ability to load figma files
