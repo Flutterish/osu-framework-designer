@@ -255,6 +255,7 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		set {
 			showSnaps = value;
 			snapMarkers.Alpha = value ? 1 : 0;
+			snapMarkers.Clear( disposeChildren: false );
 		}
 	}
 
