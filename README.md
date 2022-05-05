@@ -44,7 +44,13 @@ A figma-like visual editor for osu!framework with an ability to export designs a
 * [ ] Auto layout using osu!famework containers
   * [ ] FillFlowContainer
   * [ ] GridContainer
+  * [ ] TableContainer
   * [ ] FlexBox
+* [ ] Interactive containers
+  * [ ] ScrollContainer
+  * [ ] RearrangeableListContainer
+  * [ ] SearchContainer
+  * [ ] TabbableContainer
 * [ ] Components
 * [ ] Ability to export designs as code
 * [ ] Feature parity with Figma
