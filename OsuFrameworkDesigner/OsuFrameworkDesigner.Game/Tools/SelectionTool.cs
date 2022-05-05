@@ -12,6 +12,7 @@ namespace OsuFrameworkDesigner.Game.Tools;
 
 public class SelectionTool : Tool {
 	List<(IHasMatrix comp, Matrix3 initialMatrix)> selectedMatrices = new();
+	Quad selectedQuad;
 
 	public SelectionTool () {
 		AddInternal( selections = new Container<DrawableSelection>().Fill() );
@@ -69,6 +70,7 @@ public class SelectionTool : Tool {
 				comp.Matrix = setMatrix;
 			}
 
+			selectedQuad = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
 			matrixChanged = false;
 		}
 	}
@@ -185,6 +187,33 @@ public class SelectionTool : Tool {
 		blueprint.Free();
 	}
 
+	void createMultiselection () {
+		var box = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
+		var props = selectionComponent.TransformProps;
+		props.X.Value = box.Location.X;
+		props.Y.Value = box.Location.Y;
+		props.Width.Value = box.Width;
+		props.Height.Value = box.Height;
+		props.ScaleX.Value = 1;
+		props.ScaleY.Value = 1;
+		props.Rotation.Value = 0;
+		props.ShearX.Value = 0;
+		props.ShearY.Value = 0;
+		props.OriginX.Value = 0;
+		props.OriginY.Value = 0;
+
+		lastPosition = selectionComponent.TransformProps.Position;
+		var matrix = props.ContentSpaceQuad.AsMatrix();
+		MatrixExtensions.TranslateFromRight( ref matrix, -lastPosition );
+		lastMatrices = (matrix, matrix.Inverted());
+		selectionComponent.TransformProps.MatrixChanged += onMatrixChanged;
+
+		selectedMatrices.Clear();
+		perform( IHasMatrix.From, m => {
+			selectedMatrices.Add( (m, m.Matrix) );
+		} );
+	}
+
 	protected override void LoadComplete () {
 		base.LoadComplete();
 
@@ -203,30 +232,7 @@ public class SelectionTool : Tool {
 			if ( Selection.Count < 2 )
 				return;
 
-			var box = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
-			var props = selectionComponent.TransformProps;
-			props.X.Value = box.Location.X;
-			props.Y.Value = box.Location.Y;
-			props.Width.Value = box.Width;
-			props.Height.Value = box.Height;
-			props.ScaleX.Value = 1;
-			props.ScaleY.Value = 1;
-			props.Rotation.Value = 0;
-			props.ShearX.Value = 0;
-			props.ShearY.Value = 0;
-			props.OriginX.Value = 0;
-			props.OriginY.Value = 0;
-
-			lastPosition = selectionComponent.TransformProps.Position;
-			var matrix = props.ContentSpaceQuad.AsMatrix();
-			MatrixExtensions.TranslateFromRight( ref matrix, -lastPosition );
-			lastMatrices = (matrix, matrix.Inverted());
-			selectionComponent.TransformProps.MatrixChanged += onMatrixChanged;
-
-			selectedMatrices.Clear();
-			perform( IHasMatrix.From, m => {
-				selectedMatrices.Add( (m, m.Matrix) );
-			} );
+			createMultiselection();
 		} );
 
 		Selection.BindCollectionChanged( ( _, e ) => {
@@ -257,6 +263,13 @@ public class SelectionTool : Tool {
 			else
 				selections.Show();
 		} );
+
+		Composer.PropsChanged += _ => {
+			var newQuad = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
+			if ( !selectedQuad.Equals( newQuad ) ) {
+				createMultiselection();
+			}
+		};
 	}
 
 	protected override bool OnKeyDown ( KeyDownEvent e ) {
