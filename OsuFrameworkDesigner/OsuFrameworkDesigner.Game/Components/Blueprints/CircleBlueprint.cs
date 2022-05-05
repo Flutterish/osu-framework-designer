@@ -125,7 +125,7 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 		fillHandle.Position = TargetToLocalSpace( offset + TransformProps.Size / 2 );
 
 		fillHandle.TooltipText = $"Fill {Value.Fill.Value:0.##%}";
-		sweepStartHandle.TooltipText = $"Start {Value.SweepStart.Value * 360:0}°";
+		sweepStartHandle.TooltipText = $"Start {Value.SweepStart.Value.WrappedDistanceTo( 0, 1 ) * 360:0}°";
 		sweepEndHandle.TooltipText = $"Sweep {( Value.SweepEnd - Value.SweepStart ) * 360:0}°";
 	}
 }
