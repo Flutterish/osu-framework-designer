@@ -321,8 +321,6 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 		TransformProps.Rotation.Value = e.AltPressed ? angle : angle.Round();
 	}
 
-	InputManager? inputManager;
-	InputManager InputManager => inputManager ??= GetContainingInputManager();
 	bool isShearing;
 	bool isDragging;
 	protected override void PositionSelf () {

@@ -16,7 +16,8 @@ public class History {
 		removeAfter( currentIndex );
 		changes.Add( change );
 		currentIndex++;
-		ChangePushed?.Invoke( change );
+		ChangeAdded?.Invoke( change );
+		NavigatedForward?.Invoke( change );
 	}
 
 	public bool Back ( [NotNullWhen( true )] out IChange? change ) {
@@ -28,7 +29,7 @@ public class History {
 		if ( currentIndex != -1 ) {
 			change = changes[currentIndex];
 			currentIndex--;
-			ChangePopped?.Invoke( change );
+			NavigatedBack?.Invoke( change );
 			return true;
 		}
 
@@ -45,7 +46,7 @@ public class History {
 		if ( currentIndex != changes.Count - 1 ) {
 			currentIndex++;
 			change = changes[currentIndex];
-			ChangePushed?.Invoke( change );
+			NavigatedForward?.Invoke( change );
 			return true;
 		}
 
@@ -55,13 +56,18 @@ public class History {
 
 	void removeAfter ( int index ) {
 		while ( changes.Count > index + 1 ) {
-			if ( changes[^1] is IDisposable d )
+			var change = changes[^1];
+			if ( change is IDisposable d )
 				d.Dispose();
 
 			changes.RemoveAt( changes.Count - 1 );
+			ChangeRemoved?.Invoke( change );
 		}
 	}
 
-	public event Action<IChange>? ChangePushed;
-	public event Action<IChange>? ChangePopped;
+	public event Action<IChange>? NavigatedForward;
+	public event Action<IChange>? NavigatedBack;
+
+	public event Action<IChange>? ChangeAdded;
+	public event Action<IChange>? ChangeRemoved;
 }
