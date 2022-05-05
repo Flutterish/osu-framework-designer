@@ -265,9 +265,11 @@ public class SelectionTool : Tool {
 		} );
 
 		Composer.PropsChanged += _ => {
-			var newQuad = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
-			if ( !selectedQuad.Equals( newQuad ) ) {
-				createMultiselection();
+			if ( Selection.Count >= 2 ) {
+				var newQuad = Composer.ToContentSpace( Selection.Select( x => x.AsDrawable() ).GetBoundingBox( x => x.ScreenSpaceDrawQuad.AABBFloat ) ).AABBFloat;
+				if ( !selectedQuad.Equals( newQuad ) ) {
+					createMultiselection();
+				}
 			}
 		};
 	}

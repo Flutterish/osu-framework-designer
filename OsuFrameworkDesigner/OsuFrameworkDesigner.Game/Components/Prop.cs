@@ -20,7 +20,10 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 		Prototype = proto;
 		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
 	}
-	public Prop ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
+	public Prop ( T @default, PropDescription proto ) : base( @default ) {
+		Prototype = proto;
+		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
+	}
 	public PropDescription Prototype { get; }
 
 	public override T Value {
@@ -36,6 +39,9 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 	public static implicit operator T ( Prop<T> prop )
 		=> prop.Value;
 
+	public override string ToString ()
+		=> $"{Prototype.Category}/{Prototype.UnqualifiedName} = {base.ToString()}";
+
 	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 }
 
@@ -44,7 +50,10 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 		Prototype = proto;
 		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
 	}
-	public ClampedProp ( T @default, PropDescription proto ) : base( @default ) { Prototype = proto; }
+	public ClampedProp ( T @default, PropDescription proto ) : base( @default ) {
+		Prototype = proto;
+		ValueChanged += e => IPropValueChanged?.Invoke( this, new( e.OldValue, e.NewValue ) );
+	}
 	public PropDescription Prototype { get; }
 
 	public override T Value {
@@ -57,10 +66,13 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 		set => Value = (T)value!;
 	}
 
-	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
-
 	public static implicit operator T ( ClampedProp<T> prop )
 		=> prop.Value;
+
+	public override string ToString ()
+		=> $"{Prototype.Category}/{Prototype.UnqualifiedName} = {base.ToString()}";
+
+	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 }
 
 public sealed record PropDescription {
