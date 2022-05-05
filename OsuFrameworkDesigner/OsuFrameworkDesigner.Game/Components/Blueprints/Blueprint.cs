@@ -44,5 +44,5 @@ public abstract class Blueprint<T> : ErrorBoundry {
 	/// <summary>
 	/// Whether this blueprint is current editing anything such as props
 	/// </summary>
-	public virtual bool IsActive => InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed || Contains( InputManager.CurrentState.Mouse.Position );
+	public virtual bool IsActive => InputManager.CurrentState.Mouse.Buttons.HasAnyButtonPressed;
 }

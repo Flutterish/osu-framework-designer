@@ -384,14 +384,16 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 	}
 
 	public bool OnPressed ( KeyBindingPressEvent<PlatformAction> e ) {
-		if ( e.Action is PlatformAction.Undo && History.Back( out var change ) ) {
+		// not saving props currenty is equivalent with "Im in the middle of editing something"
+		// so we dont want to interrupt that even if the user requests an undo/redo
+		if ( e.Action is PlatformAction.Undo && SaveProps && History.Back( out var change ) ) {
 			History.IsLocked = true;
 			change.Undo();
 			TrackedProps.Flush();
 			History.IsLocked = false;
 			return true;
 		}
-		else if ( e.Action is PlatformAction.Redo && History.Forward( out change ) ) {
+		else if ( e.Action is PlatformAction.Redo && SaveProps && History.Forward( out change ) ) {
 			History.IsLocked = true;
 			change.Redo();
 			TrackedProps.Flush();

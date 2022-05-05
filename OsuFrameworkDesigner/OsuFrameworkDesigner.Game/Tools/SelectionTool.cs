@@ -260,7 +260,7 @@ public class SelectionTool : Tool {
 	}
 
 	protected override bool OnKeyDown ( KeyDownEvent e ) {
-		if ( e.Key is Key.Delete && Selection.Any() ) {
+		if ( e.Key is Key.Delete && Selection.Any() && !IsEditingProps ) {
 			Composer.RemoveRange( Selection );
 			Selection.Clear();
 			return true;
