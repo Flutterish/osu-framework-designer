@@ -1,12 +1,15 @@
-﻿using osu.Framework.Graphics.UserInterface;
+﻿using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 
 namespace OsuFrameworkDesigner.Game.Containers.Assets;
 
 public class AssetListItem : CompositeDrawable {
 	BasicTextBox name;
-	Box icon;
+	Sprite icon;
 
 	public AssetListItem () {
 		RelativeSizeAxes = Axes.X;
@@ -14,10 +17,14 @@ public class AssetListItem : CompositeDrawable {
 
 		AddInternal( new Box { Alpha = 0, AlwaysPresent = true }.Fill() );
 		AddInternal( new FillFlowContainer { Spacing = new( 4 ), AutoSizeAxes = Axes.Y, Direction = FillDirection.Horizontal }.WithChildren(
-			icon = new Box {
+			new Container {
 				Size = new( 16 ),
 				Anchor = Anchor.CentreLeft,
-				Origin = Anchor.CentreLeft
+				Origin = Anchor.CentreLeft,
+				Child = icon = new Sprite {
+					RelativeSizeAxes = Axes.Both,
+					FillMode = FillMode.Fit
+				}
 			},
 			name = new() {
 				Height = 26,
@@ -52,11 +59,13 @@ public class AssetListItem : CompositeDrawable {
 
 	public IComponent Component { get; private set; } = null!;
 	protected IHasFillColour? ComponentColour { get; private set; }
+	protected IProp<Texture>? ComponentTexture { get; private set; }
 
 	protected virtual void OnApply ( IComponent component ) { }
 	public void Apply ( IComponent component ) {
 		Component = component;
 		ComponentColour = IHasFillColour.From( component );
+		ComponentTexture = component.GetProperty<Texture>( PropDescriptions.Texture );
 		onNameUpdated();
 
 		OnApply( component );
@@ -74,6 +83,7 @@ public class AssetListItem : CompositeDrawable {
 		base.Update();
 
 		icon.Colour = ComponentColour?.FillColour.Value ?? Colour4.Black;
+		icon.Texture = ComponentTexture?.Value ?? Texture.WhitePixel;
 		name.Width = DrawWidth - 20;
 	}
 

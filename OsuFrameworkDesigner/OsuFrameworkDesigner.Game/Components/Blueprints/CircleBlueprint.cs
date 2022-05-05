@@ -31,8 +31,8 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 		AddInternal( sweepEndHandle = new PointHandle() );
 		AddInternal( fillHandle = new PointHandle() );
 
-		sweepStartHandle.Dragged += e => {
-			var pos = ToTargetSpace( e.ScreenSpaceMousePosition ) - TransformProps.Size / 2;
+		sweepStartHandle.SnapDragged += e => {
+			var pos = ContentToTargetSpace( e.Position ) - TransformProps.Size / 2;
 			var (x, y) = pos;
 			var angle = ( MathF.Atan2( y / TransformProps.Height.Value, x / TransformProps.Width.Value ) + MathF.PI / 2 ).Mod( MathF.Tau ) / MathF.Tau;
 
@@ -49,8 +49,8 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 			}
 		};
 
-		sweepEndHandle.Dragged += e => {
-			var pos = ToTargetSpace( e.ScreenSpaceMousePosition ) - TransformProps.Size / 2;
+		sweepEndHandle.SnapDragged += e => {
+			var pos = ContentToTargetSpace( e.Position ) - TransformProps.Size / 2;
 			var (x, y) = pos;
 			var angle = ( MathF.Atan2( y / TransformProps.Height.Value, x / TransformProps.Width.Value ) + MathF.PI / 2 ).Mod( MathF.Tau ) / MathF.Tau;
 

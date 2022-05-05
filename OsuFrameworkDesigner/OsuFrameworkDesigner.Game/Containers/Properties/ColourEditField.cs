@@ -43,7 +43,6 @@ public class ColourEditField : EditField<Colour4> {
 	private class ColourSelectorBox : Box, IHasPopover {
 		public Popover? GetPopover () {
 			var popover = new PopoverColourSelector();
-			popover.ColourPicker.Current.Value = Colour;
 			popover.ColourPicker.Current.BindTo( Current );
 			return popover;
 		}

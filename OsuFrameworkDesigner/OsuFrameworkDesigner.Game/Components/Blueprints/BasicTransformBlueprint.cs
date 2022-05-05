@@ -209,17 +209,23 @@ public abstract class BasicTransformBlueprint<T> : Blueprint<IComponent> where T
 			}
 		};
 		SelectionBox.HandleSnappedTranslate( ( lines, points ) => {
-			lines.Add( new() { StartPoint = TransformProps.TopCentre, EndPoint = TransformProps.BottomCentre } );
-			lines.Add( new() { StartPoint = TransformProps.LeftCentre, EndPoint = TransformProps.RightCentre } );
-			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.TopRight } );
-			lines.Add( new() { StartPoint = TransformProps.BottomLeft, EndPoint = TransformProps.BottomRight } );
-			lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.BottomLeft } );
-			lines.Add( new() { StartPoint = TransformProps.TopRight, EndPoint = TransformProps.BottomRight } );
+			if ( Value is IHasSnapGuides snapGuides ) {
+				lines.AddRange( snapGuides.LineGuides );
+				points.AddRange( snapGuides.PointGuides.Select( x => new HandlePointGuide { Point = x.Point } ) );
+			}
+			else {
+				lines.Add( new() { StartPoint = TransformProps.TopCentre, EndPoint = TransformProps.BottomCentre } );
+				lines.Add( new() { StartPoint = TransformProps.LeftCentre, EndPoint = TransformProps.RightCentre } );
+				lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.TopRight } );
+				lines.Add( new() { StartPoint = TransformProps.BottomLeft, EndPoint = TransformProps.BottomRight } );
+				lines.Add( new() { StartPoint = TransformProps.TopLeft, EndPoint = TransformProps.BottomLeft } );
+				lines.Add( new() { StartPoint = TransformProps.TopRight, EndPoint = TransformProps.BottomRight } );
 
-			points.Add( TransformProps.TopLeft );
-			points.Add( TransformProps.TopRight );
-			points.Add( TransformProps.BottomLeft );
-			points.Add( TransformProps.BottomRight );
+				points.Add( TransformProps.TopLeft );
+				points.Add( TransformProps.TopRight );
+				points.Add( TransformProps.BottomLeft );
+				points.Add( TransformProps.BottomRight );
+			}
 
 			return TransformProps.Position;
 		}, position => {

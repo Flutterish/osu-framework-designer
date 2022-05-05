@@ -29,7 +29,11 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 			return Composer.Snap( point, Source, context );
 		}
 		else /* if ( Type is HandleType.Line ) */ {
-			if ( DrawWidth > DrawHeight ) {
+			if ( LineSnapDirection is float dir ) {
+				var direction = Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.TopRight );
+				return Composer.Snap( point, direction.Rotate( dir ), Source, context );
+			}
+			else if ( DrawWidth > DrawHeight ) {
 				var direction = Composer.ToContentSpace( ScreenSpaceDrawQuad.TopLeft ) - Composer.ToContentSpace( ScreenSpaceDrawQuad.TopRight );
 				return Composer.Snap( point, direction, Source, context );
 			}
@@ -141,6 +145,7 @@ public class Handle : CompositeDrawable, IUsesCursorStyle, IUsesCursorRotation, 
 	public event Action<SnapResult>? SnapDragEnded;
 
 	public HandleType Type = HandleType.Point;
+	public float? LineSnapDirection;
 	public CursorStyle CursorStyle { get; set; }
 	public float CursorRotation { get; set; }
 	public LocalisableString TooltipText { get; set; }
