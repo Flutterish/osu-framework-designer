@@ -25,7 +25,7 @@ A figma-like visual editor for osu!framework with an ability to export designs a
 * [X] Asset panel ( working, will be redesigned ) 
 * [X] Property panel ( working, will be redesigned ) 
 * [X] History ( undo/redo for all actions )
-* [ ] History Panel ( list of all recorded changes )
+* [X] History Panel ( list of all recorded changes - working, will be redesigned )
 * [ ] Copy-paste
 * [X] Snap Guides ( point, line and line intersection guides )
   * [ ] TODO Snap when shearing
