@@ -39,6 +39,10 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 			Value.SweepStart.Value = Value.SweepStart.Value.ClosestEquivalentWrappedValue( angle, 1 );
 			sweepHandleRadius = pos.Length;
 
+			if ( Value.SweepEnd.Value.WrappedDistanceTo( Value.SweepStart, 1 ).Abs() < 0.01f ) {
+				Value.SweepStart.Value = Value.SweepStart.Value.ClosestEquivalentWrappedValue( Value.SweepEnd, 1 );
+			}
+
 			if ( ( Value.SweepEnd - Value.SweepStart ).Abs() > 1 ) {
 				var delta = Value.SweepStart.Value.WrappedDistanceTo( Value.SweepEnd, 1 );
 				(Value.SweepStart.Value, Value.SweepEnd.Value) = (Value.SweepEnd.Value, Value.SweepEnd.Value + ( delta < 0 ? 1 : -1 ));
@@ -53,6 +57,10 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 			Value.SweepEnd.Value = Value.SweepEnd.Value.ClosestEquivalentWrappedValue( angle, 1 );
 			sweepHandleRadius = pos.Length;
 
+			if ( Value.SweepEnd.Value.WrappedDistanceTo( Value.SweepStart, 1 ).Abs() < 0.01f ) {
+				Value.SweepEnd.Value = Value.SweepEnd.Value.ClosestEquivalentWrappedValue( Value.SweepStart, 1 );
+			}
+
 			if ( ( Value.SweepEnd - Value.SweepStart ).Abs() > 1 ) {
 				var delta = Value.SweepStart.Value.WrappedDistanceTo( Value.SweepEnd, 1 );
 				(Value.SweepStart.Value, Value.SweepEnd.Value) = (Value.SweepStart.Value + ( delta > 0 ? 1 : -1 ), Value.SweepStart.Value);
@@ -66,7 +74,16 @@ public class CircleBlueprint : BasicTransformBlueprint<CircleComponent> {
 			fillHandleAngle = angle;
 			angle = ToScaledAngle( angle );
 
-			Value.Fill.Value = Math.Clamp( 1 - pos.Length / RadiusAtAngle( angle ), 0, 1 );
+			if ( Value.ContainsAngle( angle - MathF.PI / 2 ) ) {
+				var fill = Math.Clamp( 1 - pos.Length / RadiusAtAngle( angle ), 0, 1 );
+				if ( fill > 0.96f )
+					fill = 1;
+
+				Value.Fill.Value = fill;
+			}
+			else {
+				Value.Fill.Value = 1;
+			}
 		};
 	}
 

@@ -23,26 +23,19 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 		circle.Current.Value = 1;
 
 		(SweepStart, SweepEnd).BindValueChanged( ( s, e ) => {
+			if ( e < s )
+				(s, e) = (e, s);
+
 			var delta = s.WrappedDistanceTo( e, 1 );
 
 			if ( delta == 0 && s != e ) {
-				delta = 2;
+				circle.Offset = s;
+				circle.Current.Value = 1;
+				return;
 			}
 
-			if ( e < s ) {
-				(s, e) = (e, s);
-				delta = s.WrappedDistanceTo( e, 1 );
-			}
-
-			if ( delta < 0 ) {
-				if ( e < s ) {
-					delta = -delta;
-					s -= delta;
-				}
-				else {
-					delta += 1;
-				}
-			}
+			if ( delta < 0 )
+				delta += 1;
 
 			circle.Offset = s;
 			circle.Current.Value = delta;
@@ -66,6 +59,9 @@ public class CircleComponent : CompositeDrawable, IComponent, IHasSnapGuides {
 
 	public override bool Contains ( Vector2 screenSpacePos )
 		=> InternalChild.Contains( screenSpacePos );
+
+	public bool ContainsAngle ( float radians )
+		=> circle.ContainsAngle( radians );
 
 	string IComponent.Name { get => Name; set => Name = value; }
 	public IEnumerable<IProp> Properties => TransformProps.Append( Fill ).Append( SweepStart ).Append( SweepEnd );
