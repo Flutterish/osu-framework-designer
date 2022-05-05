@@ -7,7 +7,7 @@ namespace OsuFrameworkDesigner.Game.Components;
 public interface IProp {
 	PropDescription Prototype { get; }
 
-	object? Value { get; }
+	object? Value { get; set; }
 }
 
 public interface IProp<T> : IProp, IBindable<T> {
@@ -24,7 +24,10 @@ public class Prop<T> : Bindable<T>, IProp<T> {
 		set => base.Value = Prototype.Normalize( value, base.Value );
 	}
 
-	object? IProp.Value => Value;
+	object? IProp.Value {
+		get => Value;
+		set => Value = (T)value!;
+	}
 
 	public static implicit operator T ( Prop<T> prop )
 		=> prop.Value;
@@ -40,7 +43,10 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 		set => base.Value = Prototype.Normalize( value, base.Value );
 	}
 
-	object? IProp.Value => Value;
+	object? IProp.Value {
+		get => Value;
+		set => Value = (T)value!;
+	}
 
 	public static implicit operator T ( ClampedProp<T> prop )
 		=> prop.Value;

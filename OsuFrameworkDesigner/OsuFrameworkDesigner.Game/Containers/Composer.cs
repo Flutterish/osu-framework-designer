@@ -1,18 +1,21 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Extensions.PolygonExtensions;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Input;
+using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using OsuFrameworkDesigner.Game.Components;
 using OsuFrameworkDesigner.Game.Components.Interfaces;
 using OsuFrameworkDesigner.Game.Graphics;
 using OsuFrameworkDesigner.Game.Memory;
+using OsuFrameworkDesigner.Game.Persistence;
 using OsuFrameworkDesigner.Game.Tools;
 using osuTK.Input;
 
 namespace OsuFrameworkDesigner.Game.Containers;
 
 [Cached]
-public class Composer : CompositeDrawable, IFileDropHandler {
+public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<PlatformAction> {
 	public readonly Bindable<Tool> Tool = new();
 	Container<Tool> tools;
 
@@ -24,6 +27,7 @@ public class Composer : CompositeDrawable, IFileDropHandler {
 	UnmaskableContainer snapMarkers;
 
 	public readonly SelectionTool SelectionTool = new();
+	public readonly History History = new();
 
 	public Composer () {
 		this.Fill();
@@ -42,15 +46,35 @@ public class Composer : CompositeDrawable, IFileDropHandler {
 
 	public IEnumerable<IComponent> Components => components.OfType<IComponent>();
 	public IEnumerable<IComponent> ComponentsReverse => components.Children.Reverse().OfType<IComponent>();
-	public void Add<T> ( T component ) where T : Drawable, IComponent {
-		components.Add( component );
+	public void Add ( IComponent component ) {
+		components.Add( component.AsDrawable() );
+		if ( !History.IsLocked ) {
+			History.Push( new ComponentChange { Target = component, Type = ChangeType.Added, Composer = this } );
+		}
 		ComponentAdded?.Invoke( component, null );
 	}
-	public void Remove<T> ( T component ) where T : Drawable, IComponent {
-		components.Remove( component );
+	public void AddRange ( IEnumerable<IComponent> components ) {
+		if ( !History.IsLocked ) {
+			History.Push( new ComponentsChange { Target = MemoryPool<IComponent>.Shared.Rent( components ), Type = ChangeType.Added, Composer = this } );
+		}
+
+		foreach ( var i in components ) {
+			this.components.Add( i.AsDrawable() );
+			ComponentAdded?.Invoke( i, null );
+		}
+	}
+	public void Remove ( IComponent component ) {
+		components.Remove( component.AsDrawable() );
+		if ( !History.IsLocked ) {
+			History.Push( new ComponentChange { Target = component, Type = ChangeType.Removed, Composer = this } );
+		}
 		ComponentRemoved?.Invoke( component, null );
 	}
 	public void RemoveRange ( IEnumerable<IComponent> components ) {
+		if ( !History.IsLocked ) {
+			History.Push( new ComponentsChange { Target = MemoryPool<IComponent>.Shared.Rent( components ), Type = ChangeType.Removed, Composer = this } );
+		}
+
 		foreach ( var i in components ) {
 			this.components.Remove( i.AsDrawable() );
 			ComponentRemoved?.Invoke( i, null );
@@ -341,4 +365,23 @@ public class Composer : CompositeDrawable, IFileDropHandler {
 
 		return false;
 	}
+
+	public bool OnPressed ( KeyBindingPressEvent<PlatformAction> e ) {
+		if ( e.Action is PlatformAction.Undo && History.Back( out var change ) ) {
+			History.IsLocked = true;
+			change.Undo();
+			History.IsLocked = false;
+			return true;
+		}
+		else if ( e.Action is PlatformAction.Redo && History.Forward( out change ) ) {
+			History.IsLocked = true;
+			change.Redo();
+			History.IsLocked = false;
+			return true;
+		}
+
+		return false;
+	}
+
+	public void OnReleased ( KeyBindingReleaseEvent<PlatformAction> e ) { }
 }
