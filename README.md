@@ -31,6 +31,7 @@ A figma-like visual editor for osu!framework with an ability to export designs a
   * [ ] Duplicate
   * [X] Dont use snap guides ( currently control )
 * [ ] Grouping
+* [ ] Effects ( glow and such. Since they use a buffered contaiener, they will be marked as bad for performance )
 * [ ] Unions
   * [ ] Union ( A∪B )
   * [ ] Substract ( A/B )
