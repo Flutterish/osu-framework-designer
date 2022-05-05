@@ -53,7 +53,12 @@ public class PropertiesPanel : CompositeDrawable {
 			items.Clear();
 			if ( Components.Count == 1 ) {
 				var comp = Components.Single();
-				var name = new DesignerSpriteText { Font = DesignerFont.Bold( 24 ), Colour = Colour4.Black, RelativeSizeAxes = Axes.X };
+				var name = new DesignerSpriteText { 
+					Font = DesignerFont.Bold( 24 ), 
+					Colour = Colour4.Black, 
+					RelativeSizeAxes = Axes.X, 
+					AlwaysPresent = true 
+				};
 				items.Add( name );
 				name.OnUpdate += _ => {
 					name.Text = comp.NameOrDefault();
