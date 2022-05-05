@@ -390,6 +390,8 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		if ( e.Action is PlatformAction.Undo && SaveProps && History.Back( out var change ) ) {
 			History.IsLocked = true;
 			change.Undo();
+			if ( change is PropsChange p )
+				PropsChanged?.Invoke( p );
 			TrackedProps.Flush();
 			History.IsLocked = false;
 			return true;
@@ -397,6 +399,8 @@ public class Composer : CompositeDrawable, IFileDropHandler, IKeyBindingHandler<
 		else if ( e.Action is PlatformAction.Redo && SaveProps && History.Forward( out change ) ) {
 			History.IsLocked = true;
 			change.Redo();
+			if ( change is PropsChange p )
+				PropsChanged?.Invoke( p );
 			TrackedProps.Flush();
 			History.IsLocked = false;
 			return true;
