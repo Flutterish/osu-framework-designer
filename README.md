@@ -12,6 +12,7 @@ A figma-like visual editor for osu!framework with an ability to export designs a
   * [X] Line/Arrow ( start/end point, width )
   * [X] Convex Polygon ( vertice count, Corner radius, Texture )
 * [ ] Addditinal properties
+  * [ ] Border colour and thickness
   * [ ] Gradients
     * [ ] Colour4 Gradient
     * [ ] Proper Gradient
