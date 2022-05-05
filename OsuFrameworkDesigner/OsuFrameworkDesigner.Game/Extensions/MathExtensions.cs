@@ -105,7 +105,7 @@ public static class MathExtensions {
 		var d = matrix.Row1.Y;
 
 		var Sy = d;
-		var Zx = -c / Sy;
+		var Zx = Sy == 0 ? 0 : ( -c / Sy );
 
 		return (
 			translation: new( Tx, Ty ),
@@ -142,7 +142,7 @@ public static class MathExtensions {
 		br = br.Rotate( -theta );
 
 		var Sy = br.Y;
-		var Zx = ( Sx - br.X ) / Sy;
+		var Zx = Sy == 0 ? 0 : ( ( Sx - br.X ) / Sy );
 
 		return (
 			translation: new( Tx, Ty ),
