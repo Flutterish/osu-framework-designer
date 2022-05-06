@@ -1,21 +1,28 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using OsuFrameworkDesigner.Game.Memory;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OsuFrameworkDesigner.Game.Persistence;
 
 public class History {
-	// TODO limit the amount of changes stored (probably a circle buffer)
-	List<IChange> changes = new();
+	RingBuffer<IChange> changes = new( 500 );
 	int currentIndex = -1;
 
 	public bool IsLocked;
-	public IReadOnlyCollection<IChange> Changes => changes;
+	public IEnumerable<IChange> Changes => changes;
 	public IChange? LatestChange => currentIndex == -1 ? null : changes[currentIndex];
+	public History () {
+		changes.Overflow += c => {
+			currentIndex--;
+			ChangeRemoved?.Invoke( c );
+		};
+	}
+
 	public void Push ( IChange change ) {
 		if ( IsLocked )
 			return;
 
 		removeAfter( currentIndex );
-		changes.Add( change );
+		changes.Push( change );
 		currentIndex++;
 		ChangeAdded?.Invoke( change );
 		NavigatedForward?.Invoke( change );
@@ -28,7 +35,7 @@ public class History {
 		}
 
 		if ( currentIndex != -1 ) {
-			change = changes[currentIndex];
+			change = changes[currentIndex]!;
 			currentIndex--;
 			NavigatedBack?.Invoke( change );
 			return true;
@@ -46,7 +53,7 @@ public class History {
 
 		if ( currentIndex != changes.Count - 1 ) {
 			currentIndex++;
-			change = changes[currentIndex];
+			change = changes[currentIndex]!;
 			NavigatedForward?.Invoke( change );
 			return true;
 		}
@@ -56,12 +63,10 @@ public class History {
 	}
 
 	void removeAfter ( int index ) {
-		while ( changes.Count > index + 1 ) {
-			var change = changes[^1];
+		while ( changes.Count > index + 1 && changes.TryPop( out var change ) ) {
 			if ( change is IDisposable d )
 				d.Dispose();
 
-			changes.RemoveAt( changes.Count - 1 );
 			ChangeRemoved?.Invoke( change );
 		}
 	}

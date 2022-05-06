@@ -57,6 +57,14 @@ public static class MathExtensions {
 			return v;
 	}
 
+	public static int Mod ( this int v, int mod ) {
+		v = v % mod;
+		if ( v < 0 )
+			return mod + v;
+		else
+			return v;
+	}
+
 	public static float WrappedDistanceTo ( this float from, float to, float unit )
 		=> Mod( to - from + unit / 2, unit ) - unit / 2;
 	public static float AngleTo ( this float from, float to )
