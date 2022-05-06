@@ -45,7 +45,7 @@ public abstract class TextEditField<T> : EditField<T> {
 	protected override void UpdateDisplay () {
 		var v = Props[0].Value;
 		if ( Props.All( x => AreValuesEqual( x.Value, v ) ) )
-			textBox.Text = $"{v:0.##}";
+			textBox.Text = Format( v );
 		else
 			textBox.Text = "Mixed";
 	}
@@ -74,4 +74,11 @@ public class FloatEditField : TextEditField<float> {
 public class IntEditField : TextEditField<int> {
 	protected override bool TryParse ( string s, out int value )
 		=> int.TryParse( s, out value );
+}
+
+public class StringEditField : TextEditField<string> {
+	protected override bool TryParse ( string s, out string value ) {
+		value = s;
+		return true;
+	}
 }

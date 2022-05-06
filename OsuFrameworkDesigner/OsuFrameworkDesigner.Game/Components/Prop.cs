@@ -138,8 +138,19 @@ public static class PropDescriptions {
 		FreeEditField = f => ( (TextureEditField)f ).Free()
 	};
 	public static readonly PropDescription StringProp = new() {
-
+		CreateEditField = self => new StringEditField() { Title = self.UnqualifiedName },
+		ApplyEditField = ( f, props ) => ( (StringEditField)f ).Apply( props.OfType<IProp<string>>() ),
+		FreeEditField = f => ( (StringEditField)f ).Free()
 	};
+	public static readonly PropDescription UnboundVector2Prop = new() {
+		CreateEditField = self => new Vector2EditField { Title = self.UnqualifiedName },
+		ApplyEditField = ( f, props ) => ( (Vector2EditField)f ).Apply( props.OfType<IProp<Vector2>>() ),
+		FreeEditField = f => ( (Vector2EditField)f ).Free()
+	};
+	public static readonly PropDescription Vector2Prop = UnboundVector2Prop.WithNormalizeFunction<Vector2>(
+		v => new Vector2( float.IsNaN( v.X ) || float.IsInfinity( v.X ) ? 0 : v.X, float.IsNaN( v.Y ) || float.IsInfinity( v.Y ) ? 0 : v.Y ),
+		( v, def ) => new Vector2( float.IsNaN( v.X ) || float.IsInfinity( v.X ) ? def.X : v.X, float.IsNaN( v.Y ) || float.IsInfinity( v.Y ) ? def.Y : v.Y )
+	);
 
 	public static readonly PropDescription X = FloatProp with { Name = "X", Category = "Basic" };
 	public static readonly PropDescription Y = FloatProp with { Name = "Y", Category = "Basic" };
