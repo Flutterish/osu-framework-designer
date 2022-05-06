@@ -126,8 +126,8 @@ public static class MathExtensions {
 	/// <summary>
 	/// Decomposes a quad as if it was a matrix where
 	/// (0,0) maps to top left,
-	/// (0,1) maps to top right,
-	/// (1,0) maps to bottom left and
+	/// (1,0) maps to top right,
+	/// (0,1) maps to bottom left and
 	/// (1,1) maps to bottom right.
 	/// The bottom left vertex is unused as it can possibly result in an invalid 3x3 matrix
 	/// </summary>
@@ -163,8 +163,8 @@ public static class MathExtensions {
 	/// <summary>
 	/// Decomposes a quad into a matrix where
 	/// (0,0) maps to top left,
-	/// (0,1) maps to top right,
-	/// (1,0) maps to bottom left and
+	/// (1,0) maps to top right,
+	/// (0,1) maps to bottom left and
 	/// (1,1) maps to bottom right.
 	/// The bottom left vertex is unused as it can possibly result in an invalid 3x3 matrix
 	/// </summary>

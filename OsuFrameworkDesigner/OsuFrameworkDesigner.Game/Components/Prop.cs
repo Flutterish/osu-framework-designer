@@ -75,7 +75,7 @@ public class ClampedProp<T> : BindableNumber<T>, IProp<T> where T : struct, ICom
 	public event Action<IProp, ValueChangedEvent<object?>>? IPropValueChanged;
 }
 
-public sealed record PropDescription {
+public record PropDescription {
 	public PropDescription ( [CallerMemberName] string name = "" ) {
 		Name = name;
 	}
@@ -112,6 +112,11 @@ public sealed record PropDescription {
 	public string UnqualifiedName => Name.StartsWith( Category ) ? Name[Category.Length..] : Name;
 }
 
+public record VectorPropDescription : PropDescription {
+	public string XLabel { get; init; } = "X";
+	public string YLabel { get; init; } = "Y";
+}
+
 public static class PropDescriptions {
 	public static readonly PropDescription UnboundFloatProp = new() {
 		CreateEditField = self => new FloatEditField { Title = self.UnqualifiedName },
@@ -142,12 +147,12 @@ public static class PropDescriptions {
 		ApplyEditField = ( f, props ) => ( (StringEditField)f ).Apply( props.OfType<IProp<string>>() ),
 		FreeEditField = f => ( (StringEditField)f ).Free()
 	};
-	public static readonly PropDescription UnboundVector2Prop = new() {
+	public static readonly VectorPropDescription UnboundVector2Prop = new() {
 		CreateEditField = self => new Vector2EditField { Title = self.UnqualifiedName },
 		ApplyEditField = ( f, props ) => ( (Vector2EditField)f ).Apply( props.OfType<IProp<Vector2>>() ),
 		FreeEditField = f => ( (Vector2EditField)f ).Free()
 	};
-	public static readonly PropDescription Vector2Prop = UnboundVector2Prop.WithNormalizeFunction<Vector2>(
+	public static readonly VectorPropDescription Vector2Prop = (VectorPropDescription)UnboundVector2Prop.WithNormalizeFunction<Vector2>(
 		v => new Vector2( float.IsNaN( v.X ) || float.IsInfinity( v.X ) ? 0 : v.X, float.IsNaN( v.Y ) || float.IsInfinity( v.Y ) ? 0 : v.Y ),
 		( v, def ) => new Vector2( float.IsNaN( v.X ) || float.IsInfinity( v.X ) ? def.X : v.X, float.IsNaN( v.Y ) || float.IsInfinity( v.Y ) ? def.Y : v.Y )
 	);

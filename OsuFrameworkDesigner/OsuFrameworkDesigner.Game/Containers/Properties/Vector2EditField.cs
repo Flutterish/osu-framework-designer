@@ -13,6 +13,14 @@ public class Vector2EditField : EditField<Vector2> {
 		set { }
 	}
 
+	public string XLabel {
+		set => title1.Text = value.ToString()[0..1];
+	}
+
+	public string YLabel {
+		set => title2.Text = value.ToString()[0..1];
+	}
+
 	public Vector2EditField () {
 		RelativeSizeAxes = Axes.X;
 		Height = 40;
