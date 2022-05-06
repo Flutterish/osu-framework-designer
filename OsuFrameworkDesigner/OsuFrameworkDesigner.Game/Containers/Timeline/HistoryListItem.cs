@@ -5,51 +5,63 @@ using OsuFrameworkDesigner.Game.Persistence;
 namespace OsuFrameworkDesigner.Game.Containers.Timeline;
 
 public class HistoryListItem : CompositeDrawable {
-	TextFlowContainer text;
-	IChange change;
+	protected TextFlowContainer Text;
 
-	public HistoryListItem ( IChange change ) {
-		this.change = change;
+	public HistoryListItem () {
 		RelativeSizeAxes = Axes.X;
 		AutoSizeAxes = Axes.Y;
 
 		AddInternal( new Box { Alpha = 0, AlwaysPresent = true }.Fill() );
-		AddInternal( text = new TextFlowContainer( s => {
+		AddInternal( Text = new TextFlowContainer( s => {
 			s.Font = DesignerFont.Default( 16 );
 			s.Colour = Colour4.Black;
 		} ) {
 			AutoSizeAxes = Axes.Y,
 			RelativeSizeAxes = Axes.X
 		} );
+	}
 
-		if ( change is ComponentChange componentSingle ) {
-			text.Text = $"{componentSingle.Type} {componentSingle.Target.NameOrDefault()}";
+	protected IChange Change { get; private set; } = null!;
+
+	protected virtual void OnApply () {
+		if ( Change is ComponentChange componentSingle ) {
+			Text.Text = $"{componentSingle.Type} {componentSingle.Target.NameOrDefault()}";
 		}
-		else if ( change is ComponentsChange componentMultiple ) {
+		else if ( Change is ComponentsChange componentMultiple ) {
 			if ( componentMultiple.Target.Length == 1 ) {
-				text.Text = $"{componentMultiple.Type} {componentMultiple.Target[0].NameOrDefault()}";
+				Text.Text = $"{componentMultiple.Type} {componentMultiple.Target[0].NameOrDefault()}";
 			}
 			else {
-				text.Text = $"{componentMultiple.Type} {componentMultiple.Target.Length} Components";
+				Text.Text = $"{componentMultiple.Type} {componentMultiple.Target.Length} Components";
 			}
 		}
-		else if ( change is PropChange propSingle ) {
+		else if ( Change is PropChange propSingle ) {
 			var target = propSingle.Target;
-			text.Text = $"Changed {target.Prototype.Category}/{target.Prototype.UnqualifiedName} from {propSingle.PreviousValue} to {propSingle.NextValue}";
+			Text.Text = $"Changed {target.Prototype.Category}/{target.Prototype.UnqualifiedName} from {propSingle.PreviousValue} to {propSingle.NextValue}";
 		}
-		else if ( change is PropsChange propMultiple ) {
+		else if ( Change is PropsChange propMultiple ) {
 			if ( propMultiple.Target.Length == 1 ) {
 				var c = propMultiple.Target[0];
 				var target = c.Target;
-				text.Text = $"Changed {target.Prototype.Category}/{target.Prototype.UnqualifiedName} from {c.PreviousValue} to {c.NextValue}";
+				Text.Text = $"Changed {target.Prototype.Category}/{target.Prototype.UnqualifiedName} from {c.PreviousValue} to {c.NextValue}";
 			}
 			else {
-				text.Text = $"Changed {propMultiple.Target.Length} Props";
+				Text.Text = $"Changed {propMultiple.Target.Length} Props";
 			}
 		}
 		else {
-			text.Text = change.ToString();
+			Text.Text = Change.ToString();
 		}
+	}
+	public void Apply ( IChange change ) {
+		Change = change;
+		OnApply();
+	}
+
+	protected virtual void OnFree () { }
+	public void Free () {
+		OnFree();
+		Change = null!;
 	}
 
 	bool selected;
@@ -78,7 +90,7 @@ public class HistoryListItem : CompositeDrawable {
 	}
 
 	protected override bool OnClick ( ClickEvent e ) {
-		Clicked?.Invoke( change, e );
+		Clicked?.Invoke( Change, e );
 		return true;
 	}
 

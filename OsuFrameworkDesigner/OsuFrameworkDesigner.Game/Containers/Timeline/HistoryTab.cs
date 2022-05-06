@@ -36,17 +36,24 @@ public class HistoryTab : FillFlowContainer {
 			selectedItem = null;
 	}
 
+	Stack<HistoryListItem> itemPool = new();
 	void addChange ( IChange change ) {
-		var item = new HistoryListItem( change );
+		if ( !itemPool.TryPop( out var item ) ) {
+			item = new HistoryListItem();
+			item.Clicked += ( c, e ) => {
+				History.NavigateTo( c );
+			};
+		}
+
+		item.Apply( change );
 		Add( item );
 		itemByChange.Add( change, item );
-		item.Clicked += ( c, e ) => {
-			History.NavigateTo( c );
-		};
 	}
 
 	void removeChange ( IChange change ) {
 		itemByChange.Remove( change, out var item );
+		item!.Free();
+		itemPool.Push( item );
 		Remove( item );
 	}
 
